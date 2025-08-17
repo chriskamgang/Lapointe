@@ -1,0 +1,263 @@
+/* Variables CSS personnalisées pour les thèmes */
+:root {
+  /* Couleurs par défaut Bootstrap */
+  --bs-primary: #007bff;
+  --bs-primary-rgb: 0, 123, 255;
+  
+  /* Variables personnalisées */
+  --primary-color: var(--bs-primary);
+  --primary-light: #3395ff;
+  --primary-dark: #0056b3;
+  --primary-fade: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Classes utilitaires pour la couleur primaire */
+.text-primary-custom {
+  color: var(--primary-color) !important;
+}
+
+.bg-primary-custom {
+  background-color: var(--primary-color) !important;
+  color: white;
+}
+
+.border-primary-custom {
+  border-color: var(--primary-color) !important;
+}
+
+.btn-primary-custom {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary-custom:hover,
+.btn-primary-custom:focus {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: white;
+}
+
+.btn-outline-primary-custom {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  background-color: transparent;
+}
+
+.btn-outline-primary-custom:hover,
+.btn-outline-primary-custom:focus {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+/* Badge personnalisé */
+.badge-primary-custom {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Navigation et Sidebar */
+.sidebar .nav-link.active {
+  background-color: var(--primary-fade) !important;
+  color: var(--primary-color) !important;
+}
+
+.sidebar .nav-link:hover {
+  background-color: var(--primary-fade) !important;
+  color: var(--primary-color) !important;
+}
+
+/* Liens */
+a {
+  color: var(--primary-color);
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
+
+/* Cards avec bordure primaire */
+.card-primary-custom {
+  border-color: var(--primary-color);
+}
+
+.card-primary-custom .card-header {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Progress bars */
+.progress-bar-primary-custom {
+  background-color: var(--primary-color);
+}
+
+/* Tabs */
+.nav-tabs .nav-link.active {
+  color: var(--primary-color) !important;
+  border-bottom-color: var(--primary-color) !important;
+}
+
+.nav-tabs .nav-link:hover {
+  color: var(--primary-color);
+}
+
+/* Form controls avec focus primaire */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem var(--primary-fade);
+}
+
+/* Checkbox et radio personnalisés */
+.form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.25rem var(--primary-fade);
+}
+
+/* Spinners */
+.spinner-border-primary-custom {
+  color: var(--primary-color);
+}
+
+/* Alerts personnalisés */
+.alert-primary-custom {
+  color: var(--primary-dark);
+  background-color: var(--primary-fade);
+  border-color: var(--primary-light);
+}
+
+/* Tables */
+.table-primary-custom {
+  --bs-table-bg: var(--primary-fade);
+  --bs-table-border-color: var(--primary-light);
+}
+
+.table-hover tbody tr:hover {
+  background-color: var(--primary-fade) !important;
+}
+
+/* Pagination */
+.pagination .page-link {
+  color: var(--primary-color);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.pagination .page-link:hover {
+  color: var(--primary-dark);
+  background-color: var(--primary-fade);
+}
+
+/* Dropdown actions */
+.btn-actions-dropdown:hover {
+  color: var(--primary-color) !important;
+  background-color: var(--primary-fade) !important;
+}
+
+/* Modal */
+.modal-header {
+  border-bottom-color: var(--primary-fade);
+}
+
+/* Toast */
+.toast-header {
+  border-bottom-color: var(--primary-fade);
+}
+
+/* Accordion */
+.accordion-button:not(.collapsed) {
+  color: var(--primary-color);
+  background-color: var(--primary-fade);
+}
+
+.accordion-button:focus {
+  box-shadow: 0 0 0 0.25rem var(--primary-fade);
+}
+
+/* Breadcrumb */
+.breadcrumb-item.active {
+  color: var(--primary-color);
+}
+
+/* List group */
+.list-group-item.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Close button personnalisé */
+.btn-close:focus {
+  box-shadow: 0 0 0 0.25rem var(--primary-fade);
+}
+
+/* Personnalisation des dropdowns */
+.dropdown-item:active {
+  background-color: var(--primary-color);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: var(--primary-fade);
+  color: var(--primary-color);
+}
+
+/* Override Bootstrap primary classes */
+.btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+}
+
+.btn-outline-primary {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.border-primary {
+  border-color: var(--primary-color) !important;
+}
+
+.badge.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+/* Animation pour les changements de couleur */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .btn-actions-dropdown {
+    padding: 0.25rem 0.5rem;
+  }
+}
