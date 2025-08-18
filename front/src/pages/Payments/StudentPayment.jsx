@@ -845,7 +845,7 @@ const StudentPayment = () => {
                                 <li>Configurez votre imprimante sur format <strong>A4 Paysage</strong></li>
                                 <li>Le reçu contient 2 exemplaires côte à côte</li>
                                 <li><strong>Côté gauche :</strong> Exemplaire parents</li>
-                                <li><strong>Côté droit :</strong> Exemplaire collège</li>
+                                <li><strong>Côté droit :</strong> Exemplaire Université</li>
                                 <li>Découpez au milieu vertical pour séparer les exemplaires</li>
                             </ul>
                         </div>

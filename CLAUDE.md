@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Structure
 
-This is a college management system for "COLLEGE POLYVALENT BILINGUE DE DOUALA" with three main components:
+This is a college management system for "INSTITUT UNIVERSITAIRE DE LA POINTE" with three main components:
 
 - **back/**: Node.js/TypeScript backend API server using Express (port 4000)
 - **front/**: React frontend application (Create React App, port 3006)

@@ -405,7 +405,7 @@ const SchoolSettings = () => {
                         onChange={(e) =>
                           handleInputChange("school_phone", e.target.value)
                         }
-                        placeholder="Ex: 233 43 25 47"
+                        placeholder="Ex: 6 55 12 49 21"
                       />
                     </Form.Group>
                   </Col>
@@ -501,7 +501,7 @@ const SchoolSettings = () => {
                         onChange={(e) =>
                           handleInputChange("city", e.target.value)
                         }
-                        placeholder="Ex: Douala"
+                        placeholder="Ex: BAFOUSSAM"
                       />
                     </Form.Group>
                   </Col>

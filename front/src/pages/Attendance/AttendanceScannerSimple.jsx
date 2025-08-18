@@ -243,7 +243,7 @@ const AttendanceScannerSimple = () => {
         </head>
         <body>
           <div class="header">
-            <h1>COLLEGE POLYVALENT BILINGUE DE DOUALA</h1>
+            <h1>INSTITUT UNIVERSITAIRE DE LA POINTE</h1>
             <h2>Liste de Présences du Jour</h2>
             <p><strong>Date:</strong> ${today}</p>
             <p><strong>Surveillant:</strong> ${user?.name || "N/A"}</p>

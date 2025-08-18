@@ -312,7 +312,7 @@ const StudentCardPrint = ({ student, schoolYear, show, onHide, onPrintSuccess })
                                 
                                 <div class="info-line">
                                     <strong>Née le :</strong> ${student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : ''} 
-                                    <strong style="margin-left: 8px;">À</strong> ${student.place_of_birth || 'DOUALA'}
+                                    <strong style="margin-left: 8px;">À</strong> ${student.place_of_birth || 'BAFOUSSAM'}
                                 </div>
                                 
                                 <div class="info-line">

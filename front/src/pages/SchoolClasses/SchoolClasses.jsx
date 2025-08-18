@@ -75,7 +75,7 @@ const SchoolClasses = () => {
     const loadClasses = async () => {
         try {
             setLoading(true);
-            console.log('Loading classes with filters:', filters);
+            console.log('Loading salles with filters:', filters);
             let response;
             
             if (filters.section_id) {
@@ -86,15 +86,15 @@ const SchoolClasses = () => {
                 response = await secureApiEndpoints.schoolClasses.getAll();
             }
             
-            console.log('Classes response:', response);
+            console.log('Salles response:', response);
             if (response.success) {
                 setClasses(response.data || []);
             } else {
-                setError(response.message || 'Erreur lors du chargement des classes');
+                setError(response.message || 'Erreur lors du chargement des salles');
             }
         } catch (error) {
-            console.error('Erreur lors du chargement des classes:', error);
-            setError('Erreur lors du chargement des classes');
+            console.error('Erreur lors du chargement des salles:', error);
+            setError('Erreur lors du chargement des salles');
         } finally {
             setLoading(false);
         }
@@ -112,7 +112,7 @@ const SchoolClasses = () => {
     const handleDeleteClass = async (classItem) => {
         const result = await Swal.fire({
             title: 'Confirmer la suppression',
-            text: `Êtes-vous sûr de vouloir supprimer la classe "${classItem.name}" ?`,
+            text: `Êtes-vous sûr de vouloir supprimer la salle "${classItem.name}" ?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
@@ -126,7 +126,7 @@ const SchoolClasses = () => {
                 const response = await secureApiEndpoints.schoolClasses.delete(classItem.id);
                 if (response.success) {
                     loadClasses();
-                    Swal.fire('Supprimé!', 'La classe a été supprimée.', 'success');
+                    Swal.fire('Supprimé!', 'La salle a été supprimée.', 'success');
                 } else {
                     Swal.fire('Erreur!', response.message || 'Erreur lors de la suppression.', 'error');
                 }
@@ -149,12 +149,12 @@ const SchoolClasses = () => {
 
     const getSectionName = (sectionId) => {
         const section = sections.find(s => s.id === sectionId);
-        return section ? section.name : 'Section inconnue';
+        return section ? section.name : 'Ecole inconnue';
     };
 
     const getLevelName = (levelId) => {
         const level = levels.find(l => l.id === levelId);
-        return level ? level.name : 'Niveau inconnu';
+        return level ? level.name : 'Spécialité inconnu';
     };
 
     const getFilteredLevels = () => {
@@ -163,7 +163,7 @@ const SchoolClasses = () => {
     };
 
     const groupedClasses = classes.reduce((acc, classItem) => {
-        const key = `${classItem.level?.section?.name || 'Sans section'} - ${classItem.level?.name || 'Sans niveau'}`;
+        const key = `${classItem.level?.section?.name || 'Sans école'} - ${classItem.level?.name || 'Sans spécialité'}`;
         if (!acc[key]) {
             acc[key] = [];
         }
@@ -197,14 +197,14 @@ const SchoolClasses = () => {
                 <div className="col-12">
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <h2 className="h4 mb-1">Gestion des Classes</h2>
+                            <h2 className="h4 mb-1">Gestion des Salles</h2>
                             <p className="text-muted mb-0">
-                                Gérez les classes, leurs séries et montants de paiement
+                                Gérez les Salles, leurs séries et montants de paiement
                             </p>
                         </div>
                         <div className="d-flex gap-2">
                             <ImportExportButton
-                                title="Classes"
+                                title="Salles"
                                 apiBasePath="/api/school-classes"
                                 onImportSuccess={loadClasses}
                                 filters={filters}
@@ -215,7 +215,7 @@ const SchoolClasses = () => {
                                 onClick={handleCreateClass}
                             >
                                 <Plus size={16} />
-                                Nouvelle Classe
+                                Nouvelle Salle
                             </button>
                         </div>
                     </div>
@@ -229,7 +229,7 @@ const SchoolClasses = () => {
                         <div className="card-body">
                             <div className="row g-3">
                                 <div className="col-md-4">
-                                    <label className="form-label">Section</label>
+                                    <label className="form-label">Ecole</label>
                                     <select
                                         className="form-select"
                                         value={filters.section_id}
@@ -239,7 +239,7 @@ const SchoolClasses = () => {
                                             level_id: '' // Reset level when section changes
                                         }))}
                                     >
-                                        <option value="">Toutes les sections</option>
+                                        <option value="">Toutes les écoles</option>
                                         {sections.map(section => (
                                             <option key={section.id} value={section.id}>
                                                 {section.name}
@@ -248,7 +248,7 @@ const SchoolClasses = () => {
                                     </select>
                                 </div>
                                 <div className="col-md-4">
-                                    <label className="form-label">Niveau</label>
+                                    <label className="form-label">Spécialité</label>
                                     <select
                                         className="form-select"
                                         value={filters.level_id}
@@ -257,7 +257,7 @@ const SchoolClasses = () => {
                                             level_id: e.target.value
                                         }))}
                                     >
-                                        <option value="">Tous les niveaux</option>
+                                        <option value="">Toutes les spécialités</option>
                                         {getFilteredLevels().map(level => (
                                             <option key={level.id} value={level.id}>
                                                 {level.name}
@@ -309,16 +309,16 @@ const SchoolClasses = () => {
                         <div className="card">
                             <div className="card-body text-center py-5">
                                 {/* <BookOpen size={48} className="text-muted mb-3" /> */}
-                                <h5 className="text-muted">Aucune classe trouvée</h5>
+                                <h5 className="text-muted">Aucune salle trouvée</h5>
                                 <p className="text-muted mb-4">
-                                    Commencez par créer votre première classe
+                                    Commencez par créer votre première salle
                                 </p>
                                 <button
                                     className="btn btn-primary"
                                     onClick={handleCreateClass}
                                 >
                                     <Plus size={16} className="me-2" />
-                                    Créer une classe
+                                    Créer une salle
                                 </button>
                             </div>
                         </div>
@@ -331,7 +331,7 @@ const SchoolClasses = () => {
                                             <Building size={16} className="me-2 text-primary" />
                                             {groupKey}
                                             <span className="badge bg-primary ms-2">
-                                                {groupClasses.length} classe{groupClasses.length > 1 ? 's' : ''}
+                                                {groupClasses.length} salle{groupClasses.length > 1 ? 's' : ''}
                                             </span>
                                         </h6>
                                     </div>
@@ -419,10 +419,10 @@ const SchoolClasses = () => {
                                                                                                 e.stopPropagation();
                                                                                                 handleViewStudents(serie.id);
                                                                                             }}
-                                                                                            title="Voir les élèves"
+                                                                                            title="Voir les étudiants"
                                                                                         >
                                                                                             <Eye size={12} className="me-1" />
-                                                                                            Élèves
+                                                                                            Étudiants
                                                                                         </button>
                                                                                     </div>
                                                                                 </div>

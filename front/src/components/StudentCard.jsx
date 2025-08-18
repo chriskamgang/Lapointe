@@ -201,7 +201,7 @@ const StudentCard = ({ student, schoolYear, onPrint }) => {
                         
                         <div style={{ marginBottom: '1px', fontSize: '9px' }}>
                             <strong>Né(e) le :</strong> {formatDate(student.date_of_birth)} 
-                            <strong style={{ marginLeft: '4px' }}>À :</strong> {student.place_of_birth || 'DOUALA'}
+                            <strong style={{ marginLeft: '4px' }}>À :</strong> {student.place_of_birth || 'BAFOUSSAM'}
                         </div>
                         <div style={{ marginBottom: '1px', fontSize: '10px' }}>
                             <strong>Matricule :</strong> {generateMatricule(student)}

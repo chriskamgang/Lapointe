@@ -13,7 +13,7 @@ const TestStudentCard = () => {
         first_name: 'JORDAN JUNIOR',
         last_name: 'KENFACK',
         date_of_birth: '2000-05-11',
-        place_of_birth: 'DOUALA',
+        place_of_birth: 'BQFOUSSQM',
         gender: 'male',
         phone: '***********',
         photo: null,

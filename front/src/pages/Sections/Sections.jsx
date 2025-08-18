@@ -61,11 +61,11 @@ const Sections = () => {
             if (response.success) {
                 setSections(response.data);
             } else {
-                setError(response.message || 'Erreur lors du chargement des sections');
+                setError(response.message || 'Erreur lors du chargement des écoles');
             }
         } catch (error) {
-            setError('Erreur lors du chargement des sections');
-            console.error('Error loading sections:', error);
+            setError('Erreur lors du chargement des écoles');
+            console.error('Error loading school:', error);
         } finally {
             setLoading(false);
         }
@@ -187,7 +187,7 @@ const Sections = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-96">
-                <LoadingSpinner text="Chargement des sections..." size="lg" />
+                <LoadingSpinner text="Chargement des écoles..." size="lg" />
             </div>
         );
     }
@@ -198,15 +198,15 @@ const Sections = () => {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                        Gestion des Sections
+                        Gestion des Ecoles
                     </h1>
                     <p className="text-gray-600">
-                        Bienvenue {user?.name} - Gérez les sections de l'établissement
+                        Bienvenue {user?.name} - Gérez les écoles de l'institut
                     </p>
                 </div>
                 <div className="flex gap-2">
                     <ImportExportButton
-                        title="Sections"
+                        title="Ecoles"
                         apiBasePath="/api/sections"
                         onImportSuccess={loadSections}
                         templateFileName="template_sections.csv"
@@ -243,7 +243,7 @@ const Sections = () => {
                     <Card className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Total Sections</p>
+                                <p className="text-sm text-gray-600">Total Ecoles</p>
                                 <p className="text-2xl font-bold text-blue-600">
                                     {dashboardStats.stats.total_sections}
                                 </p>
@@ -257,7 +257,7 @@ const Sections = () => {
                     <Card className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Sections Actives</p>
+                                <p className="text-sm text-gray-600">Ecoles Actives</p>
                                 <p className="text-2xl font-bold text-green-600">
                                     {dashboardStats.stats.active_sections}
                                 </p>
@@ -271,7 +271,7 @@ const Sections = () => {
                     <Card className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Sections Inactives</p>
+                                <p className="text-sm text-gray-600">Ecoles Inactives</p>
                                 <p className="text-2xl font-bold text-red-600">
                                     {dashboardStats.stats.inactive_sections}
                                 </p>
@@ -285,7 +285,7 @@ const Sections = () => {
                     <Card className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Avec Classes</p>
+                                <p className="text-sm text-gray-600">Avec Salle</p>
                                 <p className="text-2xl font-bold text-purple-600">
                                     {dashboardStats.stats.sections_with_classes}
                                 </p>
@@ -324,9 +324,9 @@ const Sections = () => {
                                         value={filterActive}
                                         onChange={(e) => setFilterActive(e.target.value)}
                                     >
-                                        <option value="all">Toutes les sections</option>
-                                        <option value="active">Sections actives</option>
-                                        <option value="inactive">Sections inactives</option>
+                                        <option value="all">Toutes les écoles</option>
+                                        <option value="active">Ecoles actives</option>
+                                        <option value="inactive">Ecoles inactives</option>
                                     </select>
                                 </div>
                                 <div className="col-md-4 d-flex align-items-end">
@@ -367,7 +367,7 @@ const Sections = () => {
             {/* Sections List/Grid */}
             {filteredSections.length === 0 ? (
                 <Card className="p-8 text-center">
-                    <p className="text-gray-500 mb-4">Aucune section trouvée</p>
+                    <p className="text-gray-500 mb-4">Aucune écoles trouvée</p>
                     <Button
                         onClick={() => {
                             resetForm();

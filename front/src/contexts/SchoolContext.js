@@ -14,7 +14,7 @@ export const useSchool = () => {
 
 export const SchoolProvider = ({ children }) => {
     const [schoolSettings, setSchoolSettings] = useState({
-        school_name: 'COLLÈGE POLYVALENT BILINGUE DE DOUALA',
+        school_name: 'INSTITUT UNIVERSITAIRE DE LA POINTE',
         school_motto: '',
         school_address: '',
         school_phone: '',

@@ -159,7 +159,7 @@ const SeriesCollectionSummary = () => {
     const generatePrintHTML = () => {
         return `
             <div class="header">
-                <h1>COLLÈGE POLYVALENT BILINGUE DE DOUALA</h1>
+                <h1>INSTITUT UNIVERSITAIRE DE LA POINTE</h1>
                 <h2>Récapitulatif d'Encaissement par Série</h2>
                 <p><strong>Année scolaire:</strong> ${schoolYear?.name || 'N/A'}</p>
                 <p><strong>Généré le:</strong> ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>

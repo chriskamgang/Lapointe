@@ -1671,7 +1671,7 @@ const Reports = () => {
             <div>
               <h4 className="mb-1">
                 {paginatedReportData?.school_settings?.school_name ||
-                  "COLLEGE POLYVALENT BILINGUE DE DOUALA"}
+                  "INSTITUT UNIVERSITAIRE DE LA POINTE"}
               </h4>
               <h5 className="mb-0 text-primary">DÉTAIL DES ENCAISSEMENTS</h5>
             </div>

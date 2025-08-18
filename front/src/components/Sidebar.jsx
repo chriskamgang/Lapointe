@@ -63,10 +63,10 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           title: "Gestion Académique",
           items: [
             { name: "Années Scolaires", href: "/school-years", icon: <Calendar /> },
-            { name: "Sections", href: "/sections", icon: <HospitalFill /> },
-            { name: "Niveaux", href: "/levels", icon: <BookFill /> },
+            { name: "Ecoles", href: "/sections", icon: <HospitalFill /> },
+            { name: "Spécialités", href: "/levels", icon: <BookFill /> },
             {
-              name: "Classes",
+              name: "Salles",
               href: "/school-classes",
               icon: <HouseHeartFill />,
             },
@@ -343,7 +343,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
         >
           <img
             src={getLogoSrc()}
-            alt={`${schoolSettings.school_name || "CPBD"} Logo`}
+            alt={`${schoolSettings.school_name || "INSTITUT UNIVERSITAIRE DE LA POINTE"} Logo`}
             style={{
               width: "40px",
               height: "40px",
@@ -360,7 +360,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
                 {schoolSettings.school_name
                   ?.split(" ")
                   .map((word) => word.charAt(0))
-                  .join("") || "CPBD"}
+                  .join("") || "INSTITUT UNIVERSITAIRE DE LA POINTE"}
               </div>
               <div
                 style={{
@@ -369,7 +369,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
                 }}
               >
                 {schoolSettings.school_name ||
-                  "College Polyvalent Bilingue de Douala"}
+                  "Institut Universitaire de la Pointe"}
               </div>
             </div>
           )}
