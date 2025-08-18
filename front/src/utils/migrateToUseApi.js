@@ -38,12 +38,12 @@ export const migrationSteps = [
 ];
 
 export const getEndpointMapping = () => ({
-    // Sections
-    '/sections/all': 'getAllSections',
-    '/sections/store': 'addSection',
-    '/sections/:id': 'getOneSection', // GET
-    '/sections/:id': 'updateSection', // PUT
-    '/sections/:id': 'deleteSection', // DELETE
+    // Schools
+    '/schools/all': 'getAllSchools',
+    '/schools/store': 'addSection',
+    '/schools/:id': 'getOneSection', // GET
+    '/schools/:id': 'updateSection', // PUT
+    '/schools/:id': 'deleteSection', // DELETE
     
     // Classes
     '/class/getAll': 'getAllClasses',

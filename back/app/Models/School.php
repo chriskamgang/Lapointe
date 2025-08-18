@@ -34,7 +34,7 @@ class School extends Model
             'App\Models\Level',
             'school_id', // Foreign key on levels table
             'level_id',   // Foreign key on school_classes table  
-            'id',         // Local key on sections table
+            'id',         // Local key on schools table
             'id'          // Local key on levels table
         );
     }

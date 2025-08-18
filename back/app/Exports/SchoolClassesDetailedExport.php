@@ -27,11 +27,11 @@ class SchoolClassesDetailedExport implements FromCollection, WithHeadings, WithM
      */
     public function collection()
     {
-        $query = SchoolClass::with(['level.section', 'series']);
+        $query = SchoolClass::with(['level.school', 'series']);
         
-        if (!empty($this->filters['section_id'])) {
+        if (!empty($this->filters['school_id'])) {
             $query->whereHas('level', function($q) {
-                $q->where('section_id', $this->filters['section_id']);
+                $q->where('school_id', $this->filters['school_id']);
             });
         }
         
@@ -42,8 +42,8 @@ class SchoolClassesDetailedExport implements FromCollection, WithHeadings, WithM
         $classes = $query->orderBy('name')->limit(50)->get(); // Limiter à 50 classes pour éviter les timeouts
         
         // Si aucun résultat avec les filtres, retourner les premières classes
-        if ($classes->isEmpty() && (!empty($this->filters['section_id']) || !empty($this->filters['level_id']))) {
-            $classes = SchoolClass::with(['level.section', 'series'])->orderBy('name')->limit(50)->get();
+        if ($classes->isEmpty() && (!empty($this->filters['school_id']) || !empty($this->filters['level_id']))) {
+            $classes = SchoolClass::with(['level.school', 'series'])->orderBy('name')->limit(50)->get();
         }
         
         // Transformer pour avoir une ligne par série
@@ -55,7 +55,7 @@ class SchoolClassesDetailedExport implements FromCollection, WithHeadings, WithM
                     $detailedRows->push((object)[
                         'class_id' => $class->id,
                         'class_name' => $class->name,
-                        'section_name' => $class->level->section->name ?? 'N/A',
+                        'school_name' => $class->level->school->name ?? 'N/A',
                         'level_name' => $class->level->name ?? 'N/A',
                         'class_description' => $class->description,
                         'class_status' => $class->is_active,
@@ -73,7 +73,7 @@ class SchoolClassesDetailedExport implements FromCollection, WithHeadings, WithM
                 $detailedRows->push((object)[
                     'class_id' => $class->id,
                     'class_name' => $class->name,
-                    'section_name' => $class->level->section->name ?? 'N/A',
+                    'school_name' => $class->level->school->name ?? 'N/A',
                     'level_name' => $class->level->name ?? 'N/A',
                     'class_description' => $class->description,
                     'class_status' => $class->is_active,
@@ -99,7 +99,7 @@ class SchoolClassesDetailedExport implements FromCollection, WithHeadings, WithM
         return [
             'ID Classe',
             'Nom de la Classe',
-            'Section',
+            'School',
             'Niveau',
             'Description Classe',
             'Statut Classe',
@@ -121,7 +121,7 @@ class SchoolClassesDetailedExport implements FromCollection, WithHeadings, WithM
         return [
             $row->class_id,
             $row->class_name,
-            $row->section_name,
+            $row->school_name,
             $row->level_name,
             $row->class_description ?? '-',
             $row->class_status ? 'Actif' : 'Inactif',

@@ -48,8 +48,8 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
 
   // Les données utilisateur sont directement disponibles via le hook useAuth
 
-  // Navigation sections based on user role
-  const getNavigationSections = () => {
+  // Navigation schools based on user role
+  const getNavigationSchools = () => {
     if (!user || !user.role) {
       return [];
 
@@ -63,7 +63,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           title: "Gestion Académique",
           items: [
             { name: "Années Scolaires", href: "/school-years", icon: <Calendar /> },
-            { name: "Ecoles", href: "/sections", icon: <HospitalFill /> },
+            { name: "Ecoles", href: "/schools", icon: <HospitalFill /> },
             { name: "Spécialités", href: "/levels", icon: <BookFill /> },
             {
               name: "Salles",
@@ -287,7 +287,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
     return null;
   }
 
-  const navigationSections = getNavigationSections();
+  const navigationSchools = getNavigationSchools();
 
   // Render the sidebar with proper styling
   return (
@@ -377,7 +377,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
 
         {/* Navigation */}
         <div style={{ flex: 1, padding: "20px 0", overflowY: "auto" }}>
-          {navigationSections.map((section, sectionIndex) => (
+          {navigationSchools.map((school, sectionIndex) => (
             <div key={sectionIndex} style={{ marginBottom: "30px" }}>
               {(!isCollapsed || isMobile) && (
                 <div
@@ -390,10 +390,10 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
                     fontWeight: "600",
                   }}
                 >
-                  {section.title}
+                  {school.title}
                 </div>
               )}
-              {section.items.map((item, itemIndex) => (
+              {school.items.map((item, itemIndex) => (
                 <Link
                   key={itemIndex}
                   to={item.href}

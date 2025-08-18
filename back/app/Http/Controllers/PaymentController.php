@@ -983,7 +983,7 @@ class PaymentController extends Controller
                     </tbody>
                 </table>
 
-                <div class='recap-section'>
+                <div class='recap-school'>
                     <strong>Reste à payer par tranche</strong>
                     <table class='recap-table'>
                         <thead>
@@ -1020,7 +1020,7 @@ class PaymentController extends Controller
                     </div>
                 </div>
 
-                <div class='signature-section'>
+                <div class='signature-school'>
                     <div>Validé par " . ($payment->createdByUser ? $payment->createdByUser->name : 'Comptable') . "</div>
                     <div class='signature-line'>_____________________</div>
                 </div>
@@ -1207,11 +1207,11 @@ class PaymentController extends Controller
                     background: #f9f9f9;
                 }
 
-                .recap-section {
+                .recap-school {
                     margin: 6px 0;
                 }
 
-                .recap-section h4 {
+                .recap-school h4 {
                     color: #000;
                     font-size: 10px;
                     margin-bottom: 6px;
@@ -1289,7 +1289,7 @@ class PaymentController extends Controller
                     font-size: 8px;
                 }
 
-                .signature-section {
+                .signature-school {
                     margin-top: 6px;
                     text-align: right;
                     font-size: 8px;
@@ -1946,7 +1946,7 @@ class PaymentController extends Controller
                     </table>
                 </div>
 
-                <div class='recap-section'>
+                <div class='recap-school'>
                     <h4>Récapitulatif par Tranche</h4>
                     <table class='recap-table'>
                         <thead>
@@ -1983,7 +1983,7 @@ class PaymentController extends Controller
                     </div>
                 </div>
 
-                <div class='signature-section'>
+                <div class='signature-school'>
                     <div>Validé par : " . ($payment->createdByUser ? $payment->createdByUser->name : 'Comptable') . "</div>
                     <div class='signature-line'>Signature : _____________</div>
                 </div>
@@ -2168,11 +2168,11 @@ class PaymentController extends Controller
                     font-size: 10px;
                 }
 
-                .recap-section {
+                .recap-school {
                     margin: 3px 0;
                 }
 
-                .recap-section h4 {
+                .recap-school h4 {
                     color: #000;
                     font-size: 12px;
                     margin-bottom: 3px;
@@ -2236,7 +2236,7 @@ class PaymentController extends Controller
                     font-size: 8px;
                 }
 
-                .signature-section {
+                .signature-school {
                     margin-top: 5px;
                     text-align: right;
                     font-size: 10px;
@@ -2307,7 +2307,7 @@ class PaymentController extends Controller
                         </table>
                     </div>
 
-                    <div class='recap-section'>
+                    <div class='recap-school'>
                         <h4>Récapitulatif par Tranche</h4>
                         <table class='recap-table'>
                             <thead>
@@ -2344,7 +2344,7 @@ class PaymentController extends Controller
                         </div>
                     </div>
 
-                    <div class='signature-section'>
+                    <div class='signature-school'>
                         <div>Validé par : " . ($payment->createdByUser ? $payment->createdByUser->name : 'Comptable') . "</div>
                         <div class='signature-line'>Signature : _____________</div>
                     </div>

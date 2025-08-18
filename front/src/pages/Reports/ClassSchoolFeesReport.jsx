@@ -185,7 +185,7 @@ const ClassSchoolFeesReport = () => {
                                     <option value="">Sélectionner une classe</option>
                                     {classes.map(classe => (
                                         <option key={classe.id} value={classe.id}>
-                                            {classe.name} ({classe.level?.section?.name || 'Section N/A'})
+                                            {classe.name} ({classe.level?.school?.name || 'School N/A'})
                                         </option>
                                     ))}
                                 </Form.Select>
@@ -311,7 +311,7 @@ const ClassSchoolFeesReport = () => {
                                 <strong>Classe :</strong> {classInfo?.name}
                             </Col>
                             <Col md={4}>
-                                <strong>Section :</strong> {classInfo?.section_name}
+                                <strong>School :</strong> {classInfo?.school_name}
                             </Col>
                             <Col md={4}>
                                 <strong>Année scolaire :</strong> {schoolYear?.name || 'N/A'}

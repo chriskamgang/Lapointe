@@ -329,9 +329,9 @@ export const useClasses = () => {
     });
 };
 
-export const useSections = () => {
-    return useCrudApi('section', {
-        getAll: apiEndpoints.getAllSections,
+export const useSchools = () => {
+    return useCrudApi('school', {
+        getAll: apiEndpoints.getAllSchools,
         add: apiEndpoints.addSection,
         update: apiEndpoints.updateSection,
         delete: apiEndpoints.deleteSection

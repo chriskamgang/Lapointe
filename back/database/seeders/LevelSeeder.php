@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Level;
-use App\Models\Section;
+use App\Models\School;
 
 class LevelSeeder extends Seeder
 {
@@ -14,16 +14,16 @@ class LevelSeeder extends Seeder
      */
     public function run(): void
     {
-        // Récupérer les sections existantes
-        $sections = Section::all();
+        // Récupérer les schools existantes
+        $schools = School::all();
 
-        foreach ($sections as $section) {
-            switch ($section->name) {
+        foreach ($schools as $school) {
+            switch ($school->name) {
                 case 'Maternelle':
                     $levels = [
-                        ['name' => 'Petite Section', 'order' => 1],
-                        ['name' => 'Moyenne Section', 'order' => 2],
-                        ['name' => 'Grande Section', 'order' => 3]
+                        ['name' => 'Petite School', 'order' => 1],
+                        ['name' => 'Moyenne School', 'order' => 2],
+                        ['name' => 'Grande School', 'order' => 3]
                     ];
                     break;
                 case 'Primaire':
@@ -56,8 +56,8 @@ class LevelSeeder extends Seeder
             foreach ($levels as $levelData) {
                 Level::create([
                     'name' => $levelData['name'],
-                    'section_id' => $section->id,
-                    'description' => "Niveau {$levelData['name']} de la section {$section->name}",
+                    'school_id' => $school->id,
+                    'description' => "Niveau {$levelData['name']} de la school {$school->name}",
                     'order' => $levelData['order'],
                     'is_active' => true
                 ]);

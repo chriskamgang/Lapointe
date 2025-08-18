@@ -25,7 +25,7 @@ import Login from "./pages/Login";
 import PaymentTranches from "./pages/PaymentTranches";
 import SchoolClasses from "./pages/SchoolClasses/SchoolClasses";
 import SchoolYears from "./pages/SchoolYears";
-import Sections from "./pages/Sections/Sections";
+import Schools from "./pages/Schools/Schools";
 import Settings from "./pages/Settings";
 import UserProfile from "./pages/Profile/UserProfile";
 import SeriesStudents from "./pages/Students/SeriesStudents";
@@ -167,7 +167,7 @@ const AppContent = () => {
                 path="/"
                 element={
                   <RoleBasedRedirect>
-                    <Sections />
+                    <Schools />
                   </RoleBasedRedirect>
                 }
               />
@@ -292,10 +292,10 @@ const AppContent = () => {
 
               {/* Routes pour administrateurs uniquement */}
               <Route
-                path="/sections"
+                path="/schools"
                 element={
                   <AdminRoute>
-                    <Sections />
+                    <Schools />
                   </AdminRoute>
                 }
               />

@@ -79,7 +79,7 @@ const AccountantClassSeries = () => {
                             <div>
                                 <h2 className="h4 mb-1">Séries - {classData?.name}</h2>
                                 <p className="text-muted mb-0">
-                                    {classData?.level?.section?.name} - {classData?.level?.name}
+                                    {classData?.level?.school?.name} - {classData?.level?.name}
                                     {filteredSeries.length > 0 && ` • ${filteredSeries.length} série${filteredSeries.length > 1 ? 's' : ''}`}
                                 </p>
                             </div>

@@ -51,7 +51,7 @@ const AccountantClasses = () => {
                 // Si pas de données groupées, créer un groupement simple
                 if (Object.keys(groupedClasses).length === 0 && classes.length > 0) {
                     const simpleGrouped = classes.reduce((acc, classe) => {
-                        const groupKey = `${classe.level?.section?.name || 'Section inconnue'} - ${classe.level?.name || 'Niveau inconnu'}`;
+                        const groupKey = `${classe.level?.school?.name || 'School inconnue'} - ${classe.level?.name || 'Niveau inconnu'}`;
                         if (!acc[groupKey]) {
                             acc[groupKey] = [];
                         }
@@ -94,7 +94,7 @@ const AccountantClasses = () => {
     const filteredClasses = classes.filter(classe =>
         classe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         classe.level?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        classe.level?.section?.name.toLowerCase().includes(searchTerm.toLowerCase())
+        classe.level?.school?.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Filtrer les classes groupées selon la recherche
@@ -110,7 +110,7 @@ const AccountantClasses = () => {
                 const filteredLevelClasses = levelClasses.filter(classe =>
                     classe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     classe.level?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    classe.level?.section?.name.toLowerCase().includes(searchTerm.toLowerCase())
+                    classe.level?.school?.name.toLowerCase().includes(searchTerm.toLowerCase())
                 );
                 
                 if (filteredLevelClasses.length > 0) {
@@ -127,7 +127,7 @@ const AccountantClasses = () => {
             const filteredGroupClasses = sectionData.filter(classe =>
                 classe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 classe.level?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                classe.level?.section?.name.toLowerCase().includes(searchTerm.toLowerCase())
+                classe.level?.school?.name.toLowerCase().includes(searchTerm.toLowerCase())
             );
             if (filteredGroupClasses.length > 0) {
                 acc[sectionKey] = filteredGroupClasses;
@@ -257,7 +257,7 @@ const AccountantClasses = () => {
                                         <input
                                             type="text"
                                             className="form-control ps-5"
-                                            placeholder="Rechercher par nom de classe, niveau ou section..."
+                                            placeholder="Rechercher par nom de classe, niveau ou school..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
@@ -299,7 +299,7 @@ const AccountantClasses = () => {
 
             {/* Classes Display */}
             {viewMode === 'grouped' ? (
-                // Vue groupée par sections et classes
+                // Vue groupée par schools et classes
                 <div className="row">
                     <div className="col-12">
                         {Object.keys(filteredGroupedClasses).length === 0 ? (
@@ -353,7 +353,7 @@ const AccountantClasses = () => {
                                         </div>
                                         <div className="card-body p-0">
                                             {typeof sectionData === 'object' && !Array.isArray(sectionData) ? (
-                                                // Structure hiérarchique : Section > Niveau > Classes
+                                                // Structure hiérarchique : School > Niveau > Classes
                                                 Object.entries(sectionData).map(([levelKey, levelClasses]) => {
                                                     const levelClassesArray = Array.isArray(levelClasses) ? levelClasses : [];
                                                     return (
@@ -442,7 +442,7 @@ const AccountantClasses = () => {
                                                     );
                                                 })
                                             ) : (
-                                                // Structure simple : Section > Classes directement
+                                                // Structure simple : School > Classes directement
                                                 Array.isArray(sectionData) ? sectionData.map((classItem) => (
                                                     <div key={classItem.id} className="border-bottom">
                                                         {/* En-tête de la classe */}
@@ -548,7 +548,7 @@ const AccountantClasses = () => {
                                             <div>
                                                 <h6 className="card-title mb-1">{classe.name}</h6>
                                                 <small className="text-muted">
-                                                    {classe.level?.section?.name} - {classe.level?.name}
+                                                    {classe.level?.school?.name} - {classe.level?.name}
                                                 </small>
                                             </div>
                                             <span className="badge bg-primary">
@@ -584,7 +584,7 @@ const AccountantClasses = () => {
                                         <thead className="table-light">
                                             <tr>
                                                 <th>Classe</th>
-                                                <th>Section</th>
+                                                <th>School</th>
                                                 <th>Niveau</th>
                                                 <th>Séries</th>
                                                 <th>Élèves</th>
@@ -595,7 +595,7 @@ const AccountantClasses = () => {
                                             {filteredClasses.map((classe) => (
                                                 <tr key={classe.id}>
                                                     <td className="fw-medium">{classe.name}</td>
-                                                    <td>{classe.level?.section?.name}</td>
+                                                    <td>{classe.level?.school?.name}</td>
                                                     <td>{classe.level?.name}</td>
                                                     <td>
                                                         <span className="badge bg-light text-dark">

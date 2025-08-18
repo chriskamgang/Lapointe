@@ -1175,7 +1175,7 @@ const SeriesStudents = () => {
                                     Élèves - {series?.name}
                                 </h2>
                                 <p className="text-muted mb-0">
-                                    {series?.school_class?.level?.section?.name} - {series?.school_class?.level?.name} - {series?.school_class?.name}
+                                    {series?.school_class?.level?.school?.name} - {series?.school_class?.level?.name} - {series?.school_class?.name}
                                     {schoolYear && ` • Année ${schoolYear.name}`}
                                     {filteredStudents.length > 0 && ` • ${filteredStudents.length} élève${filteredStudents.length > 1 ? 's' : ''}`}
                                 </p>
@@ -1487,7 +1487,7 @@ const SeriesStudents = () => {
                             </div>
                             <form onSubmit={handleSubmit}>
                                 <div className="modal-body">
-                                    {/* Section Photo */}
+                                    {/* School Photo */}
                                     <div className="row mb-4">
                                         <div className="col-12">
                                             <label className="form-label">Photo de l'élève</label>

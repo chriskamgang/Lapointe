@@ -614,13 +614,13 @@ class NeedController extends Controller
             $needs = $this->getFilteredNeeds($request);
             
             $phpWord = new PhpWord();
-            $section = $phpWord->addSection();
+            $school = $phpWord->addSection();
             
             // Ajouter le logo et l'en-tête
             $logoPath = public_path('assets/logo.png');
             if (file_exists($logoPath)) {
                 // Créer un tableau pour le header avec logo
-                $headerTable = $section->addTable();
+                $headerTable = $school->addTable();
                 $headerTable->addRow();
                 $cellLogo = $headerTable->addCell(2000);
                 $cellLogo->addImage($logoPath, ['width' => 80, 'height' => 80]);
@@ -638,7 +638,7 @@ class NeedController extends Controller
                 };
                 
                 $cellTitle->addText('Liste des Besoins - ' . $statusLabel, ['bold' => true, 'size' => 14], ['alignment' => 'center']);
-                $section->addTextBreak();
+                $school->addTextBreak();
             } else {
                 // Titre sans logo
                 $statusLabel = match($request->get('status', 'all')) {
@@ -648,15 +648,15 @@ class NeedController extends Controller
                     default => 'Tous'
                 };
                 
-                $section->addTitle('INSTITUT UNIVERSITAIRE DE LA POINTE', 1);
-                $section->addTitle('Liste des Besoins - ' . $statusLabel, 2);
+                $school->addTitle('INSTITUT UNIVERSITAIRE DE LA POINTE', 1);
+                $school->addTitle('Liste des Besoins - ' . $statusLabel, 2);
             }
             
-            $section->addText('Généré le ' . now()->format('d/m/Y à H:i'));
-            $section->addTextBreak(2);
+            $school->addText('Généré le ' . now()->format('d/m/Y à H:i'));
+            $school->addTextBreak(2);
             
             // Table
-            $table = $section->addTable([
+            $table = $school->addTable([
                 'borderSize' => 6,
                 'borderColor' => '000000',
                 'cellMargin' => 80

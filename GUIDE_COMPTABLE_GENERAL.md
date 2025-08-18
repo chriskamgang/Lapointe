@@ -24,7 +24,7 @@ L'administrateur peut maintenant créer un utilisateur spécial "Comptable Gén�
 ### ❌ Droits administrateur (NON ACCORDÉS)
 - ❌ Gestion des utilisateurs
 - ❌ Paramètres système
-- ❌ Création/modification sections, niveaux, classes
+- ❌ Création/modification schools, niveaux, classes
 - ❌ Gestion des enseignants
 - ❌ Tranches de paiement
 
@@ -71,7 +71,7 @@ php artisan create:general-accountant "Marie Dupont" "marie.dupont" "marie.dupon
 
 ## 📋 Menu du Comptable Général
 
-Le comptable général aura accès aux sections suivantes :
+Le comptable général aura accès aux schools suivantes :
 
 ### Comptabilité
 - Classes

@@ -174,7 +174,7 @@ const Search = () => {
                                     </div>
                                     <div className="d-flex align-items-center text-muted small">
                                         <Building size={12} className="me-1" />
-                                        <span className="me-3">{student.section_name} - {student.level_name} - {student.class_name} ({student.series_name})</span>
+                                        <span className="me-3">{student.school_name} - {student.level_name} - {student.class_name} ({student.series_name})</span>
                                         {student.parent_name && (
                                             <>
                                                 <Person size={12} className="me-1" />
@@ -244,7 +244,7 @@ const Search = () => {
                                         </Badge>
                                     </div>
                                     <div className="d-flex align-items-center text-muted small">
-                                        <span className="me-3">{schoolClass.section_name} - {schoolClass.level_name}</span>
+                                        <span className="me-3">{schoolClass.school_name} - {schoolClass.level_name}</span>
                                         {schoolClass.description && (
                                             <span className="me-3">{schoolClass.description}</span>
                                         )}
@@ -311,7 +311,7 @@ const Search = () => {
                                     </div>
                                     <div className="d-flex align-items-center text-muted small">
                                         <Building size={12} className="me-1" />
-                                        <span className="me-3">{serie.class_name} - {serie.section_name} - {serie.level_name}</span>
+                                        <span className="me-3">{serie.class_name} - {serie.school_name} - {serie.level_name}</span>
                                         {serie.main_teacher && (
                                             <span>Prof. principal: {serie.main_teacher}</span>
                                         )}

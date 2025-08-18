@@ -7,7 +7,7 @@ use App\Models\Student;
 use App\Models\SchoolClass;
 use App\Models\ClassSeries;
 use App\Models\Teacher;
-use App\Models\Section;
+use App\Models\School;
 use App\Models\Level;
 use App\Models\SchoolYear;
 use Illuminate\Support\Facades\DB;
@@ -88,22 +88,22 @@ class StatsController extends Controller
             ->pluck('count', 'gender')
             ->toArray();
         
-        // Répartition par section - requête simplifiée
+        // Répartition par school - requête simplifiée
         $sectionStats = DB::select("
-            SELECT sections.name as section_name, COUNT(*) as count
+            SELECT schools.name as school_name, COUNT(*) as count
             FROM students 
             JOIN class_series ON students.class_series_id = class_series.id
             JOIN school_classes ON class_series.class_id = school_classes.id  
             JOIN levels ON school_classes.level_id = levels.id
-            JOIN sections ON levels.section_id = sections.id
+            JOIN schools ON levels.school_id = schools.id
             WHERE students.is_active = 1
             " . ($currentYear ? "AND students.school_year_id = {$currentYear->id}" : "") . "
-            GROUP BY sections.id, sections.name
+            GROUP BY schools.id, schools.name
         ");
         
         // Convertir en array
         $sectionStats = array_map(function($item) {
-            return ['section_name' => $item->section_name, 'count' => $item->count];
+            return ['school_name' => $item->school_name, 'count' => $item->count];
         }, $sectionStats);
         
         // Évolution mensuelle (12 derniers mois)
@@ -144,14 +144,14 @@ class StatsController extends Controller
         $totalClasses = SchoolClass::where('school_classes.is_active', true)->count();
         $totalSeries = ClassSeries::where('class_series.is_active', true)->count();
         
-        // Répartition par section
+        // Répartition par school
         $sectionStats = SchoolClass::where('school_classes.is_active', true)
             ->join('levels', 'school_classes.level_id', '=', 'levels.id')
-            ->join('sections', 'levels.section_id', '=', 'sections.id')
+            ->join('schools', 'levels.school_id', '=', 'schools.id')
             ->where('levels.is_active', true)
-            ->where('sections.is_active', true)
-            ->select('sections.name as section_name', DB::raw('count(*) as count'))
-            ->groupBy('sections.id', 'sections.name')
+            ->where('schools.is_active', true)
+            ->select('schools.name as school_name', DB::raw('count(*) as count'))
+            ->groupBy('schools.id', 'schools.name')
             ->get()
             ->toArray();
         

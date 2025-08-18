@@ -34,8 +34,8 @@ class CompleteSchoolSeeder extends Seeder
         // 1. Créer les utilisateurs de base
         $this->createUsers();
         
-        // 2. Créer les sections
-        $this->createSections();
+        // 2. Créer les schools
+        $this->createSchools();
         
         // 3. Créer les niveaux
         $this->createLevels();
@@ -116,17 +116,17 @@ class CompleteSchoolSeeder extends Seeder
         }
     }
 
-    private function createSections()
+    private function createSchools()
     {
-        $this->command->info('📚 Création des sections...');
+        $this->command->info('📚 Création des schools...');
         
-        $sections = [
-            ['name' => 'Maternelle', 'description' => 'Section pour les enfants de 3 à 6 ans', 'order' => 1],
-            ['name' => 'Primaire', 'description' => 'Section pour les élèves du CP au CM2', 'order' => 2],
-            ['name' => 'Secondaire', 'description' => 'Section pour les élèves de la 6ème à la Terminale', 'order' => 3]
+        $schools = [
+            ['name' => 'Maternelle', 'description' => 'School pour les enfants de 3 à 6 ans', 'order' => 1],
+            ['name' => 'Primaire', 'description' => 'School pour les élèves du CP au CM2', 'order' => 2],
+            ['name' => 'Secondaire', 'description' => 'School pour les élèves de la 6ème à la Terminale', 'order' => 3]
         ];
 
-        foreach ($sections as $sectionData) {
+        foreach ($schools as $sectionData) {
             School::updateOrCreate(
                 ['name' => $sectionData['name']],
                 array_merge($sectionData, ['is_active' => true])
@@ -138,14 +138,14 @@ class CompleteSchoolSeeder extends Seeder
     {
         $this->command->info('📖 Création des niveaux...');
         
-        $sections = School::all();
+        $schools = School::all();
         
-        foreach ($sections as $section) {
-            $levels = match($section->name) {
+        foreach ($schools as $school) {
+            $levels = match($school->name) {
                 'Maternelle' => [
-                    ['name' => 'Petite Section', 'order' => 1],
-                    ['name' => 'Moyenne Section', 'order' => 2],
-                    ['name' => 'Grande Section', 'order' => 3]
+                    ['name' => 'Petite School', 'order' => 1],
+                    ['name' => 'Moyenne School', 'order' => 2],
+                    ['name' => 'Grande School', 'order' => 3]
                 ],
                 'Primaire' => [
                     ['name' => 'CP', 'order' => 1],
@@ -168,9 +168,9 @@ class CompleteSchoolSeeder extends Seeder
 
             foreach ($levels as $levelData) {
                 Level::updateOrCreate(
-                    ['name' => $levelData['name'], 'section_id' => $section->id],
+                    ['name' => $levelData['name'], 'school_id' => $school->id],
                     array_merge($levelData, [
-                        'description' => "Niveau {$levelData['name']} de la section {$section->name}",
+                        'description' => "Niveau {$levelData['name']} de la school {$school->name}",
                         'is_active' => true
                     ])
                 );
@@ -228,7 +228,7 @@ class CompleteSchoolSeeder extends Seeder
     private function getSeriesForLevel($levelName)
     {
         return match($levelName) {
-            'Petite Section', 'Moyenne Section', 'Grande Section', 'CP', 'CE1', 'CE2' => ['A'],
+            'Petite School', 'Moyenne School', 'Grande School', 'CP', 'CE1', 'CE2' => ['A'],
             'CM1', 'CM2', '6ème', '5ème' => ['A', 'B'],
             '4ème', '3ème', '2nde' => ['A', 'B', 'C'],
             '1ère', 'Terminale' => ['A', 'C', 'D'],
@@ -258,9 +258,9 @@ class CompleteSchoolSeeder extends Seeder
     private function getAmountsForLevel($levelName)
     {
         $baseAmounts = [
-            'Petite Section' => ['inscription' => 15000, 'tranche' => 35000],
-            'Moyenne Section' => ['inscription' => 15000, 'tranche' => 35000],
-            'Grande Section' => ['inscription' => 18000, 'tranche' => 40000],
+            'Petite School' => ['inscription' => 15000, 'tranche' => 35000],
+            'Moyenne School' => ['inscription' => 15000, 'tranche' => 35000],
+            'Grande School' => ['inscription' => 18000, 'tranche' => 40000],
             'CP' => ['inscription' => 20000, 'tranche' => 45000],
             'CE1' => ['inscription' => 20000, 'tranche' => 45000],
             'CE2' => ['inscription' => 20000, 'tranche' => 45000],
@@ -539,7 +539,7 @@ class CompleteSchoolSeeder extends Seeder
         
         $counts = [
             'Utilisateurs' => User::count(),
-            'Sections' => School::count(),
+            'Schools' => School::count(),
             'Niveaux' => Level::count(),
             'Classes' => SchoolClass::count(),
             'Séries' => ClassSeries::count(),

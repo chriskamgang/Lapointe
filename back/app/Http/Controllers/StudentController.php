@@ -206,7 +206,7 @@ class StudentController extends Controller
                 ->get();
 
             // Récupérer les informations de la série
-            $series = ClassSeries::with(['schoolClass.level.section'])->find($seriesId);
+            $series = ClassSeries::with(['schoolClass.level.school'])->find($seriesId);
 
             if (!$series) {
                 return response()->json([
@@ -539,7 +539,7 @@ class StudentController extends Controller
                 ->orderBy('first_name')
                 ->get();
 
-            $series = ClassSeries::with(['schoolClass.level.section'])->find($seriesId);
+            $series = ClassSeries::with(['schoolClass.level.school'])->find($seriesId);
 
             $filename = 'eleves_' . str_replace(' ', '_', $series->name) . '_' . date('Y-m-d') . '.csv';
 
@@ -618,7 +618,7 @@ class StudentController extends Controller
                 ->orderBy('first_name')
                 ->get();
 
-            $series = ClassSeries::with(['schoolClass.level.section'])->find($seriesId);
+            $series = ClassSeries::with(['schoolClass.level.school'])->find($seriesId);
 
             // Générer le HTML pour le PDF
             $html = $this->generateStudentListHtml($students, $series, $workingYear);
@@ -692,7 +692,7 @@ class StudentController extends Controller
             <strong>Niveau:</strong> <span>' . $series->schoolClass->level->name . '</span>
         </div>
         <div class="info-row">
-            <strong>Section:</strong> <span>' . $series->schoolClass->level->section->name . '</span>
+            <strong>School:</strong> <span>' . $series->schoolClass->level->school->name . '</span>
         </div>
         <div class="info-row">
             <strong>Année scolaire:</strong> <span>' . $schoolYear->name . '</span>
@@ -1150,7 +1150,7 @@ class StudentController extends Controller
             }
 
             // Récupérer les informations de la nouvelle série
-            $newSeries = ClassSeries::with(['schoolClass', 'schoolClass.level', 'schoolClass.level.section'])
+            $newSeries = ClassSeries::with(['schoolClass', 'schoolClass.level', 'schoolClass.level.school'])
                 ->find($newSeriesId);
 
             if (!$newSeries) {
@@ -1205,7 +1205,7 @@ class StudentController extends Controller
                 'classSeries',
                 'classSeries.schoolClass',
                 'classSeries.schoolClass.level',
-                'classSeries.schoolClass.level.section',
+                'classSeries.schoolClass.level.school',
                 'schoolYear'
             ]);
 
@@ -1225,7 +1225,7 @@ class StudentController extends Controller
                     'to' => [
                         'series_name' => $newSeries->name,
                         'class_name' => $newSeries->schoolClass->name,
-                        'section_name' => $newSeries->schoolClass->level->section->name ?? '',
+                        'school_name' => $newSeries->schoolClass->level->school->name ?? '',
                         'level_name' => $newSeries->schoolClass->level->name ?? ''
                     ]
                 ]
@@ -1270,8 +1270,8 @@ class StudentController extends Controller
                 $filters['class_series_id'] = $request->class_series_id;
             }
             
-            if ($request->has('section_id')) {
-                $filters['section_id'] = $request->section_id;
+            if ($request->has('school_id')) {
+                $filters['school_id'] = $request->school_id;
             }
             
             if ($request->has('level_id')) {
@@ -1317,8 +1317,8 @@ class StudentController extends Controller
                 $filters['class_series_id'] = $request->class_series_id;
             }
             
-            if ($request->has('section_id')) {
-                $filters['section_id'] = $request->section_id;
+            if ($request->has('school_id')) {
+                $filters['school_id'] = $request->school_id;
             }
             
             if ($request->has('level_id')) {
@@ -1597,8 +1597,8 @@ class StudentController extends Controller
                 $filters['class_series_id'] = $request->class_series_id;
             }
             
-            if ($request->has('section_id')) {
-                $filters['section_id'] = $request->section_id;
+            if ($request->has('school_id')) {
+                $filters['school_id'] = $request->school_id;
             }
             
             if ($request->has('level_id')) {
@@ -1644,8 +1644,8 @@ class StudentController extends Controller
                 $filters['class_series_id'] = $request->class_series_id;
             }
             
-            if ($request->has('section_id')) {
-                $filters['section_id'] = $request->section_id;
+            if ($request->has('school_id')) {
+                $filters['school_id'] = $request->school_id;
             }
             
             if ($request->has('level_id')) {

@@ -207,7 +207,7 @@ const StudentTransfer = ({ student, show, onHide, onTransferSuccess }) => {
                             <option value="">Sélectionner une classe</option>
                             {availableClasses.map(cls => (
                                 <option key={cls.id} value={cls.id}>
-                                    {cls.name} ({cls.level?.name} - {cls.level?.section?.name})
+                                    {cls.name} ({cls.level?.name} - {cls.level?.school?.name})
                                 </option>
                             ))}
                         </Form.Select>

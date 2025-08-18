@@ -214,18 +214,18 @@ const Stats = () => {
         />;
     };
 
-    // Graphique de répartition par section (étudiants)
+    // Graphique de répartition par school (étudiants)
     const renderStudentSectionChart = () => {
         if (!stats?.students?.section_distribution || stats.students.section_distribution.length === 0) return null;
 
         const data = stats.students.section_distribution.map(item => ({
-            label: item.section_name,
+            label: item.school_name,
             value: item.count
         }));
 
         return <SimpleBarChart 
             data={data} 
-            title="Répartition par Section" 
+            title="Répartition par School" 
             color={colors.primary} 
         />;
     };

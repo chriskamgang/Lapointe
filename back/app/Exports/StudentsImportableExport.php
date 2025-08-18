@@ -31,7 +31,7 @@ class StudentsImportableExport implements FromCollection, WithHeadings, WithMapp
             'classSeries', 
             'classSeries.schoolClass',
             'classSeries.schoolClass.level',
-            'classSeries.schoolClass.level.section',
+            'classSeries.schoolClass.level.school',
             'schoolYear'
         ]);
         
@@ -45,9 +45,9 @@ class StudentsImportableExport implements FromCollection, WithHeadings, WithMapp
             $query->where('class_series_id', $this->filters['class_series_id']);
         }
         
-        if (!empty($this->filters['section_id'])) {
+        if (!empty($this->filters['school_id'])) {
             $query->whereHas('classSeries.schoolClass.level', function($q) {
-                $q->where('section_id', $this->filters['section_id']);
+                $q->where('school_id', $this->filters['school_id']);
             });
         }
         

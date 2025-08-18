@@ -9,7 +9,7 @@ use App\Models\PaymentTranche;
 use App\Models\SchoolClass;
 use App\Models\ClassSeries;
 use App\Models\ClassScholarship;
-use App\Models\Section;
+use App\Models\School;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -58,23 +58,23 @@ class ReportsController extends Controller
                 ], 400);
             }
 
-            $filterType = $request->get('filterType', 'section'); // section, class, series
-            $sectionId = $request->get('sectionId');
+            $filterType = $request->get('filterType', 'school'); // school, class, series
+            $schoolId = $request->get('schoolId');
             $classId = $request->get('classId');
             $seriesId = $request->get('seriesId');
 
             // Récupérer tous les étudiants avec leurs informations de paiement
             $studentsQuery = Student::with([
-                'classSeries.schoolClass.level.section',
+                'classSeries.schoolClass.level.school',
                 'payments.paymentDetails.paymentTranche'
             ])
                 ->where('school_year_id', $workingYear->id)
                 ->where('is_active', true);
 
             // Appliquer les filtres
-            if (!empty($sectionId)) {
-                $studentsQuery->whereHas('classSeries.schoolClass.level.section', function ($query) use ($sectionId) {
-                    $query->where('id', $sectionId);
+            if (!empty($schoolId)) {
+                $studentsQuery->whereHas('classSeries.schoolClass.level.school', function ($query) use ($schoolId) {
+                    $query->where('id', $schoolId);
                 });
             }
 
@@ -182,8 +182,8 @@ class ReportsController extends Controller
                 return $student->classSeries->id;
             case 'class':
                 return $student->classSeries->schoolClass->id;
-            case 'section':
-                return $student->classSeries->schoolClass->level->section->id;
+            case 'school':
+                return $student->classSeries->schoolClass->level->school->id;
             default:
                 return $student->classSeries->id;
         }
@@ -199,8 +199,8 @@ class ReportsController extends Controller
                 return $student->classSeries->schoolClass->name . ' - ' . $student->classSeries->name;
             case 'class':
                 return $student->classSeries->schoolClass->name;
-            case 'section':
-                return $student->classSeries->schoolClass->level->section->name;
+            case 'school':
+                return $student->classSeries->schoolClass->level->school->name;
             default:
                 return $student->classSeries->schoolClass->name . ' - ' . $student->classSeries->name;
         }
@@ -221,23 +221,23 @@ class ReportsController extends Controller
                 ], 400);
             }
 
-            $filterType = $request->get('filterType', 'section'); // section, class, series
-            $sectionId = $request->get('sectionId');
+            $filterType = $request->get('filterType', 'school'); // school, class, series
+            $schoolId = $request->get('schoolId');
             $classId = $request->get('classId');
             $seriesId = $request->get('seriesId');
 
             // Récupérer tous les étudiants avec leurs informations de paiement
             $studentsQuery = Student::with([
-                'classSeries.schoolClass.level.section',
+                'classSeries.schoolClass.level.school',
                 'payments.paymentDetails.paymentTranche'
             ])
                 ->where('school_year_id', $workingYear->id)
                 ->where('is_active', true);
 
             // Appliquer les filtres
-            if (!empty($sectionId)) {
-                $studentsQuery->whereHas('classSeries.schoolClass.level.section', function ($query) use ($sectionId) {
-                    $query->where('id', $sectionId);
+            if (!empty($schoolId)) {
+                $studentsQuery->whereHas('classSeries.schoolClass.level.school', function ($query) use ($schoolId) {
+                    $query->where('id', $schoolId);
                 });
             }
 
@@ -348,8 +348,8 @@ class ReportsController extends Controller
                 ], 400);
             }
 
-            $filterType = $request->get('filterType', 'section'); // section, class, series
-            $sectionId = $request->get('sectionId');
+            $filterType = $request->get('filterType', 'school'); // school, class, series
+            $schoolId = $request->get('schoolId');
             $classId = $request->get('classId');
             $seriesId = $request->get('seriesId');
 
@@ -370,7 +370,7 @@ class ReportsController extends Controller
 
             // Récupérer tous les étudiants avec leurs informations RAME
             $studentsQuery = Student::with([
-                'classSeries.schoolClass.level.section',
+                'classSeries.schoolClass.level.school',
                 'payments.paymentDetails.paymentTranche',
                 'rameStatus' => function ($query) use ($workingYear) {
                     $query->where('school_year_id', $workingYear->id);
@@ -380,9 +380,9 @@ class ReportsController extends Controller
                 ->where('is_active', true);
 
             // Appliquer les filtres
-            if (!empty($sectionId)) {
-                $studentsQuery->whereHas('classSeries.schoolClass.level.section', function ($query) use ($sectionId) {
-                    $query->where('id', $sectionId);
+            if (!empty($schoolId)) {
+                $studentsQuery->whereHas('classSeries.schoolClass.level.school', function ($query) use ($schoolId) {
+                    $query->where('id', $schoolId);
                 });
             }
 
@@ -651,20 +651,20 @@ class ReportsController extends Controller
                 ], 400);
             }
 
-            $filterType = $request->get('filterType', 'section');
-            $sectionId = $request->get('sectionId');
+            $filterType = $request->get('filterType', 'school');
+            $schoolId = $request->get('schoolId');
             $classId = $request->get('classId');
             $seriesId = $request->get('seriesId');
 
             // Récupérer les classes/séries selon les filtres
-            $classSeriesQuery = ClassSeries::with(['schoolClass.level.section'])
+            $classSeriesQuery = ClassSeries::with(['schoolClass.level.school'])
                 ->whereHas('schoolClass', function ($query) use ($workingYear) {
                     $query->where('school_year_id', $workingYear->id);
                 });
 
-            if (!empty($sectionId)) {
-                $classSeriesQuery->whereHas('schoolClass.level.section', function ($query) use ($sectionId) {
-                    $query->where('id', $sectionId);
+            if (!empty($schoolId)) {
+                $classSeriesQuery->whereHas('schoolClass.level.school', function ($query) use ($schoolId) {
+                    $query->where('id', $schoolId);
                 });
             }
 
@@ -773,20 +773,20 @@ class ReportsController extends Controller
                 ], 400);
             }
 
-            $filterType = $request->get('filterType', 'section');
-            $sectionId = $request->get('sectionId');
+            $filterType = $request->get('filterType', 'school');
+            $schoolId = $request->get('schoolId');
             $classId = $request->get('classId');
             $seriesId = $request->get('seriesId');
 
             // Récupérer les paiements selon les filtres
             $paymentsQuery = Payment::with([
-                'student.classSeries.schoolClass.level.section'
+                'student.classSeries.schoolClass.level.school'
             ])
                 ->where('school_year_id', $workingYear->id);
 
-            if (!empty($sectionId)) {
-                $paymentsQuery->whereHas('student.classSeries.schoolClass.level.section', function ($query) use ($sectionId) {
-                    $query->where('id', $sectionId);
+            if (!empty($schoolId)) {
+                $paymentsQuery->whereHas('student.classSeries.schoolClass.level.school', function ($query) use ($schoolId) {
+                    $query->where('id', $schoolId);
                 });
             }
 
@@ -874,23 +874,23 @@ class ReportsController extends Controller
                 ], 400);
             }
 
-            $filterType = $request->get('filterType', 'section');
-            $sectionId = $request->get('sectionId');
+            $filterType = $request->get('filterType', 'school');
+            $schoolId = $request->get('schoolId');
             $classId = $request->get('classId');
             $seriesId = $request->get('seriesId');
 
             // Récupérer tous les étudiants actifs (les bourses seront déterminées via leurs classes)
             $studentsQuery = Student::with([
-                'classSeries.schoolClass.level.section',
+                'classSeries.schoolClass.level.school',
                 'classSeries.schoolClass', // Pour accéder aux bourses de classe
                 'payments.paymentDetails.paymentTranche'
             ])
                 ->where('school_year_id', $workingYear->id)
                 ->where('is_active', true);
 
-            if (!empty($sectionId)) {
-                $studentsQuery->whereHas('classSeries.schoolClass.level.section', function ($query) use ($sectionId) {
-                    $query->where('id', $sectionId);
+            if (!empty($schoolId)) {
+                $studentsQuery->whereHas('classSeries.schoolClass.level.school', function ($query) use ($schoolId) {
+                    $query->where('id', $schoolId);
                 });
             }
 
@@ -1744,8 +1744,8 @@ class ReportsController extends Controller
             }
 
             // Récupérer les filtres
-            $filterType = $request->get('filterType', 'section');
-            $sectionId = $request->get('sectionId');
+            $filterType = $request->get('filterType', 'school');
+            $schoolId = $request->get('schoolId');
             $classId = $request->get('classId');
             $seriesId = $request->get('seriesId');
             $startDate = $request->get('startDate');
@@ -1761,7 +1761,7 @@ class ReportsController extends Controller
 
             // Construire la requête des paiements
             $paymentsQuery = Payment::with([
-                'student.classSeries.schoolClass.level.section',
+                'student.classSeries.schoolClass.level.school',
                 'paymentDetails.paymentTranche',
                 'createdByUser' // Ajouter la relation avec l'utilisateur validateur
             ])
@@ -1769,9 +1769,9 @@ class ReportsController extends Controller
                 ->whereBetween('payment_date', [$startDate, $endDate]);
 
             // Appliquer les filtres
-            if (!empty($sectionId)) {
-                $paymentsQuery->whereHas('student.classSeries.schoolClass.level.section', function ($query) use ($sectionId) {
-                    $query->where('id', $sectionId);
+            if (!empty($schoolId)) {
+                $paymentsQuery->whereHas('student.classSeries.schoolClass.level.school', function ($query) use ($schoolId) {
+                    $query->where('id', $schoolId);
                 });
             }
 
@@ -2449,7 +2449,7 @@ class ReportsController extends Controller
 
     /**
      * Rapport d'encaissement détaillé de la période
-     * Filtres: dates et section
+     * Filtres: dates et school
      * Format: Numéro, Matricule, Nom, Prénom, Classe, Inscription(Montant), Tranche(Montant)
      */
     public function getDetailedCollectionReport(Request $request)
@@ -2467,7 +2467,7 @@ class ReportsController extends Controller
             // Récupérer les filtres
             $startDate = $request->get('start_date');
             $endDate = $request->get('end_date');
-            $sectionId = $request->get('section_id');
+            $schoolId = $request->get('school_id');
 
             // Validation des dates
             if (!$startDate || !$endDate) {
@@ -2479,17 +2479,17 @@ class ReportsController extends Controller
 
             // Construire la requête des paiements avec relations
             $query = Payment::with([
-                'student.classSeries.schoolClass.level.section',
+                'student.classSeries.schoolClass.level.school',
                 'paymentDetails.paymentTranche'
             ])
                 ->where('school_year_id', $workingYear->id)
                 ->whereBetween('payment_date', [$startDate, $endDate])
                 ->whereNotNull('validation_date');
 
-            // Filtrer par section si spécifié
-            if ($sectionId) {
-                $query->whereHas('student.classSeries.schoolClass.level.section', function($q) use ($sectionId) {
-                    $q->where('id', $sectionId);
+            // Filtrer par school si spécifié
+            if ($schoolId) {
+                $query->whereHas('student.classSeries.schoolClass.level.school', function($q) use ($schoolId) {
+                    $q->where('id', $schoolId);
                 });
             }
 
@@ -2547,10 +2547,10 @@ class ReportsController extends Controller
                 $totalTranches += $trancheAmount;
             }
 
-            // Récupérer les informations de section si filtré
+            // Récupérer les informations de school si filtré
             $sectionInfo = null;
-            if ($sectionId) {
-                $sectionInfo = \App\Models\School::find($sectionId);
+            if ($schoolId) {
+                $sectionInfo = \App\Models\School::find($schoolId);
             }
 
             return response()->json([
@@ -2607,7 +2607,7 @@ class ReportsController extends Controller
             }
 
             // Récupérer la classe avec ses informations de base
-            $schoolClass = \App\Models\SchoolClass::with(['level.section'])->find($classId);
+            $schoolClass = \App\Models\SchoolClass::with(['level.school'])->find($classId);
 
             if (!$schoolClass) {
                 return response()->json([
@@ -2727,8 +2727,8 @@ class ReportsController extends Controller
                         'id' => $schoolClass->id,
                         'name' => $schoolClass->name,
                         'level_name' => $schoolClass->level ? $schoolClass->level->name : 'N/A',
-                        'section_name' => $schoolClass->level && $schoolClass->level->section ? 
-                            $schoolClass->level->section->name : 'N/A'
+                        'school_name' => $schoolClass->level && $schoolClass->level->school ? 
+                            $schoolClass->level->school->name : 'N/A'
                     ],
                     'school_year' => $workingYear
                 ]
@@ -2803,7 +2803,7 @@ class ReportsController extends Controller
         $html .= "</head><body>";
         $html .= "<h2>INSTITUT UNIVERSITAIRE DE LA POINTE</h2>";
         $html .= "<h3>PAIEMENT DES FRAIS DE SCOLARITÉ PAR CLASSE</h3>";
-        $html .= "<p>Classe: " . $classInfo['name'] . " | Section: " . $classInfo['section_name'] . "</p>";
+        $html .= "<p>Classe: " . $classInfo['name'] . " | School: " . $classInfo['school_name'] . "</p>";
         $html .= "<p>Année scolaire: " . $schoolYear['name'] . " | Nombre d'élèves: " . $summary['total_students'] . "</p>";
         
         $html .= "<table>";

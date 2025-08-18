@@ -46,13 +46,13 @@ Le comptable général doit avoir exactement les **mêmes droits qu'un comptable
 Le comptable général ne doit **PAS** avoir accès à :
 
 #### Navigation absente :
-- ❌ **Gestion Académique** (sections, niveaux, classes)
+- ❌ **Gestion Académique** (schools, niveaux, classes)
 - ❌ **Administration** (utilisateurs, paramètres)
 - ❌ **Enseignants** (gestion des enseignants)
 - ❌ **Surveillance** (assignations surveillants)
 
 #### Routes bloquées :
-- ❌ `/sections` - Gestion sections
+- ❌ `/schools` - Gestion schools
 - ❌ `/levels` - Gestion niveaux  
 - ❌ `/school-classes` - Gestion classes
 - ❌ `/payment-tranches` - Tranches paiement
@@ -74,14 +74,14 @@ Le comptable général ne doit **PAS** avoir accès à :
 
 #### 1. ✅ Vérifier l'accès autorisé
 - [ ] Se connecter avec pharmacie12
-- [ ] Vérifier que le menu contient seulement les 6 sections autorisées
+- [ ] Vérifier que le menu contient seulement les 6 schools autorisées
 - [ ] Tester l'accès à chaque page autorisée
 - [ ] **Spécialement tester "Gestion des Besoins"**
 
 #### 2. ❌ Vérifier les restrictions
 - [ ] Essayer d'accéder directement aux URLs interdites
 - [ ] Vérifier le message "Accès non autorisé"
-- [ ] Confirmer que le menu n'affiche pas les sections admin
+- [ ] Confirmer que le menu n'affiche pas les schools admin
 
 #### 3. 🆕 Tester les fonctionnalités besoins
 - [ ] Créer un besoin dans "Mes Besoins"

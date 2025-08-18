@@ -31,7 +31,7 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             'classSeries',
             'classSeries.schoolClass',
             'classSeries.schoolClass.level', 
-            'classSeries.schoolClass.level.section',
+            'classSeries.schoolClass.level.school',
             'schoolYear'
         ]);
         
@@ -45,9 +45,9 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             $query->where('class_series_id', $this->filters['class_series_id']);
         }
         
-        if (!empty($this->filters['section_id'])) {
+        if (!empty($this->filters['school_id'])) {
             $query->whereHas('classSeries.schoolClass.level', function($q) {
-                $q->where('section_id', $this->filters['section_id']);
+                $q->where('school_id', $this->filters['school_id']);
             });
         }
         
@@ -84,7 +84,7 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             'Adresse',
             'Série',
             'Classe',
-            'Section',
+            'School',
             'Niveau',
             'Année Scolaire',
             'Statut Étudiant',
@@ -111,7 +111,7 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, WithS
             $student->address ?? 'N/A',
             $student->classSeries ? $student->classSeries->name : 'N/A',
             $student->classSeries && $student->classSeries->schoolClass ? $student->classSeries->schoolClass->name : 'N/A',
-            $student->classSeries && $student->classSeries->schoolClass && $student->classSeries->schoolClass->level && $student->classSeries->schoolClass->level->section ? $student->classSeries->schoolClass->level->section->name : 'N/A',
+            $student->classSeries && $student->classSeries->schoolClass && $student->classSeries->schoolClass->level && $student->classSeries->schoolClass->level->school ? $student->classSeries->schoolClass->level->school->name : 'N/A',
             $student->classSeries && $student->classSeries->schoolClass && $student->classSeries->schoolClass->level ? $student->classSeries->schoolClass->level->name : 'N/A',
             $student->schoolYear ? $student->schoolYear->name : 'N/A',
             $student->student_status ?? ($student->is_new ? 'Nouveau' : 'Ancien'),

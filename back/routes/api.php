@@ -115,12 +115,12 @@ Route::post('/students', function () {
 // Routes protégées
 Route::middleware('auth:api')->group(function () {
 
-    // Routes pour les sections
-    Route::prefix('sections')->group(function () {
+    // Routes pour les schools
+    Route::prefix('schools')->group(function () {
 
         Route::get('/dashboard', [SectionController::class, 'dashboard'])->middleware(['role:admin,accountant']);
         Route::get('/', [SectionController::class, 'index'])->middleware(['role:admin,accountant']);
-        Route::get('/{section}', [SectionController::class, 'show'])->middleware(['role:admin,accountant']);
+        Route::get('/{school}', [SectionController::class, 'show'])->middleware(['role:admin,accountant']);
         
         // Export routes
         Route::get('/export/excel', [SectionController::class, 'exportExcel'])->middleware(['role:admin,accountant']);
@@ -132,13 +132,13 @@ Route::middleware('auth:api')->group(function () {
 
         Route::get('/dashboard', [SectionController::class, 'dashboard'])->middleware(['role:admin,accountant,comptable_superieur']);
         Route::get('/', [SectionController::class, 'index'])->middleware(['role:admin,accountant,comptable_superieur']);
-        Route::get('/{section}', [SectionController::class, 'show'])->middleware(['role:admin,accountant,comptable_superieur']);
+        Route::get('/{school}', [SectionController::class, 'show'])->middleware(['role:admin,accountant,comptable_superieur']);
 
 
         Route::post('/', [SectionController::class, 'store'])->middleware(['role:admin']);
-        Route::put('/{section}', [SectionController::class, 'update'])->middleware(['role:admin']);
-        Route::delete('/{section}', [SectionController::class, 'destroy'])->middleware(['role:admin']);
-        Route::post('/{section}/toggle-status', [SectionController::class, 'toggleStatus'])->middleware(['role:admin']);
+        Route::put('/{school}', [SectionController::class, 'update'])->middleware(['role:admin']);
+        Route::delete('/{school}', [SectionController::class, 'destroy'])->middleware(['role:admin']);
+        Route::post('/{school}/toggle-status', [SectionController::class, 'toggleStatus'])->middleware(['role:admin']);
         Route::post('/import/csv', [SectionController::class, 'importCsv'])->middleware(['role:admin']);
     });
 

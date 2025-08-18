@@ -2,8 +2,8 @@ export const comTraductions = {
     en: {
         addCom: 'Ajouter une compétence',
         comName: 'Nom de la compétence',
-        section: 'Section',
-        selectSection: '--- Selectionner la section ----',
+        school: 'School',
+        selectSection: '--- Selectionner la school ----',
         fr: 'Francophone',
         en: 'Anglophone',
         mat: 'Maternelle',
@@ -26,8 +26,8 @@ export const comTraductions = {
     fr: {
         addCom: 'Ajouter une compétence',
         comName: 'Nom de la compétence',
-        section: 'Section',
-        selectSection: '--- Selectionner la section ----',
+        school: 'School',
+        selectSection: '--- Selectionner la school ----',
         fr: 'Francophone',
         en: 'Anglophone',
         mat: 'Maternelle',

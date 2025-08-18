@@ -157,7 +157,7 @@ response.data.forEach(student => {
 - Méthodes `payRamePhysically()` et `getRameStatus()` du PaymentController
 - Routes complexes `/pay-rame-physically` et `/rame-status`
 - Exclusion de RAME dans PaymentStatusService (plus nécessaire)
-- Section RAME complexe dans StudentPayment.jsx
+- School RAME complexe dans StudentPayment.jsx
 
 ### Ajouts :
 - Table `student_rame_status`
@@ -189,7 +189,7 @@ WHERE is_rame_physical = true;
 ```
 
 ### Code Frontend
-- Remplacer les sections RAME complexes par `<RameStatusToggle />`
+- Remplacer les schools RAME complexes par `<RameStatusToggle />`
 - Supprimer les états `rame_choice` et `is_rame_physical`
 - Nettoyer les méthodes `handlePayRame` obsolètes
 

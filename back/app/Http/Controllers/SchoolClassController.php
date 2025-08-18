@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Log;
 
 class SchoolClassController extends Controller
 {
@@ -24,17 +25,17 @@ class SchoolClassController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = SchoolClass::with(['level.section', 'series', 'paymentAmounts.paymentTranche']);
+            $query = SchoolClass::with(['level.school', 'series', 'paymentAmounts.paymentTranche']);
             
             // Filtrer par niveau si spécifié
             if ($request->has('level_id')) {
                 $query->where('level_id', $request->level_id);
             }
             
-            // Filtrer par section si spécifié
-            if ($request->has('section_id')) {
+            // Filtrer par school si spécifié
+            if ($request->has('school_id')) {
                 $query->whereHas('level', function($q) use ($request) {
-                    $q->where('section_id', $request->section_id);
+                    $q->where('school_id', $request->school_id);
                 });
             }
             
@@ -68,7 +69,7 @@ class SchoolClassController extends Controller
                 'total_series' => ClassSeries::count(),
             ];
 
-            $recentClasses = SchoolClass::with(['level.section'])
+            $recentClasses = SchoolClass::with(['level.school'])
                 ->latest()
                 ->take(5)
                 ->get();
@@ -160,7 +161,7 @@ class SchoolClassController extends Controller
 
             // Recharger avec les relations
             $schoolClass->load([
-                'level.section', 
+                'level.school', 
                 'series', 
                 'paymentAmounts.paymentTranche'
             ]);
@@ -187,7 +188,7 @@ class SchoolClassController extends Controller
     {
         try {
             $schoolClass->load([
-                'level.section',
+                'level.school',
                 'series.students',
                 'paymentAmounts.paymentTranche'
             ]);
@@ -329,7 +330,7 @@ class SchoolClassController extends Controller
             DB::commit();
 
             // Recharger avec les relations
-            $schoolClass->load(['level.section', 'series', 'paymentAmounts.paymentTranche']);
+            $schoolClass->load(['level.school', 'series', 'paymentAmounts.paymentTranche']);
 
             return response()->json([
                 'success' => true,
@@ -461,7 +462,7 @@ class SchoolClassController extends Controller
     {
         try {
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             $filename = 'classes_' . date('Y-m-d_H-i-s') . '.xlsx';
@@ -482,7 +483,7 @@ class SchoolClassController extends Controller
     {
         try {
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             $filename = 'classes_' . date('Y-m-d_H-i-s') . '.csv';
@@ -505,7 +506,7 @@ class SchoolClassController extends Controller
             \Log::info('Export PDF démarré', ['user_id' => auth()->id()]);
             
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             
@@ -588,7 +589,7 @@ class SchoolClassController extends Controller
     {
         try {
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             $filename = 'classes_importable_' . date('Y-m-d_H-i-s') . '.csv';

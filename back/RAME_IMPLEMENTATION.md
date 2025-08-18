@@ -156,7 +156,7 @@ Pour tester le système :
 
 1. Créer un étudiant dans le système
 2. Accéder à la page de paiement de l'étudiant
-3. Dans la section RAME, choisir "Physique (rame apportée)"
+3. Dans la school RAME, choisir "Physique (rame apportée)"
 4. Confirmer le paiement
 5. Vérifier la notification WhatsApp et le reçu généré
 

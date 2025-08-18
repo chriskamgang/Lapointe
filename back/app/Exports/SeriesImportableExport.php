@@ -24,15 +24,15 @@ class SeriesImportableExport implements FromCollection, WithHeadings, WithMappin
      */
     public function collection()
     {
-        $query = ClassSeries::with(['schoolClass.level.section']);
+        $query = ClassSeries::with(['schoolClass.level.school']);
         
         if (!empty($this->filters['class_id'])) {
             $query->where('class_id', $this->filters['class_id']);
         }
         
-        if (!empty($this->filters['section_id'])) {
-            $query->whereHas('schoolClass.level.section', function($q) {
-                $q->where('id', $this->filters['section_id']);
+        if (!empty($this->filters['school_id'])) {
+            $query->whereHas('schoolClass.level.school', function($q) {
+                $q->where('id', $this->filters['school_id']);
             });
         }
         
@@ -50,7 +50,7 @@ class SeriesImportableExport implements FromCollection, WithHeadings, WithMappin
             'code',
             'classe',
             'niveau',
-            'section',
+            'school',
             'capacite',
             'statut'
         ];
@@ -67,7 +67,7 @@ class SeriesImportableExport implements FromCollection, WithHeadings, WithMappin
             $series->code ?? '',
             $series->schoolClass->name ?? '',
             $series->schoolClass->level->name ?? '',
-            $series->schoolClass->level->section->name ?? '',
+            $series->schoolClass->level->school->name ?? '',
             $series->capacity ?? '',
             $series->is_active ? 'actif' : 'inactif'
         ];

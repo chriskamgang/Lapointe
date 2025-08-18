@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Section;
+use App\Models\School;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -10,14 +10,14 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class SectionsImportableExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class SchoolsImportableExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     /**
      * @return \Illuminate\Support\Collection
      */
     public function collection()
     {
-        return Section::orderBy('name')->get();
+        return School::orderBy('name')->get();
     }
 
     /**
@@ -34,15 +34,15 @@ class SectionsImportableExport implements FromCollection, WithHeadings, WithMapp
     }
 
     /**
-     * @var Section $section
+     * @var School $school
      */
-    public function map($section): array
+    public function map($school): array
     {
         return [
-            $section->id,
-            $section->name,
-            $section->description ?? '',
-            $section->is_active ? 1 : 0
+            $school->id,
+            $school->name,
+            $school->description ?? '',
+            $school->is_active ? 1 : 0
         ];
     }
 

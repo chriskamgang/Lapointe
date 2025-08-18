@@ -378,7 +378,7 @@ const AttendanceScanner = () => {
         </Col>
       </Row>
 
-      {/* Scanner Section */}
+      {/* Scanner School */}
       <Row className="mb-4">
         <Col lg={6}>
           <Card>

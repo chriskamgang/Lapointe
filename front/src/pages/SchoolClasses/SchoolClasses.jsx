@@ -22,14 +22,14 @@ import Swal from 'sweetalert2';
 const SchoolClasses = () => {
     const navigate = useNavigate();
     const [classes, setClasses] = useState([]);
-    const [sections, setSections] = useState([]);
+    const [schools, setSchools] = useState([]);
     const [levels, setLevels] = useState([]);
     const [expandedClasses, setExpandedClasses] = useState({});
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedClass, setSelectedClass] = useState(null);
     const [filters, setFilters] = useState({
-        section_id: '',
+        school_id: '',
         level_id: ''
     });
     const [loading, setLoading] = useState(false);
@@ -51,24 +51,24 @@ const SchoolClasses = () => {
 
     const loadInitialData = async () => {
         try {
-            console.log('Loading initial data - sections and levels...');
-            const [sectionsResponse, levelsResponse] = await Promise.all([
-                secureApiEndpoints.sections.getAll(),
+            console.log('Loading initial data - schools and levels...');
+            const [schoolsResponse, levelsResponse] = await Promise.all([
+                secureApiEndpoints.schools.getAll(),
                 secureApiEndpoints.levels.getAll()
             ]);
             
-            console.log('Sections response:', sectionsResponse);
+            console.log('Schools response:', schoolsResponse);
             console.log('Levels response:', levelsResponse);
             
-            if (sectionsResponse.success) {
-                setSections(sectionsResponse.data || []);
+            if (schoolsResponse.success) {
+                setSchools(schoolsResponse.data || []);
             }
             if (levelsResponse.success) {
                 setLevels(levelsResponse.data || []);
             }
         } catch (error) {
             console.error('Erreur lors du chargement des données:', error);
-            setError('Erreur lors du chargement des sections et niveaux');
+            setError('Erreur lors du chargement des schools et niveaux');
         }
     };
 
@@ -78,8 +78,8 @@ const SchoolClasses = () => {
             console.log('Loading salles with filters:', filters);
             let response;
             
-            if (filters.section_id) {
-                response = await secureApiEndpoints.schoolClasses.getBySection(filters.section_id);
+            if (filters.school_id) {
+                response = await secureApiEndpoints.schoolClasses.getBySection(filters.school_id);
             } else if (filters.level_id) {
                 response = await secureApiEndpoints.schoolClasses.getByLevel(filters.level_id);
             } else {
@@ -147,9 +147,9 @@ const SchoolClasses = () => {
         navigate(`/students/series/${seriesId}`);
     };
 
-    const getSectionName = (sectionId) => {
-        const section = sections.find(s => s.id === sectionId);
-        return section ? section.name : 'Ecole inconnue';
+    const getSchoolName = (schoolId) => {
+        const school = schools.find(s => s.id === schoolId);
+        return school ? school.name : 'Ecole inconnue';
     };
 
     const getLevelName = (levelId) => {
@@ -158,12 +158,12 @@ const SchoolClasses = () => {
     };
 
     const getFilteredLevels = () => {
-        if (!filters.section_id) return levels;
-        return levels.filter(level => level.section_id === parseInt(filters.section_id));
+        if (!filters.school_id) return levels;
+        return levels.filter(level => level.school_id === parseInt(filters.school_id));
     };
 
     const groupedClasses = classes.reduce((acc, classItem) => {
-        const key = `${classItem.level?.section?.name || 'Sans école'} - ${classItem.level?.name || 'Sans spécialité'}`;
+        const key = `${classItem.level?.school?.name || 'Sans école'} - ${classItem.level?.name || 'Sans spécialité'}`;
         if (!acc[key]) {
             acc[key] = [];
         }
@@ -232,17 +232,17 @@ const SchoolClasses = () => {
                                     <label className="form-label">Ecole</label>
                                     <select
                                         className="form-select"
-                                        value={filters.section_id}
+                                        value={filters.school_id}
                                         onChange={(e) => setFilters(prev => ({
                                             ...prev,
-                                            section_id: e.target.value,
-                                            level_id: '' // Reset level when section changes
+                                            school_id: e.target.value,
+                                            level_id: '' // Reset level when school changes
                                         }))}
                                     >
                                         <option value="">Toutes les écoles</option>
-                                        {sections.map(section => (
-                                            <option key={section.id} value={section.id}>
-                                                {section.name}
+                                        {schools.map(school => (
+                                            <option key={school.id} value={school.id}>
+                                                {school.name}
                                             </option>
                                         ))}
                                     </select>
@@ -268,7 +268,7 @@ const SchoolClasses = () => {
                                 <div className="col-md-4 d-flex align-items-end">
                                     <button
                                         className="btn btn-outline-secondary"
-                                        onClick={() => setFilters({ section_id: '', level_id: '' })}
+                                        onClick={() => setFilters({ school_id: '', level_id: '' })}
                                     >
                                         Réinitialiser
                                     </button>
@@ -490,7 +490,7 @@ const SchoolClasses = () => {
                         setShowCreateModal(false);
                         loadClasses();
                     }}
-                    sections={sections}
+                    schools={schools}
                     levels={levels}
                 />
             )}
@@ -508,7 +508,7 @@ const SchoolClasses = () => {
                         loadClasses();
                     }}
                     classData={selectedClass}
-                    sections={sections}
+                    schools={schools}
                     levels={levels}
                 />
             )}

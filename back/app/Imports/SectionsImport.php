@@ -2,14 +2,14 @@
 
 namespace App\Imports;
 
-use App\Models\Section;
+use App\Models\School;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class SectionsImport implements ToCollection, WithHeadingRow
+class SchoolsImport implements ToCollection, WithHeadingRow
 {
     protected $results = [
         'created' => 0,
@@ -22,7 +22,7 @@ class SectionsImport implements ToCollection, WithHeadingRow
         foreach ($rows as $index => $row) {
             try {
                 $validator = Validator::make($row->toArray(), [
-                    'id' => 'nullable|integer|exists:sections,id',
+                    'id' => 'nullable|integer|exists:schools,id',
                     'nom' => 'required|string|max:255',
                     'description' => 'nullable|string',
                     'statut' => 'nullable|in:0,1,actif,inactif,Actif,Inactif,ACTIF,INACTIF'
@@ -46,7 +46,7 @@ class SectionsImport implements ToCollection, WithHeadingRow
                 
                 // Si un ID est fourni, chercher par ID
                 if (!empty($row['id'])) {
-                    $existingSection = Section::find($row['id']);
+                    $existingSection = School::find($row['id']);
                     if ($existingSection) {
                         $existingSection->update($data);
                         $this->results['updated']++;
@@ -59,9 +59,9 @@ class SectionsImport implements ToCollection, WithHeadingRow
                         continue;
                     }
                 } else {
-                    // Pas d'ID fourni, créer une nouvelle section
+                    // Pas d'ID fourni, créer une nouvelle school
                     // (La modification se fait uniquement par ID pour éviter les ambiguïtés)
-                    Section::create($data);
+                    School::create($data);
                     $this->results['created']++;
                 }
 

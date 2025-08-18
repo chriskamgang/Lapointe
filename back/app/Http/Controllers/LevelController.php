@@ -22,9 +22,9 @@ class LevelController extends Controller
         try {
             $query = Level::with(['school', 'schoolClasses']);
             
-            // Filtrer par section si spécifié
+            // Filtrer par school si spécifié
             if ($request->has('school_id')) {
-                $query->where('school_id', $request->section_id);
+                $query->where('school_id', $request->school_id);
             }
             
             $levels = $query->ordered()->get();
@@ -99,9 +99,9 @@ class LevelController extends Controller
         }
 
         try {
-            // Si aucun ordre n'est spécifié, mettre à la fin pour cette section
+            // Si aucun ordre n'est spécifié, mettre à la fin pour cette school
             if (!$request->has('order')) {
-                $lastOrder = Level::where('school_id', $request->section_id)->max('order') ?? 0;
+                $lastOrder = Level::where('school_id', $request->school_id)->max('order') ?? 0;
                 $request->merge(['order' => $lastOrder + 1]);
             }
 
@@ -241,9 +241,9 @@ class LevelController extends Controller
     public function exportExcel(Request $request)
     {
         try {
-            $sectionId = $request->get('school_id');
+            $schoolId = $request->get('school_id');
             $filename = 'niveaux_' . date('Y-m-d_H-i-s') . '.xlsx';
-            return Excel::download(new LevelsExport($sectionId), $filename);
+            return Excel::download(new LevelsExport($schoolId), $filename);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -259,9 +259,9 @@ class LevelController extends Controller
     public function exportCsv(Request $request)
     {
         try {
-            $sectionId = $request->get('school_id');
+            $schoolId = $request->get('school_id');
             $filename = 'niveaux_' . date('Y-m-d_H-i-s') . '.csv';
-            return Excel::download(new LevelsImportableExport($sectionId), $filename, \Maatwebsite\Excel\Excel::CSV);
+            return Excel::download(new LevelsImportableExport($schoolId), $filename, \Maatwebsite\Excel\Excel::CSV);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -277,9 +277,9 @@ class LevelController extends Controller
     public function exportPdf(Request $request)
     {
         try {
-            $sectionId = $request->get('school_id');
+            $schoolId = $request->get('school_id');
             $filename = 'niveaux_' . date('Y-m-d_H-i-s') . '.pdf';
-            return Excel::download(new LevelsExport($sectionId), $filename, \Maatwebsite\Excel\Excel::DOMPDF);
+            return Excel::download(new LevelsExport($schoolId), $filename, \Maatwebsite\Excel\Excel::DOMPDF);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -333,9 +333,9 @@ class LevelController extends Controller
     public function exportImportable(Request $request)
     {
         try {
-            $sectionId = $request->get('school_id');
+            $schoolId = $request->get('school_id');
             $filename = 'niveaux_importable_' . date('Y-m-d_H-i-s') . '.csv';
-            return Excel::download(new LevelsImportableExport($sectionId), $filename, \Maatwebsite\Excel\Excel::CSV);
+            return Excel::download(new LevelsImportableExport($schoolId), $filename, \Maatwebsite\Excel\Excel::CSV);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

@@ -23,9 +23,9 @@ class Level extends Model
     ];
 
     /**
-     * Relation avec la section
+     * Relation avec la school
      */
-    public function section()
+    public function school()
     {
         return $this->belongsTo(School::class);
     }

@@ -209,7 +209,7 @@ export const RoleBasedRedirect = ({ children }) => {
   // Redirection basée sur le rôle si on est sur la racine
   if (location.pathname === "/" && user?.role) {
     const defaultPaths = {
-      admin: "/sections",
+      admin: "/schools",
       teacher: "/students",
       accountant: "/class-comp",
       comptable_superieur: "/class-comp",

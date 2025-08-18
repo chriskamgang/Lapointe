@@ -32,7 +32,7 @@
             overflow: hidden;
         }
         
-        /* Header Section similaire à la carte étudiante */
+        /* Header School similaire à la carte étudiante */
         .header {
             background: #4A6FFF;
             color: white;
@@ -71,8 +71,8 @@
             gap: 10pt;
         }
         
-        /* Left Section - Info */
-        .info-section {
+        /* Left School - Info */
+        .info-school {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -121,8 +121,8 @@
             color: #333;
         }
         
-        /* Right Section - Photo and QR */
-        .visual-section {
+        /* Right School - Photo and QR */
+        .visual-school {
             width: 80pt;
             display: flex;
             flex-direction: column;
@@ -171,7 +171,7 @@
             height: 100%;
         }
         
-        /* Footer Section */
+        /* Footer School */
         .footer {
             position: absolute;
             bottom: 0;
@@ -251,8 +251,8 @@
         
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Left Section - Staff Information -->
-            <div class="info-section">
+            <!-- Left School - Staff Information -->
+            <div class="info-school">
                 <div class="staff-info">
                     <div class="staff-name">{{ $user->name }}</div>
                     <div class="staff-id">ID: {{ str_pad($user->id, 6, '0', STR_PAD_LEFT) }}</div>
@@ -300,8 +300,8 @@
                 </div>
             </div>
             
-            <!-- Right Section - Photo and QR Code -->
-            <div class="visual-section">
+            <!-- Right School - Photo and QR Code -->
+            <div class="visual-school">
                 <div class="photo-container">
                     @if($user->photo)
                         <img src="{{ $user->photo }}" alt="Photo" class="staff-photo" 

@@ -46,10 +46,10 @@ const Reports = () => {
   // États pour les filtres
   const [filters, setFilters] = useState({
     // Filtre principal
-    filterType: "section", // section, class, series
+    filterType: "school", // school, class, series
 
     // Filtres spécifiques
-    sectionId: "",
+    schoolId: "",
     classId: "",
     seriesId: "",
 
@@ -59,7 +59,7 @@ const Reports = () => {
   });
 
   const [availableOptions, setAvailableOptions] = useState({
-    sections: [],
+    schools: [],
     classes: [],
     series: [],
   });
@@ -70,16 +70,16 @@ const Reports = () => {
 
   const loadAvailableOptions = async () => {
     try {
-      // Charger les sections, classes disponibles
-      const [sectionsRes, classesRes] = await Promise.all([
-        secureApiEndpoints.sections.getAll(),
+      // Charger les schools, classes disponibles
+      const [schoolsRes, classesRes] = await Promise.all([
+        secureApiEndpoints.schools.getAll(),
         secureApiEndpoints.schoolClasses.getAll(),
       ]);
 
       // S'assurer que les données sont des tableaux
-      const sections =
-        sectionsRes.success && Array.isArray(sectionsRes.data)
-          ? sectionsRes.data
+      const schools =
+        schoolsRes.success && Array.isArray(schoolsRes.data)
+          ? schoolsRes.data
           : [];
       const classes =
         classesRes.success && Array.isArray(classesRes.data)
@@ -108,7 +108,7 @@ const Reports = () => {
       }
 
       setAvailableOptions({
-        sections,
+        schools,
         classes,
         series: allSeries,
       });
@@ -725,13 +725,13 @@ const Reports = () => {
                   setFilters({
                     ...filters,
                     filterType: e.target.value,
-                    sectionId: "",
+                    schoolId: "",
                     classId: "",
                     seriesId: "",
                   });
                 }}
               >
-                <option value="section">Section</option>
+                <option value="school">School</option>
                 <option value="class">Classe</option>
                 <option value="series">Série</option>
               </Form.Select>
@@ -740,24 +740,24 @@ const Reports = () => {
           <Col md={3}>
             <Form.Group className="mb-3">
               <Form.Label>
-                {filters.filterType === "section"
-                  ? "Section"
+                {filters.filterType === "school"
+                  ? "School"
                   : filters.filterType === "class"
                   ? "Classe"
                   : "Série"}
               </Form.Label>
               <Form.Select
                 value={
-                  filters.filterType === "section"
-                    ? filters.sectionId
+                  filters.filterType === "school"
+                    ? filters.schoolId
                     : filters.filterType === "class"
                     ? filters.classId
                     : filters.seriesId
                 }
                 onChange={(e) => {
                   const newFilters = { ...filters };
-                  if (filters.filterType === "section") {
-                    newFilters.sectionId = e.target.value;
+                  if (filters.filterType === "school") {
+                    newFilters.schoolId = e.target.value;
                   } else if (filters.filterType === "class") {
                     newFilters.classId = e.target.value;
                   } else {
@@ -767,16 +767,16 @@ const Reports = () => {
                 }}
               >
                 <option value="">
-                  {filters.filterType === "section"
-                    ? "Toutes les sections"
+                  {filters.filterType === "school"
+                    ? "Toutes les schools"
                     : filters.filterType === "class"
                     ? "Toutes les classes"
                     : "Toutes les séries"}
                 </option>
-                {filters.filterType === "section" &&
-                  availableOptions.sections.map((section) => (
-                    <option key={section.id} value={section.id}>
-                      {section.name}
+                {filters.filterType === "school" &&
+                  availableOptions.schools.map((school) => (
+                    <option key={school.id} value={school.id}>
+                      {school.name}
                     </option>
                   ))}
                 {filters.filterType === "class" &&

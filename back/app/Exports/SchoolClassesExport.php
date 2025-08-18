@@ -24,11 +24,11 @@ class SchoolClassesExport implements FromCollection, WithHeadings, WithMapping, 
      */
     public function collection()
     {
-        $query = SchoolClass::with(['level.section', 'series']);
+        $query = SchoolClass::with(['level.school', 'series']);
         
-        if (!empty($this->filters['section_id'])) {
+        if (!empty($this->filters['school_id'])) {
             $query->whereHas('level', function($q) {
-                $q->where('section_id', $this->filters['section_id']);
+                $q->where('school_id', $this->filters['school_id']);
             });
         }
         
@@ -39,8 +39,8 @@ class SchoolClassesExport implements FromCollection, WithHeadings, WithMapping, 
         $results = $query->orderBy('name')->get();
         
         // Si aucun résultat avec les filtres, retourner toutes les classes
-        if ($results->isEmpty() && (!empty($this->filters['section_id']) || !empty($this->filters['level_id']))) {
-            return SchoolClass::with(['level.section', 'series'])->orderBy('name')->get();
+        if ($results->isEmpty() && (!empty($this->filters['school_id']) || !empty($this->filters['level_id']))) {
+            return SchoolClass::with(['level.school', 'series'])->orderBy('name')->get();
         }
         
         return $results;
@@ -54,7 +54,7 @@ class SchoolClassesExport implements FromCollection, WithHeadings, WithMapping, 
         return [
             'ID',
             'Nom',
-            'Section',
+            'School',
             'Niveau',
             'Description',
             'Nombre de Séries',
@@ -72,7 +72,7 @@ class SchoolClassesExport implements FromCollection, WithHeadings, WithMapping, 
         return [
             $schoolClass->id,
             $schoolClass->name,
-            $schoolClass->level->section->name ?? 'N/A',
+            $schoolClass->level->school->name ?? 'N/A',
             $schoolClass->level->name ?? 'N/A',
             $schoolClass->description ?? 'N/A',
             $schoolClass->series ? $schoolClass->series->count() : 0,

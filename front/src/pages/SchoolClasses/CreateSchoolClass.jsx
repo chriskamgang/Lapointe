@@ -4,7 +4,7 @@ import { Plus, Trash2, CreditCard } from 'react-bootstrap-icons';
 import { secureApiEndpoints } from '../../utils/apiMigration';
 import Swal from 'sweetalert2';
 
-const CreateSchoolClass = ({ show, onHide, onSuccess, sections, levels }) => {
+const CreateSchoolClass = ({ show, onHide, onSuccess, schools, levels }) => {
     const [formData, setFormData] = useState({
         name: '',
         level_id: '',
@@ -17,7 +17,7 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, sections, levels }) => {
     });
     
     const [paymentTranches, setPaymentTranches] = useState([]);
-    const [selectedSectionId, setSelectedSectionId] = useState('');
+    const [selectedSchoolId, setSelectedSchoolId] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -57,7 +57,7 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, sections, levels }) => {
 
     const handleLevelChange = (levelId) => {
         const level = levels.find(l => l.id === parseInt(levelId));
-        setSelectedSectionId(level?.section_id || '');
+        setSelectedSchoolId(level?.school_id || '');
         setFormData(prev => ({ ...prev, level_id: levelId }));
     };
 
@@ -165,7 +165,7 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, sections, levels }) => {
             ],
             payment_amounts: []
         });
-        setSelectedSectionId('');
+        setSelectedSchoolId('');
     };
 
     const getFilteredLevels = () => {
@@ -209,7 +209,7 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, sections, levels }) => {
                                         <option value="">Sélectionner un niveau</option>
                                         {getFilteredLevels().map(level => (
                                             <option key={level.id} value={level.id}>
-                                                {level.section?.name} - {level.name}
+                                                {level.school?.name} - {level.name}
                                             </option>
                                         ))}
                                     </select>
@@ -350,7 +350,7 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, sections, levels }) => {
                                 </p>
                                 <small className="text-muted">
                                     Les tranches de paiement doivent être créées avant de pouvoir configurer les montants des classes.
-                                    Allez dans la section "Tranches de Paiement" pour en créer.
+                                    Allez dans la school "Tranches de Paiement" pour en créer.
                                 </small>
                             </div>
                         ) : (

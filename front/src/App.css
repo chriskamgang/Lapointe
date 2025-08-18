@@ -231,11 +231,11 @@ body {
   overflow-y: auto;
 }
 
-.nav-section {
+.nav-school {
   margin-bottom: 2rem;
 }
 
-.nav-section-title {
+.nav-school-title {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--gray-500);

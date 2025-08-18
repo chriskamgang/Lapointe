@@ -54,7 +54,7 @@ class AccountantController extends Controller
             }
 
             $classes = SchoolClass::with([
-                'level.section',
+                'level.school',
                 'series' => function ($query) use ($workingYear) {
                     $query->orderBy('name')
                           ->withCount(['students' => function ($q) use ($workingYear) {
@@ -75,21 +75,21 @@ class AccountantController extends Controller
                 $class->total_students = $class->series->sum('students_count');
             }
 
-            // Grouper les classes par section et niveau
+            // Grouper les classes par school et niveau
             $groupedClasses = [];
             foreach ($classes as $class) {
-                $sectionName = $class->level->section->name;
+                $schoolName = $class->level->school->name;
                 $levelName = $class->level->name;
                 
-                if (!isset($groupedClasses[$sectionName])) {
-                    $groupedClasses[$sectionName] = [];
+                if (!isset($groupedClasses[$schoolName])) {
+                    $groupedClasses[$schoolName] = [];
                 }
                 
-                if (!isset($groupedClasses[$sectionName][$levelName])) {
-                    $groupedClasses[$sectionName][$levelName] = [];
+                if (!isset($groupedClasses[$schoolName][$levelName])) {
+                    $groupedClasses[$schoolName][$levelName] = [];
                 }
                 
-                $groupedClasses[$sectionName][$levelName][] = $class;
+                $groupedClasses[$schoolName][$levelName][] = $class;
             }
 
             return response()->json([
@@ -126,7 +126,7 @@ class AccountantController extends Controller
             }
 
             $class = SchoolClass::with([
-                'level.section',
+                'level.school',
                 'series' => function ($query) use ($workingYear) {
                     $query->orderBy('name')
                           ->withCount(['students' => function ($q) use ($workingYear) {
@@ -194,7 +194,7 @@ class AccountantController extends Controller
                 ->get();
 
             // Récupérer les informations de la série
-            $series = ClassSeries::with(['schoolClass.level.section'])->find($seriesId);
+            $series = ClassSeries::with(['schoolClass.level.school'])->find($seriesId);
             
             if (!$series) {
                 return response()->json([
@@ -230,7 +230,7 @@ class AccountantController extends Controller
         try {
             $student = Student::with([
                 'schoolYear',
-                'classSeries.schoolClass.level.section'
+                'classSeries.schoolClass.level.school'
             ])->find($studentId);
 
             if (!$student) {

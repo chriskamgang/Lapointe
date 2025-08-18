@@ -1281,7 +1281,7 @@ const StudentPayment = () => {
 
         {/* Payment History */}
         <Col md={5}>
-          {/* Section RAME en haut de la colonne de droite */}
+          {/* School RAME en haut de la colonne de droite */}
           <div className="mb-3">
             <RameStatusToggle
               studentId={studentId}
@@ -1487,7 +1487,7 @@ const StudentPayment = () => {
               </Col>
             </Row>
 
-            {/* Anciennes sections de réduction supprimées - maintenant intégrées dans la logique de date */}
+            {/* Anciennes schools de réduction supprimées - maintenant intégrées dans la logique de date */}
 
             <Row>
               <Col md={6}>
@@ -1535,7 +1535,7 @@ const StudentPayment = () => {
               </Col>
             </Row>
 
-            {/* Section de réduction dynamique basée sur la date de versement */}
+            {/* School de réduction dynamique basée sur la date de versement */}
             {isCheckingDiscount && (
               <Row className="mb-3">
                 <Col>

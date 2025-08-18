@@ -24,7 +24,7 @@ import { extractErrorMessage } from '../../utils/errorHandler';
 
 const DetailedCollectionReport = () => {
     const [encaissements, setEncaissements] = useState([]);
-    const [sections, setSections] = useState([]);
+    const [schools, setSchools] = useState([]);
     const [summary, setSummary] = useState({});
     const [sectionInfo, setSectionInfo] = useState(null);
     const [schoolYear, setSchoolYear] = useState(null);
@@ -36,7 +36,7 @@ const DetailedCollectionReport = () => {
     const [filters, setFilters] = useState({
         start_date: '',
         end_date: '',
-        section_id: ''
+        school_id: ''
     });
 
     useEffect(() => {
@@ -48,20 +48,20 @@ const DetailedCollectionReport = () => {
         setFilters({
             start_date: firstDayOfMonth.toISOString().split('T')[0],
             end_date: lastDayOfMonth.toISOString().split('T')[0],
-            section_id: ''
+            school_id: ''
         });
 
-        loadSections();
+        loadSchools();
     }, []);
 
-    const loadSections = async () => {
+    const loadSchools = async () => {
         try {
-            const response = await secureApiEndpoints.sections.getAll();
+            const response = await secureApiEndpoints.schools.getAll();
             if (response.success) {
-                setSections(response.data);
+                setSchools(response.data);
             }
         } catch (error) {
-            console.error('Erreur lors du chargement des sections:', error);
+            console.error('Erreur lors du chargement des schools:', error);
         }
     };
 
@@ -120,7 +120,7 @@ const DetailedCollectionReport = () => {
                         <div>
                             <h2>Encaissement Détaillé de la Période</h2>
                             <p className="text-muted">
-                                Rapport détaillé des encaissements avec filtres par période et section
+                                Rapport détaillé des encaissements avec filtres par période et school
                             </p>
                         </div>
                     </div>
@@ -173,15 +173,15 @@ const DetailedCollectionReport = () => {
                         </Col>
                         <Col md={3}>
                             <Form.Group>
-                                <Form.Label>Section</Form.Label>
+                                <Form.Label>School</Form.Label>
                                 <Form.Select
-                                    value={filters.section_id}
-                                    onChange={(e) => setFilters({ ...filters, section_id: e.target.value })}
+                                    value={filters.school_id}
+                                    onChange={(e) => setFilters({ ...filters, school_id: e.target.value })}
                                 >
-                                    <option value="">Toutes les sections</option>
-                                    {sections.map(section => (
-                                        <option key={section.id} value={section.id}>
-                                            {section.name}
+                                    <option value="">Toutes les schools</option>
+                                    {schools.map(school => (
+                                        <option key={school.id} value={school.id}>
+                                            {school.name}
                                         </option>
                                     ))}
                                 </Form.Select>
@@ -260,7 +260,7 @@ const DetailedCollectionReport = () => {
                 </Row>
             )}
 
-            {/* Informations de la période et section */}
+            {/* Informations de la période et school */}
             {summary.total_encaissements > 0 && (
                 <Card className="mb-4">
                     <Card.Body>
@@ -269,7 +269,7 @@ const DetailedCollectionReport = () => {
                                 <strong>Période :</strong> Du {formatDate(summary.period_start)} au {formatDate(summary.period_end)}
                             </Col>
                             <Col md={4}>
-                                <strong>Section :</strong> {sectionInfo ? sectionInfo.name : 'Toutes les sections'}
+                                <strong>School :</strong> {sectionInfo ? sectionInfo.name : 'Toutes les schools'}
                             </Col>
                             <Col md={4}>
                                 <strong>Année scolaire :</strong> {schoolYear?.name || 'N/A'}

@@ -19,17 +19,17 @@ class SeriesController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = ClassSeries::with(['schoolClass.level.section']);
+            $query = ClassSeries::with(['schoolClass.level.school']);
             
             // Filtrer par classe si spécifié
             if ($request->has('class_id')) {
                 $query->where('class_id', $request->class_id);
             }
             
-            // Filtrer par section si spécifié
-            if ($request->has('section_id')) {
-                $query->whereHas('schoolClass.level.section', function($q) use ($request) {
-                    $q->where('id', $request->section_id);
+            // Filtrer par school si spécifié
+            if ($request->has('school_id')) {
+                $query->whereHas('schoolClass.level.school', function($q) use ($request) {
+                    $q->where('id', $request->school_id);
                 });
             }
             
@@ -57,7 +57,7 @@ class SeriesController extends Controller
         try {
             $filters = [
                 'class_id' => $request->get('class_id'),
-                'section_id' => $request->get('section_id')
+                'school_id' => $request->get('school_id')
             ];
             $filename = 'series_' . date('Y-m-d_H-i-s') . '.xlsx';
             return Excel::download(new SeriesExport($filters), $filename);
@@ -78,7 +78,7 @@ class SeriesController extends Controller
         try {
             $filters = [
                 'class_id' => $request->get('class_id'),
-                'section_id' => $request->get('section_id')
+                'school_id' => $request->get('school_id')
             ];
             $filename = 'series_' . date('Y-m-d_H-i-s') . '.csv';
             return Excel::download(new SeriesImportableExport($filters), $filename, \Maatwebsite\Excel\Excel::CSV);
@@ -99,7 +99,7 @@ class SeriesController extends Controller
         try {
             $filters = [
                 'class_id' => $request->get('class_id'),
-                'section_id' => $request->get('section_id')
+                'school_id' => $request->get('school_id')
             ];
             $filename = 'series_' . date('Y-m-d_H-i-s') . '.pdf';
             return Excel::download(new SeriesExport($filters), $filename, \Maatwebsite\Excel\Excel::DOMPDF);
@@ -120,7 +120,7 @@ class SeriesController extends Controller
         try {
             $filters = [
                 'class_id' => $request->get('class_id'),
-                'section_id' => $request->get('section_id')
+                'school_id' => $request->get('school_id')
             ];
             $filename = 'series_importable_' . date('Y-m-d_H-i-s') . '.csv';
             return Excel::download(new SeriesImportableExport($filters), $filename, \Maatwebsite\Excel\Excel::CSV);
@@ -182,10 +182,10 @@ class SeriesController extends Controller
                 'Content-Disposition' => 'attachment; filename="template_series.csv"'
             ];
 
-            $csvData = "id,nom,code,classe,niveau,section,capacite,statut\n";
-            $csvData .= ",6ème A,6A,6ème A,6ème,Section Secondaire,40,actif\n";
-            $csvData .= ",CP1 B,CP1B,CP1 B,CP1,Section Primaire,35,actif\n";
-            $csvData .= "1,5ème A,5A,5ème A,5ème,Section Secondaire,38,actif\n";
+            $csvData = "id,nom,code,classe,niveau,school,capacite,statut\n";
+            $csvData .= ",6ème A,6A,6ème A,6ème,School Secondaire,40,actif\n";
+            $csvData .= ",CP1 B,CP1B,CP1 B,CP1,School Primaire,35,actif\n";
+            $csvData .= "1,5ème A,5A,5ème A,5ème,School Secondaire,38,actif\n";
 
             return Response::make($csvData, 200, $headers);
 

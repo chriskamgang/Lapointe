@@ -72,7 +72,7 @@ const handleQuickPayment = async () => {
 **Modifications :**
 - Ajout du bouton "Paiement Rapide" dans l'en-tête du tableau
 - Intégration du composant RameStatusToggle dans la colonne de droite
-- Suppression de l'ancienne section RAME complexe
+- Suppression de l'ancienne school RAME complexe
 
 ### Backend (Déjà implémenté)
 
@@ -150,6 +150,6 @@ const handleQuickPayment = async () => {
 
 **❌ Remplace :**
 - Ancienne logique RAME complexe
-- Section RAME dans le modal de paiement
+- School RAME dans le modal de paiement
 
 Les améliorations sont **entièrement rétrocompatibles** et n'affectent pas les fonctionnalités existantes ! 🎉

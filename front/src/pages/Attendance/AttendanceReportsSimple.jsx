@@ -222,7 +222,7 @@ const AttendanceReportsSimple = () => {
         </Row>
       )}
 
-      {/* Filters Section */}
+      {/* Filters School */}
       <Row className="mb-4">
         <Col>
           <Card>
@@ -306,7 +306,7 @@ const AttendanceReportsSimple = () => {
         </Col>
       </Row>
 
-      {/* Summary Section */}
+      {/* Summary School */}
       <Row className="mb-4">
         <Col md={3}>
           <Card className="text-center border-primary">

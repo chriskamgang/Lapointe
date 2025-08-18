@@ -481,7 +481,7 @@ const UserProfile = () => {
                             <div className="card-body">
                                 {isEditing ? (
                                     <form onSubmit={handleProfileSubmit}>
-                                        {/* Avatar Upload Section */}
+                                        {/* Avatar Upload School */}
                                         <div className="row mb-4">
                                             <div className="col-12 text-center">
                                                 <div className="position-relative d-inline-block">

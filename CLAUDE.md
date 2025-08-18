@@ -69,7 +69,7 @@ npm run createsuperuser  # Create admin user interactively
 
 - **Students**: Personal info, class assignments, fee tracking, academic records
 - **Teachers**: Subject assignments, login credentials
-- **Classes/Sections**: Academic structure organization
+- **Classes/Schools**: Academic structure organization
 - **Payments**: Financial tracking with receipt generation (`payments_details`)
 - **Grades**: Sequences, trimesters, annual exams by academic domain
 

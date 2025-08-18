@@ -506,21 +506,21 @@ export const secureApiEndpoints = {
     classes: {
         getAll: () => secureApi.get('/classes'),
         getById: (id) => secureApi.get(`/classes/${id}`),
-        getBySection: (sectionId) => secureApi.get(`/classes/section/${sectionId}`),
+        getBySection: (schoolId) => secureApi.get(`/classes/school/${schoolId}`),
         create: (data) => secureApi.post('/classes', data),
         update: (id, data) => secureApi.put(`/classes/${id}`, data),
         delete: (id) => secureApi.delete(`/classes/${id}`)
     },
 
     // === SECTIONS ===
-    sections: {
-        getAll: () => secureApi.get('/sections'),
-        getById: (id) => secureApi.get(`/sections/${id}`),
-        create: (data) => secureApi.post('/sections', data),
-        update: (id, data) => secureApi.put(`/sections/${id}`, data),
-        delete: (id) => secureApi.delete(`/sections/${id}`),
-        getDashboard: () => secureApi.get('/sections/dashboard'),
-        toggleStatus: (id) => secureApi.post(`/sections/${id}/toggle-status`)
+    schools: {
+        getAll: () => secureApi.get('/schools'),
+        getById: (id) => secureApi.get(`/schools/${id}`),
+        create: (data) => secureApi.post('/schools', data),
+        update: (id, data) => secureApi.put(`/schools/${id}`, data),
+        delete: (id) => secureApi.delete(`/schools/${id}`),
+        getDashboard: () => secureApi.get('/schools/dashboard'),
+        toggleStatus: (id) => secureApi.post(`/schools/${id}/toggle-status`)
     },
 
     // === LEVELS ===
@@ -532,7 +532,7 @@ export const secureApiEndpoints = {
         delete: (id) => secureApi.delete(`/levels/${id}`),
         getDashboard: () => secureApi.get('/levels/dashboard'),
         toggleStatus: (id) => secureApi.post(`/levels/${id}/toggle-status`),
-        getBySection: (sectionId) => secureApi.get(`/levels?section_id=${sectionId}`)
+        getBySection: (schoolId) => secureApi.get(`/levels?school_id=${schoolId}`)
     },
 
     // === SCHOOL CLASSES ===
@@ -546,7 +546,7 @@ export const secureApiEndpoints = {
         toggleStatus: (id) => secureApi.post(`/school-classes/${id}/toggle-status`),
         configurePayments: (id, data) => secureApi.post(`/school-classes/${id}/configure-payments`, data),
         getByLevel: (levelId) => secureApi.get(`/school-classes?level_id=${levelId}`),
-        getBySection: (sectionId) => secureApi.get(`/school-classes?section_id=${sectionId}`)
+        getBySection: (schoolId) => secureApi.get(`/school-classes?school_id=${schoolId}`)
     },
 
     // === GRADES ===

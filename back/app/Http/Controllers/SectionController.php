@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\School;
-use App\Exports\SectionsExport;
-use App\Exports\SectionsImportableExport;
-use App\Imports\SectionsImport;
+use App\Exports\SchoolsExport;
+use App\Exports\SchoolsImportableExport;
+use App\Imports\SchoolsImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -19,17 +19,17 @@ class SectionController extends Controller
     public function index()
     {
         try {
-            $sections = School::ordered()->get();
+            $schools = School::ordered()->get();
             
             return response()->json([
                 'success' => true,
-                'data' => $sections,
-                'message' => 'Sections récupérées avec succès'
+                'data' => $schools,
+                'message' => 'Schools récupérées avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération des sections',
+                'message' => 'Erreur lors de la récupération des schools',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -42,7 +42,7 @@ class SectionController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255|unique:sections',
+                'name' => 'required|string|max:255|unique:schools',
                 'description' => 'nullable|string|max:500',
                 'is_active' => 'boolean',
                 'order' => 'integer|min:0'
@@ -56,17 +56,17 @@ class SectionController extends Controller
                 ], 422);
             }
 
-            $section = School::create($validator->validated());
+            $school = School::create($validator->validated());
 
             return response()->json([
                 'success' => true,
-                'data' => $section,
-                'message' => 'Section créée avec succès'
+                'data' => $school,
+                'message' => 'School créée avec succès'
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la création de la section',
+                'message' => 'Erreur lors de la création de la school',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -75,20 +75,20 @@ class SectionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(School $section)
+    public function show(School $school)
     {
         try {
-            $section->load('classes');
+            $school->load('classes');
             
             return response()->json([
                 'success' => true,
-                'data' => $section,
-                'message' => 'Section récupérée avec succès'
+                'data' => $school,
+                'message' => 'School récupérée avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération de la section',
+                'message' => 'Erreur lors de la récupération de la school',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -97,11 +97,11 @@ class SectionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, School $section)
+    public function update(Request $request, School $school)
     {
         try {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255|unique:sections,name,' . $section->id,
+                'name' => 'required|string|max:255|unique:schools,name,' . $school->id,
                 'description' => 'nullable|string|max:500',
                 'is_active' => 'boolean',
                 'order' => 'integer|min:0'
@@ -115,17 +115,17 @@ class SectionController extends Controller
                 ], 422);
             }
 
-            $section->update($validator->validated());
+            $school->update($validator->validated());
 
             return response()->json([
                 'success' => true,
-                'data' => $section,
-                'message' => 'Section mise à jour avec succès'
+                'data' => $school,
+                'message' => 'School mise à jour avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la mise à jour de la section',
+                'message' => 'Erreur lors de la mise à jour de la school',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -134,27 +134,27 @@ class SectionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(School $section)
+    public function destroy(School $school)
     {
         try {
-            // Vérifier si la section a des classes associées
-            if ($section->classes()->count() > 0) {
+            // Vérifier si la school a des classes associées
+            if ($school->classes()->count() > 0) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Impossible de supprimer une section qui contient des classes'
+                    'message' => 'Impossible de supprimer une school qui contient des classes'
                 ], 400);
             }
 
-            $section->delete();
+            $school->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Section supprimée avec succès'
+                'message' => 'School supprimée avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la suppression de la section',
+                'message' => 'Erreur lors de la suppression de la school',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -167,19 +167,19 @@ class SectionController extends Controller
     {
         try {
             $stats = [
-                'total_sections' => School::count(),
-                'active_sections' => School::active()->count(),
-                'inactive_sections' => School::where('is_active', false)->count(),
-                'sections_with_classes' => School::has('classes')->count(),
+                'total_schools' => School::count(),
+                'active_schools' => School::active()->count(),
+                'inactive_schools' => School::where('is_active', false)->count(),
+                'schools_with_classes' => School::has('classes')->count(),
             ];
 
-            $recent_sections = School::latest()->take(5)->get();
+            $recent_schools = School::latest()->take(5)->get();
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'stats' => $stats,
-                    'recent_sections' => $recent_sections
+                    'recent_schools' => $recent_schools
                 ],
                 'message' => 'Statistiques récupérées avec succès'
             ]);
@@ -193,17 +193,17 @@ class SectionController extends Controller
     }
 
     /**
-     * Toggle section status
+     * Toggle school status
      */
-    public function toggleStatus(School $section)
+    public function toggleStatus(School $school)
     {
         try {
-            $section->update(['is_active' => !$section->is_active]);
+            $school->update(['is_active' => !$school->is_active]);
 
             return response()->json([
                 'success' => true,
-                'data' => $section,
-                'message' => 'Statut de la section mis à jour avec succès'
+                'data' => $school,
+                'message' => 'Statut de la school mis à jour avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -215,13 +215,13 @@ class SectionController extends Controller
     }
 
     /**
-     * Export sections to Excel
+     * Export schools to Excel
      */
     public function exportExcel(Request $request)
     {
         try {
-            $filename = 'sections_' . date('Y-m-d_H-i-s') . '.xlsx';
-            return Excel::download(new SectionsExport(), $filename);
+            $filename = 'schools_' . date('Y-m-d_H-i-s') . '.xlsx';
+            return Excel::download(new SchoolsExport(), $filename);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -232,13 +232,13 @@ class SectionController extends Controller
     }
 
     /**
-     * Export sections to CSV
+     * Export schools to CSV
      */
     public function exportCsv(Request $request)
     {
         try {
-            $filename = 'sections_' . date('Y-m-d_H-i-s') . '.csv';
-            return Excel::download(new SectionsImportableExport(), $filename, \Maatwebsite\Excel\Excel::CSV);
+            $filename = 'schools_' . date('Y-m-d_H-i-s') . '.csv';
+            return Excel::download(new SchoolsImportableExport(), $filename, \Maatwebsite\Excel\Excel::CSV);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -249,13 +249,13 @@ class SectionController extends Controller
     }
 
     /**
-     * Export sections to PDF
+     * Export schools to PDF
      */
     public function exportPdf(Request $request)
     {
         try {
-            $filename = 'sections_' . date('Y-m-d_H-i-s') . '.pdf';
-            return Excel::download(new SectionsExport(), $filename, \Maatwebsite\Excel\Excel::DOMPDF);
+            $filename = 'schools_' . date('Y-m-d_H-i-s') . '.pdf';
+            return Excel::download(new SchoolsExport(), $filename, \Maatwebsite\Excel\Excel::DOMPDF);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -266,7 +266,7 @@ class SectionController extends Controller
     }
 
     /**
-     * Import sections from CSV
+     * Import schools from CSV
      */
     public function importCsv(Request $request)
     {
@@ -283,7 +283,7 @@ class SectionController extends Controller
                 ], 422);
             }
 
-            $import = new SectionsImport();
+            $import = new SchoolsImport();
             Excel::import($import, $request->file('file'));
             
             $results = $import->getResults();
@@ -304,13 +304,13 @@ class SectionController extends Controller
     }
 
     /**
-     * Export sections in importable CSV format
+     * Export schools in importable CSV format
      */
     public function exportImportable(Request $request)
     {
         try {
-            $filename = 'sections_importable_' . date('Y-m-d_H-i-s') . '.csv';
-            return Excel::download(new SectionsImportableExport(), $filename, \Maatwebsite\Excel\Excel::CSV);
+            $filename = 'schools_importable_' . date('Y-m-d_H-i-s') . '.csv';
+            return Excel::download(new SchoolsImportableExport(), $filename, \Maatwebsite\Excel\Excel::CSV);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -321,20 +321,20 @@ class SectionController extends Controller
     }
 
     /**
-     * Download CSV template for sections import
+     * Download CSV template for schools import
      */
     public function downloadTemplate()
     {
         try {
             $headers = [
                 'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="template_sections.csv"'
+                'Content-Disposition' => 'attachment; filename="template_schools.csv"'
             ];
 
             $csvData = "id,nom,description,statut\n";
-            $csvData .= ",Section Primaire,Section pour les classes primaires,1\n";
-            $csvData .= ",Section Secondaire,Section pour les classes secondaires,1\n";
-            $csvData .= "1,Section Maternelle,Section pour les classes maternelles,0\n";
+            $csvData .= ",School Primaire,School pour les classes primaires,1\n";
+            $csvData .= ",School Secondaire,School pour les classes secondaires,1\n";
+            $csvData .= "1,School Maternelle,School pour les classes maternelles,0\n";
 
             return Response::make($csvData, 200, $headers);
 

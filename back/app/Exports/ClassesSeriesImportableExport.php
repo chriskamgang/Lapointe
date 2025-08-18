@@ -24,11 +24,11 @@ class ClassesSeriesImportableExport implements FromCollection, WithHeadings, Wit
      */
     public function collection()
     {
-        $query = SchoolClass::with(['level.section', 'series']);
+        $query = SchoolClass::with(['level.school', 'series']);
         
-        if (!empty($this->filters['section_id'])) {
-            $query->whereHas('level.section', function($q) {
-                $q->where('id', $this->filters['section_id']);
+        if (!empty($this->filters['school_id'])) {
+            $query->whereHas('level.school', function($q) {
+                $q->where('id', $this->filters['school_id']);
             });
         }
         
@@ -39,8 +39,8 @@ class ClassesSeriesImportableExport implements FromCollection, WithHeadings, Wit
         $results = $query->orderBy('name')->get();
         
         // Si aucun résultat avec les filtres, retourner toutes les classes
-        if ($results->isEmpty() && (!empty($this->filters['section_id']) || !empty($this->filters['level_id']))) {
-            return SchoolClass::with(['level.section', 'series'])->orderBy('name')->get();
+        if ($results->isEmpty() && (!empty($this->filters['school_id']) || !empty($this->filters['level_id']))) {
+            return SchoolClass::with(['level.schools', 'series'])->orderBy('name')->get();
         }
         
         return $results;

@@ -24,11 +24,11 @@ class ClassSeriesExport implements FromCollection, WithHeadings, WithMapping, Wi
      */
     public function collection()
     {
-        $query = ClassSeries::with(['schoolClass.section', 'schoolClass.level', 'students', 'mainTeacher']);
+        $query = ClassSeries::with(['schoolClass.school', 'schoolClass.level', 'students', 'mainTeacher']);
         
-        if (!empty($this->filters['section_id'])) {
+        if (!empty($this->filters['school_id'])) {
             $query->whereHas('schoolClass', function($q) {
-                $q->where('section_id', $this->filters['section_id']);
+                $q->where('school_id', $this->filters['school_id']);
             });
         }
         
@@ -54,7 +54,7 @@ class ClassSeriesExport implements FromCollection, WithHeadings, WithMapping, Wi
             'ID',
             'Nom',
             'Classe',
-            'Section',
+            'School',
             'Niveau',
             'Nombre d\'Élèves',
             'Professeur Principal',
@@ -73,7 +73,7 @@ class ClassSeriesExport implements FromCollection, WithHeadings, WithMapping, Wi
             $series->id,
             $series->name,
             $series->schoolClass->name ?? 'N/A',
-            $series->schoolClass->section->name ?? 'N/A',
+            $series->schoolClass->school->name ?? 'N/A',
             $series->schoolClass->level->name ?? 'N/A',
             $series->students->count(),
             $series->mainTeacher->teacher->name ?? 'Non assigné',

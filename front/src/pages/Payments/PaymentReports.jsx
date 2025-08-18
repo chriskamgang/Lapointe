@@ -267,7 +267,7 @@ const PaymentReports = () => {
                     )} à ${new Date().toLocaleTimeString("fr-FR")}</p>
                 </div>
                 
-                <div class="stats-section">
+                <div class="stats-school">
                     <h3>Résumé des Statistiques</h3>
                     <div class="stats-grid">
                         <div class="stat-card">
@@ -285,7 +285,7 @@ const PaymentReports = () => {
                     </div>
                 </div>
                 
-                <div class="payments-section">
+                <div class="payments-school">
                     <h3>Détail des Paiements</h3>
                     <table>
                         <thead>
@@ -322,7 +322,7 @@ const PaymentReports = () => {
                 ${
                   Object.keys(stats.by_tranche || {}).length > 0
                     ? `
-                <div class="tranches-section">
+                <div class="tranches-school">
                     <h3>Répartition par Tranche</h3>
                     <table>
                         <thead>

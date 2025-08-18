@@ -26,7 +26,7 @@ import { Button } from 'react-bootstrap';
 const Levels = () => {
     const { user } = useAuth();
     const [levels, setLevels] = useState([]);
-    const [sections, setSections] = useState([]);
+    const [schools, setSchools] = useState([]);
     const [dashboardStats, setDashboardStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -47,7 +47,7 @@ const Levels = () => {
     // Form data
     const [formData, setFormData] = useState({
         name: '',
-        section_id: '',
+        school_id: '',
         description: '',
         is_active: true,
         order: 0
@@ -56,7 +56,7 @@ const Levels = () => {
     // Load data on component mount
     useEffect(() => {
         loadLevels();
-        loadSections();
+        loadSchools();
         loadDashboard();
     }, []);
 
@@ -77,11 +77,11 @@ const Levels = () => {
         }
     };
 
-    const loadSections = async () => {
+    const loadSchools = async () => {
         try {
-            const response = await secureApiEndpoints.sections.getAll();
+            const response = await secureApiEndpoints.schools.getAll();
             if (response.success) {
-                setSections(response.data);
+                setSchools(response.data);
             }
         } catch (error) {
             console.error('Error loading school:', error);
@@ -166,7 +166,7 @@ const Levels = () => {
     const resetForm = () => {
         setFormData({
             name: '',
-            section_id: '',
+            school_id: '',
             description: '',
             is_active: true,
             order: 0
@@ -178,7 +178,7 @@ const Levels = () => {
         setSelectedLevel(level);
         setFormData({
             name: level.name,
-            section_id: level.section_id.toString(),
+            school_id: level.school_id.toString(),
             description: level.description || '',
             is_active: level.is_active,
             order: level.order
@@ -195,14 +195,14 @@ const Levels = () => {
     const filteredLevels = levels.filter(level => {
         const matchesSearch = level.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             (level.description && level.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                            (level.section && level.section.name.toLowerCase().includes(searchTerm.toLowerCase()));
+                            (level.school && level.school.name.toLowerCase().includes(searchTerm.toLowerCase()));
         
         const matchesFilter = filterActive === 'all' || 
                             (filterActive === 'active' && level.is_active) ||
                             (filterActive === 'inactive' && !level.is_active);
 
         const matchesSection = filterSection === 'all' || 
-                              level.section_id.toString() === filterSection;
+                              level.school_id.toString() === filterSection;
         
         return matchesSearch && matchesFilter && matchesSection;
     });
@@ -232,7 +232,7 @@ const Levels = () => {
                         title="Spécialités"
                         apiBasePath="/api/levels"
                         onImportSuccess={loadLevels}
-                        filters={{ section_id: filterSection !== 'all' ? filterSection : undefined }}
+                        filters={{ school_id: filterSection !== 'all' ? filterSection : undefined }}
                         templateFileName="template_niveaux.csv"
                     />
                     <Button
@@ -347,9 +347,9 @@ const Levels = () => {
                                         onChange={(e) => setFilterSection(e.target.value)}
                                     >
                                         <option value="all">Toutes les écoles</option>
-                                        {sections.map(section => (
-                                            <option key={section.id} value={section.id.toString()}>
-                                                {section.name}
+                                        {schools.map(school => (
+                                            <option key={school.id} value={school.id.toString()}>
+                                                {school.name}
                                             </option>
                                         ))}
                                     </select>
@@ -439,8 +439,8 @@ const Levels = () => {
                             
                             <div className="mb-3">
                                 <p className="text-sm text-gray-600 mb-1">
-                                    Section: <span className="font-medium text-blue-600">
-                                        {level.section?.name}
+                                    School: <span className="font-medium text-blue-600">
+                                        {level.school?.name}
                                     </span>
                                 </p>
                                 {level.description && (
@@ -508,7 +508,7 @@ const Levels = () => {
                                                 {level.is_active ? 'Actif' : 'Inactif'}
                                             </span>
                                             <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                                                {level.section?.name}
+                                                {level.school?.name}
                                             </span>
                                             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                                                 Ordre: {level.order}
@@ -582,15 +582,15 @@ const Levels = () => {
                             Ecole *
                         </label>
                         <select
-                            value={formData.section_id}
-                            onChange={(e) => setFormData({ ...formData, section_id: e.target.value })}
+                            value={formData.school_id}
+                            onChange={(e) => setFormData({ ...formData, school_id: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required
                         >
                             <option value="">Sélectionner une école</option>
-                            {sections.filter(s => s.is_active).map(section => (
-                                <option key={section.id} value={section.id.toString()}>
-                                    {section.name}
+                            {schools.filter(s => s.is_active).map(school => (
+                                <option key={school.id} value={school.id.toString()}>
+                                    {school.name}
                                 </option>
                             ))}
                         </select>

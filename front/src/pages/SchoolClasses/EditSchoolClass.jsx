@@ -4,7 +4,7 @@ import { Plus, Trash2, CreditCard } from 'react-bootstrap-icons';
 import { secureApiEndpoints } from '../../utils/apiMigration';
 import Swal from 'sweetalert2';
 
-const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels }) => {
+const EditSchoolClass = ({ show, onHide, onSuccess, classData, schools, levels }) => {
     const [formData, setFormData] = useState({
         name: '',
         level_id: '',
@@ -15,7 +15,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
     });
     
     const [paymentTranches, setPaymentTranches] = useState([]);
-    const [selectedSectionId, setSelectedSectionId] = useState('');
+    const [selectedSchoolId, setSelectedSchoolId] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -46,9 +46,9 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
             })) || []
         });
 
-        // Set section ID for level filtering
+        // Set school ID for level filtering
         const level = levels.find(l => l.id === classData.level_id);
-        setSelectedSectionId(level?.section_id || '');
+        setSelectedSchoolId(level?.school_id || '');
     };
 
     const loadPaymentTranches = async () => {
@@ -105,7 +105,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
 
     const handleLevelChange = (levelId) => {
         const level = levels.find(l => l.id === parseInt(levelId));
-        setSelectedSectionId(level?.section_id || '');
+        setSelectedSchoolId(level?.school_id || '');
         setFormData(prev => ({ ...prev, level_id: levelId }));
     };
 
@@ -264,7 +264,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                                         <option value="">Sélectionner un niveau</option>
                                         {getFilteredLevels().map(level => (
                                             <option key={level.id} value={level.id}>
-                                                {level.section?.name} - {level.name}
+                                                {level.school?.name} - {level.name}
                                             </option>
                                         ))}
                                     </select>
@@ -421,7 +421,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                                 </p>
                                 <small className="text-muted">
                                     Les tranches de paiement doivent être créées avant de pouvoir configurer les montants des classes.
-                                    Allez dans la section "Tranches de Paiement" pour en créer.
+                                    Allez dans la school "Tranches de Paiement" pour en créer.
                                 </small>
                             </div>
                         ) : (

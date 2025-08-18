@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // 1. Renommer sections en écoles (schools)
-        Schema::rename('sections', 'schools');
+        // 1. Renommer schools en écoles (schools)
+        Schema::rename('schools', 'schools');
         
         // 2. Ajouter des colonnes supplémentaires aux écoles
         Schema::table('schools', function (Blueprint $table) {
@@ -24,7 +24,7 @@ return new class extends Migration
 
         // 3. Adapter les niveaux pour l'université
         Schema::table('levels', function (Blueprint $table) {
-            $table->renameColumn('section_id', 'school_id');
+            $table->renameColumn('school_id', 'school_id');
             $table->string('level_code', 20)->nullable()->after('name');
             $table->integer('duration_years')->default(1)->after('level_code');
             $table->enum('level_type', ['BTS', 'HND', 'LICENCE', 'LICENCE_PRO', 'BACHELOR', 'MASTER', 'CQP', 'DQP', 'TMS', 'INGENIERIE'])->after('duration_years');
@@ -124,7 +124,7 @@ return new class extends Migration
 
         Schema::table('levels', function (Blueprint $table) {
             $table->dropForeign(['school_id']);
-            $table->renameColumn('school_id', 'section_id');
+            $table->renameColumn('school_id', 'school_id');
             $table->dropColumn(['level_code', 'duration_years', 'level_type']);
         });
 
@@ -132,6 +132,6 @@ return new class extends Migration
             $table->dropColumn(['code', 'director_name', 'director_email', 'director_phone']);
         });
 
-        Schema::rename('schools', 'sections');
+        Schema::rename('schools', 'schools');
     }
 };
