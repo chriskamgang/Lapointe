@@ -26,6 +26,9 @@ return new class extends Migration
             $table->enum('status', ['new', 'old'])->default('new');
             $table->boolean('is_new')->default(true);
             $table->boolean('is_active')->default(true);
+            $table->string('qr_code')->nullable();
+            $table->string('registration_number')->nullable();
+            $table->string('mention')->nullable();
             $table->timestamps();
             
             $table->index(['class_series_id', 'is_active']);

@@ -1010,12 +1010,12 @@ class PaymentController extends Controller
                     <div class='contact-info'>
                         <div class='contact-left'>
                             <div><strong>B.P :</strong> " . ($schoolSettings->school_address ? explode(',', $schoolSettings->school_address)[0] : '4100') . "</div>
-                            <div><strong>Tél :</strong> " . ($schoolSettings->school_phone ?? '233 43 25 47') . "</div>
-                            <div><strong>Site web :</strong> " . ($schoolSettings->website ?? 'www.cpdyassa.com') . "</div>
+                            <div><strong>Tél :</strong> " . ($schoolSettings->school_phone ?? '6 55 12 49 21') . "</div>
+                            <div><strong>Site web :</strong> " . ($schoolSettings->website ?? 'iu-pointe.fr') . "</div>
                         </div>
                         <div class='contact-right'>
-                            <div>" . ($schoolSettings->school_address ? explode(',', $schoolSettings->school_address)[1] ?? 'Douala' : 'Douala') . "</div>
-                            <div><strong>Email :</strong> " . ($schoolSettings->school_email ?? 'contact@cpdyassa.com') . "</div>
+                            <div>" . ($schoolSettings->school_address ? explode(',', $schoolSettings->school_address)[1] ?? 'Bafoussam' : 'Bafoussam') . "</div>
+                            <div><strong>Email :</strong> " . ($schoolSettings->school_email ?? 'contact@iu-pointe.fr') . "</div>
                         </div>
                     </div>
                 </div>
@@ -1973,12 +1973,12 @@ class PaymentController extends Controller
                     <div class='contact-info'>
                         <div class='contact-left'>
                             <div><strong></strong> " . ($schoolSettings->school_address ? explode(',', $schoolSettings->school_address)[0] : '4100') . "</div>
-                            <div><strong></strong> " . ($schoolSettings->school_phone ?? '233 43 25 47') . "</div>
-                            <div><strong></strong> " . ($schoolSettings->website ?? 'www.cpdyassa.com') . "</div>
+                            <div><strong></strong> " . ($schoolSettings->school_phone ?? '6 55 12 49 21') . "</div>
+                            <div><strong></strong> " . ($schoolSettings->website ?? 'iu-pointe.fr') . "</div>
                         </div>
                         <div class='contact-right'>
-                            <div><strong></strong> " . ($schoolSettings->school_address ? explode(',', $schoolSettings->school_address)[1] ?? 'Douala' : 'Douala') . "</div>
-                            <div><strong></strong> " . ($schoolSettings->school_email ?? 'contact@cpdyassa.com') . "</div>
+                            <div><strong></strong> " . ($schoolSettings->school_address ? explode(',', $schoolSettings->school_address)[1] ?? 'Bafoussam' : 'Bafoussam') . "</div>
+                            <div><strong></strong> " . ($schoolSettings->school_email ?? 'contact@iu-pointe.fr') . "</div>
                         </div>
                     </div>
                 </div>
@@ -2265,9 +2265,9 @@ class PaymentController extends Controller
                 <!-- Exemplaire Parents -->
                 {$receiptContent}
 
-                <!-- Exemplaire Collège -->
+                <!-- Exemplaire Institut -->
                 <div class='receipt-copy' style='border-left: 2px dashed #000;'>
-                    <div class='copy-label'>EXEMPLAIRE COLLÈGE</div>
+                    <div class='copy-label'>EXEMPLAIRE INSTITUT</div>
                     <div class='date-time'>
                         Généré le " . now()->format('d/m/Y à H:i:s') . "
                     </div>
@@ -2334,12 +2334,12 @@ class PaymentController extends Controller
                         <div class='contact-info'>
                             <div class='contact-left'>
                                 <div><strong></strong> " . ($schoolSettings->school_address ? explode(',', $schoolSettings->school_address)[0] : '4100') . "</div>
-                                <div><strong></strong> " . ($schoolSettings->school_phone ?? '233 43 25 47') . "</div>
-                                <div><strong></strong> " . ($schoolSettings->website ?? 'www.cpdyassa.com') . "</div>
+                                <div><strong></strong> " . ($schoolSettings->school_phone ?? '6 55 12 49 21') . "</div>
+                                <div><strong></strong> " . ($schoolSettings->website ?? 'iu-pointe.fr') . "</div>
                             </div>
                             <div class='contact-right'>
-                                <div><strong></strong> " . ($schoolSettings->school_address ? explode(',', $schoolSettings->school_address)[1] ?? 'Douala' : 'Douala') . "</div>
-                                <div><strong></strong> " . ($schoolSettings->school_email ?? 'contact@cpdyassa.com') . "</div>
+                                <div><strong></strong> " . ($schoolSettings->school_address ? explode(',', $schoolSettings->school_address)[1] ?? 'Bafoussam' : 'Bafoussam') . "</div>
+                                <div><strong></strong> " . ($schoolSettings->school_email ?? 'contact@iu-pointe.fr') . "</div>
                             </div>
                         </div>
                     </div>

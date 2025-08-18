@@ -529,7 +529,7 @@ class NeedController extends Controller
             if (file_exists($logoPath)) {
                 $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
                 $drawing->setName('Logo');
-                $drawing->setDescription('Logo du Collège');
+                $drawing->setDescription('Logo de l\'institut');
                 $drawing->setPath($logoPath);
                 $drawing->setHeight(60);
                 $drawing->setCoordinates('A1');
@@ -543,7 +543,7 @@ class NeedController extends Controller
             
             // Titre principal
             if (file_exists($logoPath)) {
-                $sheet->setCellValue('C1', 'COLLÈGE POLYVALENT BILINGUE DE DOUALA');
+                $sheet->setCellValue('C1', 'INSTITUT UNIVERSITAIRE DE LA POINTE');
                 $sheet->getStyle('C1')->getFont()->setBold(true)->setSize(16);
                 $sheet->setCellValue('C2', 'Liste des Besoins');
                 $sheet->getStyle('C2')->getFont()->setBold(true)->setSize(14);
@@ -626,7 +626,7 @@ class NeedController extends Controller
                 $cellLogo->addImage($logoPath, ['width' => 80, 'height' => 80]);
                 
                 $cellTitle = $headerTable->addCell(8000);
-                $cellTitle->addText('COLLÈGE POLYVALENT BILINGUE DE DOUALA', ['bold' => true, 'size' => 16], ['alignment' => 'center']);
+                $cellTitle->addText('INSTITUT UNIVERSITAIRE DE LA POINTE', ['bold' => true, 'size' => 16], ['alignment' => 'center']);
                 $cellTitle->addTextBreak();
                 
                 // Titre du rapport
@@ -648,7 +648,7 @@ class NeedController extends Controller
                     default => 'Tous'
                 };
                 
-                $section->addTitle('COLLÈGE POLYVALENT BILINGUE DE DOUALA', 1);
+                $section->addTitle('INSTITUT UNIVERSITAIRE DE LA POINTE', 1);
                 $section->addTitle('Liste des Besoins - ' . $statusLabel, 2);
             }
             

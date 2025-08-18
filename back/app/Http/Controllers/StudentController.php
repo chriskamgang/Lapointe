@@ -677,7 +677,7 @@ class StudentController extends Controller
 </head>
 <body>
     <div class="header">
-        <h1>COLLEGE POLYVALENT BILINGUE DE DOUALA</h1>
+        <h1>INSTITUT UNIVERSITAIRE DE LA POINTE</h1>
         <p>Liste des Élèves</p>
     </div>
 
@@ -737,7 +737,7 @@ class StudentController extends Controller
 
     <div class="footer">
         <p>Document généré automatiquement le ' . date('d/m/Y à H:i:s') . '</p>
-        <p>COLLEGE POLYVALENT BILINGUE DE DOUALA</p>
+        <p>INSTITUT UNIVERSITAIRE DE LA POINTE</p>
     </div>
 </body>
 </html>';

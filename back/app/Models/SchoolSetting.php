@@ -41,7 +41,7 @@ class SchoolSetting extends Model
     public static function getSettings()
     {
         return self::first() ?? self::create([
-            'school_name' => 'COLLÈGE POLYVALENT BILINGUE DE DOUALA',
+            'school_name' => 'INSTITUT UNIVERSITAIRE DE LA POINTE',
             'currency' => 'FCFA',
             'reduction_percentage' => 10.00,
             'primary_color' => '#007bff'

@@ -1154,7 +1154,7 @@ class ReportsController extends Controller
     private function generateReportHtml($reportType, $reportData, $request)
     {
         $workingYear = $this->getUserWorkingYear();
-        $schoolName = "COLLEGE POLYVALENT DE DOUALA";
+        $schoolName = "INSTITUT UNIVERSITAIRE DE LA POINTE";
         $currentDate = now()->format('d/m/Y H:i');
 
         $titles = [
@@ -1959,7 +1959,7 @@ class ReportsController extends Controller
 
         // Titres
         $html .= "<div>";
-        $html .= "<h2 style='margin: 0; font-size: 24px; font-weight: bold;'>" . ($schoolSettings['school_name'] ?? 'COLLEGE POLYVALENT BILINGUE DE DOUALA') . "</h2>";
+        $html .= "<h2 style='margin: 0; font-size: 24px; font-weight: bold;'>" . ($schoolSettings['school_name'] ?? 'INSTITUT UNIVERSITAIRE DE LA POINTE') . "</h2>";
         $html .= "<h3 style='margin: 5px 0 0 0; color: #0066cc; font-size: 20px;'>DÉTAIL DES ENCAISSEMENTS</h3>";
         $html .= "</div>";
         $html .= "</div>";
@@ -2384,9 +2384,9 @@ class ReportsController extends Controller
         <body>
             <div class='header'>
                 <div class='header-content'>
-                    <img src='" . public_path('assets/logo.png') . "' alt='Logo du Collège' class='logo'>
+                    <img src='" . public_path('assets/logo.png') . "' alt='Logo de l'institut' class='logo'>
                     <div class='school-info'>
-                        <div class='school-name'>COLLÈGE POLYVALENT BILINGUE DE DOUALA</div>
+                        <div class='school-name'>INSTITUT UNIVERSITAIRE DE LA POINTE</div>
                         <div class='report-title'>DÉTAIL DES PAIEMENTS DES FRAIS DE SCOLARITÉ</div>
                     </div>
                 </div>
@@ -2439,7 +2439,7 @@ class ReportsController extends Controller
             </table>
             
             <div class='footer'>
-                Document généré automatiquement le {$summary['generated_at']} - COLLÈGE POLYVALENT BILINGUE DE DOUALA
+                Document généré automatiquement le {$summary['generated_at']} - INSTITUT UNIVERSITAIRE DE LA POINTE
             </div>
         </body>
         </html>";
@@ -2550,7 +2550,7 @@ class ReportsController extends Controller
             // Récupérer les informations de section si filtré
             $sectionInfo = null;
             if ($sectionId) {
-                $sectionInfo = \App\Models\Section::find($sectionId);
+                $sectionInfo = \App\Models\School::find($sectionId);
             }
 
             return response()->json([
@@ -2768,7 +2768,7 @@ class ReportsController extends Controller
             // Test simple pour vérifier le fonctionnement
             $classId = $request->get('class_id', 'N/A');
             $html = "<!DOCTYPE html><html><head><title>Rapport PDF</title></head><body>";
-            $html .= "<h1>COLLÈGE POLYVALENT BILINGUE DE DOUALA</h1>";
+            $html .= "<h1>INSTITUT UNIVERSITAIRE DE LA POINTE</h1>";
             $html .= "<h2>Paiement des Frais de Scolarité par Classe</h2>";
             $html .= "<p>Classe ID: " . $classId . "</p>";
             $html .= "<p>Date de génération: " . date('d/m/Y H:i:s') . "</p>";
@@ -2801,7 +2801,7 @@ class ReportsController extends Controller
         $html .= "<title>Paiement des Frais de Scolarité par Classe</title>";
         $html .= "<style>body{font-family:Arial;font-size:12px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:5px;text-align:left;}</style>";
         $html .= "</head><body>";
-        $html .= "<h2>COLLÈGE POLYVALENT BILINGUE DE DOUALA</h2>";
+        $html .= "<h2>INSTITUT UNIVERSITAIRE DE LA POINTE</h2>";
         $html .= "<h3>PAIEMENT DES FRAIS DE SCOLARITÉ PAR CLASSE</h3>";
         $html .= "<p>Classe: " . $classInfo['name'] . " | Section: " . $classInfo['section_name'] . "</p>";
         $html .= "<p>Année scolaire: " . $schoolYear['name'] . " | Nombre d'élèves: " . $summary['total_students'] . "</p>";

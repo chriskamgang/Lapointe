@@ -11,7 +11,7 @@ class Level extends Model
 
     protected $fillable = [
         'name',
-        'section_id',
+        'school_id',
         'description',
         'order',
         'is_active'
@@ -27,7 +27,7 @@ class Level extends Model
      */
     public function section()
     {
-        return $this->belongsTo(Section::class);
+        return $this->belongsTo(School::class);
     }
 
     /**

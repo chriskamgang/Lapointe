@@ -46,7 +46,7 @@ return new class extends Migration
         DB::statement("
             UPDATE payments 
             SET versement_date = CASE 
-                WHEN payment_date IS NOT NULL AND payment_date != '0000-00-00' THEN payment_date 
+                WHEN payment_date IS NOT NULL AND payment_date < '1000-01-01' THEN payment_date 
                 ELSE DATE(created_at) 
             END,
             validation_date = created_at

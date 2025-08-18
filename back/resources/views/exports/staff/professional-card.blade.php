@@ -231,7 +231,7 @@
         <!-- Header inspiré de la carte étudiante -->
         <div class="header">
             <div class="school-acronym">CPB</div>
-            <div class="school-full-name">COLLÈGE POLYVALENT<br>BILINGUE DE DOUALA</div>
+            <div class="school-full-name">INSTITUT UNIVERSITAIRE<br>DE LA POINTE</div>
             @php
                 $logoPath = public_path('assets/logo.png');
             @endphp

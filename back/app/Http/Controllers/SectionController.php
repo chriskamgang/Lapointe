@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Section;
+use App\Models\School;
 use App\Exports\SectionsExport;
 use App\Exports\SectionsImportableExport;
 use App\Imports\SectionsImport;
@@ -19,7 +19,7 @@ class SectionController extends Controller
     public function index()
     {
         try {
-            $sections = Section::ordered()->get();
+            $sections = School::ordered()->get();
             
             return response()->json([
                 'success' => true,
@@ -56,7 +56,7 @@ class SectionController extends Controller
                 ], 422);
             }
 
-            $section = Section::create($validator->validated());
+            $section = School::create($validator->validated());
 
             return response()->json([
                 'success' => true,
@@ -75,7 +75,7 @@ class SectionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Section $section)
+    public function show(School $section)
     {
         try {
             $section->load('classes');
@@ -97,7 +97,7 @@ class SectionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Section $section)
+    public function update(Request $request, School $section)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -134,7 +134,7 @@ class SectionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Section $section)
+    public function destroy(School $section)
     {
         try {
             // Vérifier si la section a des classes associées
@@ -167,13 +167,13 @@ class SectionController extends Controller
     {
         try {
             $stats = [
-                'total_sections' => Section::count(),
-                'active_sections' => Section::active()->count(),
-                'inactive_sections' => Section::where('is_active', false)->count(),
-                'sections_with_classes' => Section::has('classes')->count(),
+                'total_sections' => School::count(),
+                'active_sections' => School::active()->count(),
+                'inactive_sections' => School::where('is_active', false)->count(),
+                'sections_with_classes' => School::has('classes')->count(),
             ];
 
-            $recent_sections = Section::latest()->take(5)->get();
+            $recent_sections = School::latest()->take(5)->get();
 
             return response()->json([
                 'success' => true,
@@ -195,7 +195,7 @@ class SectionController extends Controller
     /**
      * Toggle section status
      */
-    public function toggleStatus(Section $section)
+    public function toggleStatus(School $section)
     {
         try {
             $section->update(['is_active' => !$section->is_active]);
