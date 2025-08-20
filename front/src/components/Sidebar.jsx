@@ -64,9 +64,9 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           items: [
             { name: "Années Scolaires", href: "/school-years", icon: <Calendar /> },
             { name: "Ecoles", href: "/schools", icon: <HospitalFill /> },
-            { name: "Spécialités", href: "/levels", icon: <BookFill /> },
+            { name: "Niveau", href: "/levels", icon: <BookFill /> },
             {
-              name: "Salles",
+              name: "Spécialités",
               href: "/school-classes",
               icon: <HouseHeartFill />,
             },
