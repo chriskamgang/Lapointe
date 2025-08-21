@@ -219,7 +219,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/import/csv', [ClassesSeriesController::class, 'importCsv'])->middleware(['role:admin']);
     });
 
-    // Routes pour les élèves
+    // Routes pour les étudiants
     Route::prefix('students')->middleware(['role:admin,accountant,comptable_superieur'])->group(function () {
         Route::get('/class-series/{seriesId}', [StudentController::class, 'getByClassSeries']);
         

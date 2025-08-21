@@ -240,7 +240,7 @@ const Search = () => {
                                             {schoolClass.series_count} série{schoolClass.series_count > 1 ? 's' : ''}
                                         </Badge>
                                         <Badge bg="info">
-                                            {schoolClass.total_students} élève{schoolClass.total_students > 1 ? 's' : ''}
+                                            {schoolClass.total_students} étudiant{schoolClass.total_students > 1 ? 's' : ''}
                                         </Badge>
                                     </div>
                                     <div className="d-flex align-items-center text-muted small">
@@ -303,7 +303,7 @@ const Search = () => {
                                             {serie.code && <span className="text-muted"> ({serie.code})</span>}
                                         </h6>
                                         <Badge bg="info" className="me-2">
-                                            {serie.students_count} élève{serie.students_count > 1 ? 's' : ''}
+                                            {serie.students_count} étudiant{serie.students_count > 1 ? 's' : ''}
                                         </Badge>
                                         <Badge bg="secondary">
                                             Cap: {serie.capacity}
@@ -321,7 +321,7 @@ const Search = () => {
                             <Link
                                 to={`/students/series/${serie.id}`}
                                 className="btn btn-sm btn-outline-info ms-2"
-                                title="Voir les élèves de la série"
+                                title="Voir les étudiants de la série"
                             >
                                 <Eye size={14} className="me-1" />
                                 Voir

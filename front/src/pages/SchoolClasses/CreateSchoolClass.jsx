@@ -103,7 +103,7 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, schools, levels }) => {
         try {
             // Validation
             if (!formData.name.trim()) {
-                Swal.fire('Erreur', 'Le nom de la classe est requis', 'error');
+                Swal.fire('Erreur', 'Le nom de la Spécialité est requis', 'error');
                 return;
             }
             
@@ -116,7 +116,7 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, schools, levels }) => {
             for (let i = 0; i < formData.series.length; i++) {
                 const serie = formData.series[i];
                 if (!serie.name.trim()) {
-                    Swal.fire('Erreur', `Le nom de la série ${i + 1} est requis`, 'error');
+                    Swal.fire('Erreur', `Le nom de la salle ${i + 1} est requis`, 'error');
                     return;
                 }
             }
@@ -140,15 +140,15 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, schools, levels }) => {
             const response = await secureApiEndpoints.schoolClasses.create(submissionData);
             
             if (response.success) {
-                Swal.fire('Succès', response.message || 'Classe créée avec succès', 'success');
+                Swal.fire('Succès', response.message || 'Spécialité créée avec succès', 'success');
                 onSuccess();
                 resetForm();
             } else {
-                Swal.fire('Erreur', response.message || 'Erreur lors de la création de la classe', 'error');
+                Swal.fire('Erreur', response.message || 'Erreur lors de la création de la Spécialité', 'error');
             }
         } catch (error) {
             console.error('Error creating class:', error);
-            Swal.fire('Erreur', 'Erreur lors de la création de la classe', 'error');
+            Swal.fire('Erreur', 'Erreur lors de la création de la Spécialité', 'error');
         } finally {
             setLoading(false);
         }
@@ -175,7 +175,7 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, schools, levels }) => {
     return (
         <Modal show={show} onHide={onHide} size="lg" scrollable>
             <Modal.Header closeButton>
-                <Modal.Title>Créer une Nouvelle Classe</Modal.Title>
+                <Modal.Title>Créer une Nouvelle Spécialité</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <form onSubmit={handleSubmit}>
@@ -186,13 +186,13 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, schools, levels }) => {
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="mb-3">
-                                    <label className="form-label">Nom de la classe *</label>
+                                    <label className="form-label">Nom de la spécialité *</label>
                                     <input
                                         type="text"
                                         className="form-control"
                                         value={formData.name}
                                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                        placeholder="Ex: 6ème A, CP1 B..."
+                                        placeholder="Ex: SI, CP1 B..."
                                         required
                                     />
                                 </div>
@@ -309,7 +309,7 @@ const CreateSchoolClass = ({ show, onHide, onSuccess, schools, levels }) => {
                                                     className="form-control"
                                                     value={serie.capacity}
                                                     onChange={(e) => handleSeriesChange(index, 'capacity', e.target.value)}
-                                                    placeholder="Nombre max d'élèves"
+                                                    placeholder="Nombre max d'étudiants"
                                                     min="1"
                                                 />
                                             </div>

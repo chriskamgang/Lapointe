@@ -178,7 +178,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Obtenir tous les élèves d'une série de classe
+     * Obtenir tous les étudiants d'une série de classe
      */
     public function getByClassSeries($seriesId)
     {
@@ -193,7 +193,7 @@ class StudentController extends Controller
                 ], 400);
             }
 
-            // Récupérer les élèves pour l'année de travail sélectionnée
+            // Récupérer les étudiants pour l'année de travail sélectionnée
             $studentsQuery = Student::with(['schoolYear', 'classSeries'])
                 ->where('class_series_id', $seriesId)
                 ->where('is_active', true)
@@ -228,14 +228,14 @@ class StudentController extends Controller
             \Log::error('Error in getByClassSeries: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération des élèves',
+                'message' => 'Erreur lors de la récupération des étudiants',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Créer un nouvel élève
+     * Créer un nouvel étudiant
      */
     public function store(Request $request)
     {
@@ -278,7 +278,7 @@ class StudentController extends Controller
         try {
             DB::beginTransaction();
 
-            // Générer le numéro d'élève pour l'année de travail
+            // Générer le numéro d'étudiant pour l'année de travail
             $studentNumber = Student::generateStudentNumber(
                 $workingYear->start_date,
                 $request->class_series_id
@@ -319,20 +319,20 @@ class StudentController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $student,
-                'message' => 'Élève créé avec succès'
+                'message' => 'Étudiant créé avec succès'
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la création de l\'élève',
+                'message' => 'Erreur lors de la création de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Mettre à jour un élève
+     * Mettre à jour un étudiant
      */
     public function update(Request $request, Student $student)
     {
@@ -395,19 +395,19 @@ class StudentController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $student,
-                'message' => 'Élève mis à jour avec succès'
+                'message' => 'Étudiant mis à jour avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la mise à jour de l\'élève',
+                'message' => 'Erreur lors de la mise à jour de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Mettre à jour un élève avec photo (via POST pour FormData)
+     * Mettre à jour un étudiant avec photo (via POST pour FormData)
      */
     public function updateWithPhoto(Request $request, Student $student)
     {
@@ -478,19 +478,19 @@ class StudentController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $student,
-                'message' => 'Élève mis à jour avec succès'
+                'message' => 'Étudiant mis à jour avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la mise à jour de l\'élève',
+                'message' => 'Erreur lors de la mise à jour de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Supprimer un élève
+     * Supprimer un étudiant
      */
     public function destroy(Student $student)
     {
@@ -504,19 +504,19 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Élève supprimé avec succès'
+                'message' => 'Étudiant supprimé avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la suppression de l\'élève',
+                'message' => 'Erreur lors de la suppression de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Exporter la liste des élèves en CSV
+     * Exporter la liste des étudiants en CSV
      */
     public function exportCsv($seriesId)
     {
@@ -595,7 +595,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Exporter la liste des élèves en PDF
+     * Exporter la liste des étudiants en PDF
      */
     public function exportPdf($seriesId)
     {
@@ -644,7 +644,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Générer le HTML pour la liste des élèves
+     * Générer le HTML pour la liste des étudiants
      */
     private function generateStudentListHtml($students, $series, $schoolYear)
     {
@@ -652,7 +652,7 @@ class StudentController extends Controller
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Liste des Élèves - ' . $series->name . '</title>
+    <title>Liste des Étudiants - ' . $series->name . '</title>
     <style>
         body { font-family: Arial, sans-serif; font-size: 12px; margin: 20px; }
         .header { text-align: center; margin-bottom: 30px; }
@@ -678,7 +678,7 @@ class StudentController extends Controller
 <body>
     <div class="header">
         <h1>INSTITUT UNIVERSITAIRE DE LA POINTE</h1>
-        <p>Liste des Élèves</p>
+        <p>Liste des Étudiants</p>
     </div>
 
     <div class="info-box">
@@ -698,7 +698,7 @@ class StudentController extends Controller
             <strong>Année scolaire:</strong> <span>' . $schoolYear->name . '</span>
         </div>
         <div class="info-row">
-            <strong>Nombre d\'élèves:</strong> <span>' . $students->count() . '</span>
+            <strong>Nombre d\'étudiants:</strong> <span>' . $students->count() . '</span>
         </div>
         <div class="info-row">
             <strong>Date d\'export:</strong> <span>' . date('d/m/Y à H:i') . '</span>
@@ -789,7 +789,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Importer des élèves depuis un fichier CSV
+     * Importer des étudiants depuis un fichier CSV
      */
     public function importCsv(Request $request)
     {
@@ -938,7 +938,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "$imported élève(s) importé(s) avec succès",
+                'message' => "$imported étudiant(s) importé(s) avec succès",
                 'data' => [
                     'imported' => $imported,
                     'errors' => $errors
@@ -979,7 +979,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Réorganiser les élèves par drag & drop
+     * Réorganiser les étudiants par drag & drop
      */
     public function reorder(Request $request)
     {
@@ -1022,7 +1022,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Ordre des élèves mis à jour avec succès'
+                'message' => 'Ordre des étudiants mis à jour avec succès'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1035,7 +1035,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Reclasser les élèves par ordre alphabétique
+     * Reclasser les étudiants par ordre alphabétique
      */
     public function sortAlphabetically(Request $request, $seriesId)
     {
@@ -1052,7 +1052,7 @@ class StudentController extends Controller
         try {
             DB::beginTransaction();
 
-            // Récupérer les élèves de la série et année scolaire
+            // Récupérer les étudiants de la série et année scolaire
             $students = Student::where('class_series_id', $seriesId)
                 ->where('school_year_id', $workingYear->id)
                 ->where('is_active', true)
@@ -1069,7 +1069,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Élèves reclassés par ordre alphabétique avec succès',
+                'message' => 'Étudiants reclassés par ordre alphabétique avec succès',
                 'data' => $students->load(['schoolYear', 'classSeries'])
             ]);
         } catch (\Exception $e) {
@@ -1083,7 +1083,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Mettre à jour uniquement le statut d'un élève
+     * Mettre à jour uniquement le statut d'un étudiant
      */
     public function updateStatus(Request $request, Student $student)
     {
@@ -1119,7 +1119,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Transférer un élève vers une nouvelle série
+     * Transférer un étudiant vers une nouvelle série
      */
     public function transferToSeries(Request $request, Student $student)
     {
@@ -1145,7 +1145,7 @@ class StudentController extends Controller
             if ($oldSeriesId == $newSeriesId) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'L\'élève est déjà dans cette série'
+                    'message' => 'L\'étudiant est déjà dans cette série'
                 ], 422);
             }
 
@@ -1200,7 +1200,7 @@ class StudentController extends Controller
 
             DB::commit();
 
-            // Recharger l'élève avec ses nouvelles relations
+            // Recharger l'étudiant avec ses nouvelles relations
             $student = $student->fresh()->load([
                 'classSeries',
                 'classSeries.schoolClass',
@@ -1212,7 +1212,7 @@ class StudentController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => sprintf(
-                    'Élève transféré avec succès vers %s - %s',
+                    'Étudiant transféré avec succès vers %s - %s',
                     $newSeries->schoolClass->name,
                     $newSeries->name
                 ),
@@ -1241,7 +1241,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors du transfert de l\'élève',
+                'message' => 'Erreur lors du transfert de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }

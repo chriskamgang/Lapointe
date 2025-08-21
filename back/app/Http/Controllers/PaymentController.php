@@ -823,7 +823,7 @@ class PaymentController extends Controller
         $workingYear = $payment->schoolYear;
         $paymentStatus = $this->getPaymentStatusAtTime($student, $payment);
 
-        // Vérifier si l'élève a payé sa RAME (physique ou électronique)
+        // Vérifier si l'étudiant a payé sa RAME (physique ou électronique)
         $hasRamePaid = $this->checkIfRamePaid($student, $workingYear, $payment);
 
         // Générer le tableau des détails de paiement
@@ -1714,7 +1714,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Vérifier si l'élève a apporté sa RAME
+     * Vérifier si l'étudiant a apporté sa RAME
      */
     private function checkIfRamePaid($student, $workingYear, $currentPayment)
     {
@@ -1782,7 +1782,7 @@ class PaymentController extends Controller
         $workingYear = $payment->schoolYear;
         $paymentStatus = $this->getPaymentStatusAtTime($student, $payment);
 
-        // Vérifier si l'élève a payé sa RAME (physique ou électronique)
+        // Vérifier si l'étudiant a payé sa RAME (physique ou électronique)
         $hasRamePaid = $this->checkIfRamePaid($student, $workingYear, $payment);
 
         // Générer le tableau des détails de paiement

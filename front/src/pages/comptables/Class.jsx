@@ -158,7 +158,7 @@ const AccountantClasses = () => {
                         <div>
                             <h2 className="h4 mb-1">Gestion des Classes</h2>
                             <p className="text-muted mb-0">
-                                Visualisation des classes et gestion des élèves (Mode Comptable)
+                                Visualisation des classes et gestion des étudiants (Mode Comptable)
                             </p>
                         </div>
                         <div className="d-flex align-items-center gap-2">
@@ -196,7 +196,7 @@ const AccountantClasses = () => {
                             <div className="d-flex justify-content-between">
                                 <div>
                                     <div className="fs-2 fw-bold">{stats.total_students}</div>
-                                    <div>Élèves Total</div>
+                                    <div>Étudiants Total</div>
                                 </div>
                                 <PeopleFill size={40} className="opacity-75" />
                             </div>
@@ -383,7 +383,7 @@ const AccountantClasses = () => {
                                                             <div>
                                                                 <h6 className="mb-1">{classItem.name}</h6>
                                                                 <small className="text-muted">
-                                                                    {classItem.series_count || 0} série{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} élève{(classItem.total_students || 0) > 1 ? 's' : ''}
+                                                                    {classItem.series_count || 0} série{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} étudiant{(classItem.total_students || 0) > 1 ? 's' : ''}
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -416,14 +416,14 @@ const AccountantClasses = () => {
                                                                                         <div>
                                                                                             <span className="fw-medium">{serie.name}</span>
                                                                                             <small className="text-muted ms-2">
-                                                                                                {serie.students_count || 0} élève{(serie.students_count || 0) > 1 ? 's' : ''}
+                                                                                                {serie.students_count || 0} étudiant{(serie.students_count || 0) > 1 ? 's' : ''}
                                                                                             </small>
                                                                                         </div>
                                                                                         <Link
                                                                                             to={`/students/series/${serie.id}`}
                                                                                             className="btn btn-sm btn-outline-success"
                                                                                         >
-                                                                                            Voir élèves
+                                                                                            Voir étudiants
                                                                                         </Link>
                                                                                     </div>
                                                                                 </div>
@@ -459,7 +459,7 @@ const AccountantClasses = () => {
                                                                 <div>
                                                                     <h6 className="mb-1">{classItem.name}</h6>
                                                                     <small className="text-muted">
-                                                                        {classItem.series_count || 0} série{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} élève{(classItem.total_students || 0) > 1 ? 's' : ''}
+                                                                        {classItem.series_count || 0} série{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} étudiant{(classItem.total_students || 0) > 1 ? 's' : ''}
                                                                     </small>
                                                                 </div>
                                                             </div>
@@ -492,14 +492,14 @@ const AccountantClasses = () => {
                                                                                             <div>
                                                                                                 <span className="fw-medium">{serie.name}</span>
                                                                                                 <small className="text-muted ms-2">
-                                                                                                    {serie.students_count || 0} élève{(serie.students_count || 0) > 1 ? 's' : ''}
+                                                                                                    {serie.students_count || 0} étudiant{(serie.students_count || 0) > 1 ? 's' : ''}
                                                                                                 </small>
                                                                                             </div>
                                                                                             <Link
                                                                                                 to={`/students/series/${serie.id}`}
                                                                                                 className="btn btn-sm btn-outline-success"
                                                                                             >
-                                                                                                Voir élèves
+                                                                                                Voir étudiants
                                                                                             </Link>
                                                                                         </div>
                                                                                     </div>
@@ -558,7 +558,7 @@ const AccountantClasses = () => {
                                         
                                         <div className="d-flex justify-content-between align-items-center mt-auto">
                                             <small className="text-muted">
-                                                {classe.total_students || 0} élève{(classe.total_students || 0) > 1 ? 's' : ''}
+                                                {classe.total_students || 0} étudiant{(classe.total_students || 0) > 1 ? 's' : ''}
                                             </small>
                                             <Link
                                                 to={`/class-comp/${classe.id}`}
@@ -587,7 +587,7 @@ const AccountantClasses = () => {
                                                 <th>School</th>
                                                 <th>Niveau</th>
                                                 <th>Séries</th>
-                                                <th>Élèves</th>
+                                                <th>Étudiants</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -602,7 +602,7 @@ const AccountantClasses = () => {
                                                             {classe.series_count || 0} série{(classe.series_count || 0) > 1 ? 's' : ''}
                                                         </span>
                                                     </td>
-                                                    <td>{classe.total_students || 0} élève{(classe.total_students || 0) > 1 ? 's' : ''}</td>
+                                                    <td>{classe.total_students || 0} étudiant{(classe.total_students || 0) > 1 ? 's' : ''}</td>
                                                     <td>
                                                         <Link
                                                             to={`/class-comp/${classe.id}`}

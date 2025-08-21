@@ -187,7 +187,7 @@ const AccountantClassSeries = () => {
                                                 </small>
                                             </div>
                                             <span className="badge bg-primary">
-                                                {serie.students_count || 0} élève{(serie.students_count || 0) > 1 ? 's' : ''}
+                                                {serie.students_count || 0} étudiant{(serie.students_count || 0) > 1 ? 's' : ''}
                                             </span>
                                         </div>
                                         
@@ -197,7 +197,7 @@ const AccountantClassSeries = () => {
                                                 className="btn btn-primary btn-sm"
                                             >
                                                 <PeopleFill size={14} className="me-1" />
-                                                Voir les élèves
+                                                Voir les étudiants
                                             </Link>
                                         </div>
                                     </div>
@@ -218,7 +218,7 @@ const AccountantClassSeries = () => {
                                             <tr>
                                                 <th>Série</th>
                                                 <th>Classe</th>
-                                                <th>Élèves</th>
+                                                <th>Étudiants</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -229,7 +229,7 @@ const AccountantClassSeries = () => {
                                                     <td>{classData?.name}</td>
                                                     <td>
                                                         <span className="badge bg-light text-dark">
-                                                            {serie.students_count || 0} élève{(serie.students_count || 0) > 1 ? 's' : ''}
+                                                            {serie.students_count || 0} étudiant{(serie.students_count || 0) > 1 ? 's' : ''}
                                                         </span>
                                                     </td>
                                                     <td>
@@ -238,7 +238,7 @@ const AccountantClassSeries = () => {
                                                             className="btn btn-sm btn-primary"
                                                         >
                                                             <PeopleFill size={14} className="me-1" />
-                                                            Voir les élèves
+                                                            Voir les étudiants
                                                         </Link>
                                                     </td>
                                                 </tr>

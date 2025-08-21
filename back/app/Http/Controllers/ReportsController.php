@@ -43,7 +43,7 @@ class ReportsController extends Controller
     }
 
     /**
-     * Rapport d'état insolvable - Liste des élèves n'ayant pas fini de payer
+     * Rapport d'état insolvable - Liste des étudiants n'ayant pas fini de payer
      */
     public function getInsolvableReport(Request $request)
     {
@@ -91,7 +91,7 @@ class ReportsController extends Controller
             $students = $studentsQuery->get();
             $paymentTranches = PaymentTranche::active()->ordered()->get();
 
-            // Filtrer seulement les élèves insolvables (qui n'ont pas fini de payer)
+            // Filtrer seulement les étudiants insolvables (qui n'ont pas fini de payer)
             $insolvableStudents = [];
 
             foreach ($students as $student) {
@@ -135,7 +135,7 @@ class ReportsController extends Controller
                     $studentTotalPaid += $paidAmount;
                 }
 
-                // Inclure seulement les élèves avec des paiements incomplets
+                // Inclure seulement les étudiants avec des paiements incomplets
                 if ($hasIncompletePayments) {
                     $insolvableStudents[] = [
                         'student' => [
@@ -207,7 +207,7 @@ class ReportsController extends Controller
     }
 
     /**
-     * Rapport des paiements - Liste de tous les élèves avec infos de toutes les tranches
+     * Rapport des paiements - Liste de tous les étudiants avec infos de toutes les tranches
      */
     public function getPaymentsReport(Request $request)
     {
@@ -263,7 +263,7 @@ class ReportsController extends Controller
                 ->ordered()
                 ->get();
 
-            // Créer les détails pour tous les élèves
+            // Créer les détails pour tous les étudiants
             $studentsData = [];
 
             foreach ($students as $student) {
@@ -334,7 +334,7 @@ class ReportsController extends Controller
     }
 
     /**
-     * Rapport d'état des RAME - Liste des élèves avec détails RAME (espèces/physique/pas payé)
+     * Rapport d'état des RAME - Liste des étudiants avec détails RAME (espèces/physique/pas payé)
      */
     public function getRameReport(Request $request)
     {
@@ -1291,7 +1291,7 @@ class ReportsController extends Controller
     {
         $html = "<div class='summary'>";
         $html .= "<h3>Résumé</h3>";
-        $html .= "<p><strong>Total élèves insolvables:</strong> {$reportData['total_insolvable_students']}</p>";
+        $html .= "<p><strong>Total étudiants insolvables:</strong> {$reportData['total_insolvable_students']}</p>";
         $html .= "</div>";
 
         $html .= "<table>
@@ -1729,7 +1729,7 @@ class ReportsController extends Controller
 
     /**
      * Rapport détaillé des encaissements
-     * Liste tous les encaissements reçus par élève avec possibilité de filtrer par date
+     * Liste tous les encaissements reçus par étudiant avec possibilité de filtrer par date
      */
     public function getCollectionDetailsReport(Request $request)
     {
@@ -2804,7 +2804,7 @@ class ReportsController extends Controller
         $html .= "<h2>INSTITUT UNIVERSITAIRE DE LA POINTE</h2>";
         $html .= "<h3>PAIEMENT DES FRAIS DE SCOLARITÉ PAR CLASSE</h3>";
         $html .= "<p>Classe: " . $classInfo['name'] . " | School: " . $classInfo['school_name'] . "</p>";
-        $html .= "<p>Année scolaire: " . $schoolYear['name'] . " | Nombre d'élèves: " . $summary['total_students'] . "</p>";
+        $html .= "<p>Année scolaire: " . $schoolYear['name'] . " | Nombre d'étudiants: " . $summary['total_students'] . "</p>";
         
         $html .= "<table>";
         $html .= "<thead><tr>";

@@ -39,7 +39,7 @@ const TestStudentActionsAndTheme = () => {
 
     // Handlers pour les actions
     const handleAction = (action, student) => {
-        alert(`Action "${action}" pour l'élève ${student.first_name} ${student.last_name}`);
+        alert(`Action "${action}" pour l'étudiant ${student.first_name} ${student.last_name}`);
     };
 
     return (
@@ -124,7 +124,7 @@ const TestStudentActionsAndTheme = () => {
                             <h5 className="mb-0">Liste des Étudiants avec Actions</h5>
                             <Button variant="primary" size="sm">
                                 <Plus className="me-1" />
-                                Nouvel élève
+                                Nouvel étudiant
                             </Button>
                         </Card.Header>
                         <Card.Body className="p-0">

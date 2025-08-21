@@ -51,7 +51,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// Composant pour afficher les photos d'élèves avec fallback
+// Composant pour afficher les photos d'étudiants avec fallback
 const StudentPhoto = ({ student, size = 40, className = "" }) => {
     const [imageError, setImageError] = useState(false);
     
@@ -119,7 +119,7 @@ const SortableStudent = ({ student, handleEdit, handleDelete, handlePrintCard, h
                     </div>
                     {student.student_status === 'old' && (
                         <span className="badge bg-success bg-opacity-25 text-success small mt-1">
-                            Ancien élève
+                            Ancien étudiant
                         </span>
                     )}
                 </div>
@@ -296,15 +296,15 @@ const SeriesStudents = () => {
                 setSchoolYear(response.data.school_year);
                 // L'année scolaire est maintenant gérée automatiquement par le backend
                 
-                // Vérifier si les élèves ont un ordre personnalisé
+                // Vérifier si les étudiants ont un ordre personnalisé
                 const hasCustom = response.data.students.some(student => student.order != null);
                 setHasCustomOrder(hasCustom);
             } else {
-                setError(response.message || 'Erreur lors du chargement des élèves');
+                setError(response.message || 'Erreur lors du chargement des étudiants');
             }
         } catch (error) {
             console.error('Error loading students:', error);
-            setError('Erreur lors du chargement des élèves');
+            setError('Erreur lors du chargement des étudiants');
         } finally {
             setLoading(false);
         }
@@ -431,15 +431,15 @@ const SeriesStudents = () => {
             }
 
             if (response.success) {
-                setSuccess(response.message || `Élève ${selectedStudent ? 'modifié' : 'créé'} avec succès`);
+                setSuccess(response.message || `Étudiant ${selectedStudent ? 'modifié' : 'créé'} avec succès`);
                 resetForm();
                 setShowAddModal(false);
                 setShowEditModal(false);
                 loadStudents();
                 
-                // Si c'est une création d'élève (pas une modification), proposer l'impression de la carte
+                // Si c'est une création d'étudiant (pas une modification), proposer l'impression de la carte
                 if (!selectedStudent && response.data) {
-                    // Enrichir les données de l'élève créé avec les infos de la série
+                    // Enrichir les données de l'étudiant créé avec les infos de la série
                     const enrichedStudent = {
                         ...response.data,
                         class_series: series,
@@ -449,7 +449,7 @@ const SeriesStudents = () => {
                     setNewStudentForCard(enrichedStudent);
                     
                     Swal.fire({
-                        title: 'Élève créé avec succès !',
+                        title: 'Étudiant créé avec succès !',
                         text: 'Voulez-vous imprimer sa carte scolaire maintenant ?',
                         icon: 'success',
                         showCancelButton: true,
@@ -465,21 +465,21 @@ const SeriesStudents = () => {
                 } else {
                     Swal.fire({
                         title: 'Succès',
-                        text: response.message || `Élève ${selectedStudent ? 'modifié' : 'créé'} avec succès`,
+                        text: response.message || `Étudiant ${selectedStudent ? 'modifié' : 'créé'} avec succès`,
                         icon: 'success',
                         timer: 2000,
                         showConfirmButton: false
                     });
                 }
             } else {
-                setError(response.message || `Erreur lors de ${selectedStudent ? 'la modification' : 'la création'} de l'élève`);
+                setError(response.message || `Erreur lors de ${selectedStudent ? 'la modification' : 'la création'} de l'étudiant`);
             }
         } catch (error) {
             console.error('Error saving student:', error);
             console.error('Error details:', error.message);
             
             // Essayer d'extraire le message d'erreur détaillé
-            let errorMessage = `Erreur lors de ${selectedStudent ? 'la modification' : 'la création'} de l'élève`;
+            let errorMessage = `Erreur lors de ${selectedStudent ? 'la modification' : 'la création'} de l'étudiant`;
             
             if (error.message) {
                 // Si c'est une erreur de validation avec détails
@@ -504,7 +504,7 @@ const SeriesStudents = () => {
     };
 
     const handlePrintCard = (student) => {
-        // Enrichir les données de l'élève avec les infos de la série
+        // Enrichir les données de l'étudiant avec les infos de la série
         const enrichedStudent = {
             ...student,
             class_series: series,
@@ -516,7 +516,7 @@ const SeriesStudents = () => {
     };
 
     const handleTransferStudent = (student) => {
-        // Enrichir les données de l'élève avec les infos de la série actuelle
+        // Enrichir les données de l'étudiant avec les infos de la série actuelle
         const enrichedStudent = {
             ...student,
             class_series: series,
@@ -533,17 +533,17 @@ const SeriesStudents = () => {
         loadStudents();
         
         // Optionnel: message de confirmation déjà géré dans le composant StudentTransfer
-        console.log(`Élève transféré vers ${newClassInfo.className} - ${newClassInfo.seriesName}`);
+        console.log(`Étudiant transféré vers ${newClassInfo.className} - ${newClassInfo.seriesName}`);
     };
 
     const handleViewStudent = (student) => {
-        // Naviguer vers la page détaillée de l'élève ou ouvrir un modal
-        console.log('Voir élève:', student);
+        // Naviguer vers la page détaillée de l'étudiant ou ouvrir un modal
+        console.log('Voir étudiant:', student);
         // navigate(`/students/${student.id}`); // Si vous avez une page dédiée
     };
 
     const handleViewPayments = (student) => {
-        // Naviguer vers la page des paiements de l'élève
+        // Naviguer vers la page des paiements de l'étudiant
         navigate(`/student-payment/${student.id}`);
     };
 
@@ -604,7 +604,7 @@ const SeriesStudents = () => {
                     )
                 );
                 
-                setSuccess(`Statut mis à jour: ${newStatus === 'old' ? 'Ancien élève' : 'Nouvel élève'}`);
+                setSuccess(`Statut mis à jour: ${newStatus === 'old' ? 'Ancien étudiant' : 'Nouvel étudiant'}`);
                 setTimeout(() => setSuccess(''), 3000);
             } else {
                 setError(response.message || 'Erreur lors de la mise à jour du statut');
@@ -618,7 +618,7 @@ const SeriesStudents = () => {
     const handleDelete = async (student) => {
         const result = await Swal.fire({
             title: 'Confirmer la suppression',
-            text: `Êtes-vous sûr de vouloir supprimer l'élève "${student.full_name}" ?`,
+            text: `Êtes-vous sûr de vouloir supprimer l'étudiant "${student.full_name}" ?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#EF4444',
@@ -633,21 +633,21 @@ const SeriesStudents = () => {
                 
                 if (response.success) {
                     loadStudents();
-                    setSuccess(response.message || 'Élève supprimé avec succès');
+                    setSuccess(response.message || 'Étudiant supprimé avec succès');
                     
                     Swal.fire({
                         title: 'Supprimé',
-                        text: response.message || 'Élève supprimé avec succès',
+                        text: response.message || 'Étudiant supprimé avec succès',
                         icon: 'success',
                         timer: 2000,
                         showConfirmButton: false
                     });
                 } else {
-                    setError(response.message || 'Erreur lors de la suppression de l\'élève');
+                    setError(response.message || 'Erreur lors de la suppression de l\'étudiant');
                 }
             } catch (error) {
                 console.error('Error deleting student:', error);
-                setError('Erreur lors de la suppression de l\'élève');
+                setError('Erreur lors de la suppression de l\'étudiant');
             }
         }
     };
@@ -777,7 +777,7 @@ const SeriesStudents = () => {
                     Swal.fire({
                         title: 'Import terminé avec des erreurs',
                         html: `
-                            <p><strong>${response.data.imported} élève(s) importé(s)</strong></p>
+                            <p><strong>${response.data.imported} étudiant(s) importé(s)</strong></p>
                             <p>Erreurs :</p>
                             <ul style="text-align: left;">
                                 ${response.data.errors.map(error => `<li>${error}</li>`).join('')}
@@ -1047,11 +1047,11 @@ const SeriesStudents = () => {
                     // school_year_id géré automatiquement par le backend
                 });
 
-                setSuccess('Ordre des élèves mis à jour avec succès');
+                setSuccess('Ordre des étudiants mis à jour avec succès');
                 setTimeout(() => setSuccess(''), 3000);
             } catch (error) {
                 console.error('Error reordering students:', error);
-                setError('Erreur lors de la réorganisation des élèves');
+                setError('Erreur lors de la réorganisation des étudiants');
                 // Remettre l'ordre original en cas d'erreur
                 loadStudents();
             }
@@ -1062,7 +1062,7 @@ const SeriesStudents = () => {
     const handleSortAlphabetically = async () => {
         const result = await Swal.fire({
             title: 'Reclasser par ordre alphabétique',
-            text: 'Cette action va réorganiser tous les élèves par ordre alphabétique (Nom + Prénom). Continuer ?',
+            text: 'Cette action va réorganiser tous les étudiants par ordre alphabétique (Nom + Prénom). Continuer ?',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#0d6efd',
@@ -1149,7 +1149,7 @@ const SeriesStudents = () => {
             <div className="container-fluid py-4">
                 <div className="text-center py-5">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Chargement des élèves...</span>
+                        <span className="visually-hidden">Chargement des étudiants...</span>
                     </div>
                 </div>
             </div>
@@ -1172,19 +1172,19 @@ const SeriesStudents = () => {
                             </button>
                             <div>
                                 <h2 className="h4 mb-1">
-                                    Élèves - {series?.name}
+                                    Étudiants - {series?.name}
                                 </h2>
                                 <p className="text-muted mb-0">
                                     {series?.school_class?.level?.school?.name} - {series?.school_class?.level?.name} - {series?.school_class?.name}
                                     {schoolYear && ` • Année ${schoolYear.name}`}
-                                    {filteredStudents.length > 0 && ` • ${filteredStudents.length} élève${filteredStudents.length > 1 ? 's' : ''}`}
+                                    {filteredStudents.length > 0 && ` • ${filteredStudents.length} étudiant${filteredStudents.length > 1 ? 's' : ''}`}
                                 </p>
                             </div>
                         </div>
                         <div className="d-flex gap-2">
                             <div className="d-flex gap-2">
                                 <ImportExportButton
-                                    title="Élèves"
+                                    title="Étudiants"
                                     apiBasePath="/api/students"
                                     onImportSuccess={loadStudents}
                                     templateFileName="template_eleves.csv"
@@ -1195,7 +1195,7 @@ const SeriesStudents = () => {
                                     onClick={() => setShowAddModal(true)}
                                 >
                                     <Plus size={16} />
-                                    Nouvel Élève
+                                    Nouvel Étudiant
                                 </button>
                             </div>
                         </div>
@@ -1261,9 +1261,9 @@ const SeriesStudents = () => {
                                         value={statusFilter}
                                         onChange={(e) => setStatusFilter(e.target.value)}
                                     >
-                                        <option value="all">Tous les élèves</option>
-                                        <option value="new">Nouveaux élèves</option>
-                                        <option value="old">Anciens élèves</option>
+                                        <option value="all">Tous les étudiants</option>
+                                        <option value="new">Nouveaux étudiants</option>
+                                        <option value="old">Anciens étudiants</option>
                                     </select>
                                 </div>
                                 <div className="col-md-3 d-flex align-items-end">
@@ -1315,11 +1315,11 @@ const SeriesStudents = () => {
                         <div className="card">
                             <div className="card-body text-center py-5">
                                 <Person size={48} className="text-muted mb-3" />
-                                <h5 className="text-muted">Aucun élève trouvé</h5>
+                                <h5 className="text-muted">Aucun étudiant trouvé</h5>
                                 <p className="text-muted mb-4">
                                     {searchTerm 
-                                        ? 'Aucun élève ne correspond à vos critères de recherche.'
-                                        : 'Commencez par ajouter le premier élève de cette série.'
+                                        ? 'Aucun étudiant ne correspond à vos critères de recherche.'
+                                        : 'Commencez par ajouter le premier étudiant de cette série.'
                                     }
                                 </p>
                                 <button
@@ -1327,7 +1327,7 @@ const SeriesStudents = () => {
                                     onClick={() => setShowAddModal(true)}
                                 >
                                     <Plus size={16} className="me-2" />
-                                    Ajouter un élève
+                                    Ajouter un étudiant
                                 </button>
                             </div>
                         </div>
@@ -1477,7 +1477,7 @@ const SeriesStudents = () => {
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">
-                                    {selectedStudent ? 'Modifier l\'élève' : 'Ajouter un élève'}
+                                    {selectedStudent ? 'Modifier l\'étudiant' : 'Ajouter un étudiant'}
                                 </h5>
                                 <button
                                     type="button"
@@ -1490,7 +1490,7 @@ const SeriesStudents = () => {
                                     {/* School Photo */}
                                     <div className="row mb-4">
                                         <div className="col-12">
-                                            <label className="form-label">Photo de l'élève</label>
+                                            <label className="form-label">Photo de l'étudiant</label>
                                             <div className="d-flex flex-column align-items-center">
                                                 {/* Aperçu de la photo */}
                                                 <div className="mb-3 position-relative" style={{ width: '150px', height: '150px' }}>
@@ -1498,7 +1498,7 @@ const SeriesStudents = () => {
                                                         <>
                                                             <img 
                                                                 src={photoPreview} 
-                                                                alt="Aperçu photo élève" 
+                                                                alt="Aperçu photo étudiant" 
                                                                 className="img-thumbnail border-2 shadow-sm"
                                                                 style={{ width: '150px', height: '150px', objectFit: 'cover' }}
                                                             />
@@ -1673,8 +1673,8 @@ const SeriesStudents = () => {
                                                     value={formData.student_status || 'new'}
                                                     onChange={(e) => setFormData({...formData, student_status: e.target.value})}
                                                 >
-                                                    <option value="new">Nouveau élève</option>
-                                                    <option value="old">Ancien élève</option>
+                                                    <option value="new">Nouveau étudiant</option>
+                                                    <option value="old">Ancien étudiant</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -1737,10 +1737,10 @@ const SeriesStudents = () => {
                                                 onChange={(e) => setFormData({...formData, has_scholarship_enabled: e.target.checked})}
                                             />
                                             <label className="form-check-label" htmlFor="scholarshipEnabled">
-                                                <strong>Activer les bourses pour cet élève</strong>
+                                                <strong>Activer les bourses pour cet étudiant</strong>
                                                 <br />
                                                 <small className="text-muted">
-                                                    Si coché, l'élève pourra bénéficier des bourses configurées pour sa classe lors des paiements
+                                                    Si coché, l'étudiant pourra bénéficier des bourses configurées pour sa classe lors des paiements
                                                 </small>
                                             </label>
                                         </div>
@@ -1774,7 +1774,7 @@ const SeriesStudents = () => {
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title">Importer des élèves (CSV)</h5>
+                                <h5 className="modal-title">Importer des étudiants (CSV)</h5>
                                 <button
                                     type="button"
                                     className="btn-close"
@@ -1897,7 +1897,7 @@ const SeriesStudents = () => {
                 />
             )}
 
-            {/* Modal de transfert d'élève */}
+            {/* Modal de transfert d'étudiant */}
             {showTransferModal && studentToTransfer && (
                 <StudentTransfer
                     student={studentToTransfer}

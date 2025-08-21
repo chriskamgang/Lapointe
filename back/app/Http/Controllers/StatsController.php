@@ -155,7 +155,7 @@ class StatsController extends Controller
             ->get()
             ->toArray();
         
-        // Classes avec le plus d'élèves
+        // Classes avec le plus d'étudiants
         $topClasses = SchoolClass::withCount(['series as students_count' => function ($query) {
                 $query->join('students', 'class_series.id', '=', 'students.class_series_id')
                       ->where('students.is_active', true)

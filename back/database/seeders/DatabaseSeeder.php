@@ -122,8 +122,8 @@ class CompleteSchoolSeeder extends Seeder
         
         $schools = [
             ['name' => 'Maternelle', 'description' => 'School pour les enfants de 3 à 6 ans', 'order' => 1],
-            ['name' => 'Primaire', 'description' => 'School pour les élèves du CP au CM2', 'order' => 2],
-            ['name' => 'Secondaire', 'description' => 'School pour les élèves de la 6ème à la Terminale', 'order' => 3]
+            ['name' => 'Primaire', 'description' => 'School pour les étudiants du CP au CM2', 'order' => 2],
+            ['name' => 'Secondaire', 'description' => 'School pour les étudiants de la 6ème à la Terminale', 'order' => 3]
         ];
 
         foreach ($schools as $sectionData) {

@@ -25,7 +25,7 @@ class SchoolYear extends Model
     ];
 
     /**
-     * Relation avec les élèves
+     * Relation avec les étudiants
      */
     public function students()
     {

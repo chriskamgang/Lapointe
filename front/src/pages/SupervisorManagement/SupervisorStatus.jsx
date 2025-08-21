@@ -120,7 +120,7 @@ const SupervisorStatus = () => {
                 <div>
                   <h5 className="text-info mb-2">Nouvelle Logique des Surveillants Généraux</h5>
                   <p className="mb-0">
-                    Les surveillants généraux ont maintenant automatiquement accès à <strong>tous les élèves de l'établissement</strong>, 
+                    Les surveillants généraux ont maintenant automatiquement accès à <strong>tous les étudiants de l'établissement</strong>, 
                     sans nécessité d'affectation spécifique à une classe. Cette approche simplifie la gestion et correspond 
                     mieux au rôle de surveillance générale.
                   </p>
@@ -156,7 +156,7 @@ const SupervisorStatus = () => {
             <Card.Body>
               <CheckCircleFill size={48} className="text-info mb-3" />
               <h3 className="text-info">{totalStudents}</h3>
-              <p className="text-muted mb-0">Élèves sous Surveillance</p>
+              <p className="text-muted mb-0">Étudiants sous Surveillance</p>
             </Card.Body>
           </Card>
         </Col>
@@ -211,7 +211,7 @@ const SupervisorStatus = () => {
                           Toutes les classes
                         </Badge>
                         <Badge bg="primary" className="small">
-                          Tous les élèves
+                          Tous les étudiants
                         </Badge>
                         <Badge bg="info" className="small">
                           Scanner QR
@@ -241,11 +241,11 @@ const SupervisorStatus = () => {
                 <Col md={6}>
                   <h6 className="text-success">✅ Permissions Accordées</h6>
                   <ul className="list-unstyled">
-                    <li>• Scanner les codes QR de tous les élèves</li>
+                    <li>• Scanner les codes QR de tous les étudiants</li>
                     <li>• Marquer les présences pour toutes les classes</li>
                     <li>• Marquer les absences pour toutes les classes</li>
                     <li>• Consulter les rapports de présence globaux</li>
-                    <li>• Accéder aux données de tous les élèves actifs</li>
+                    <li>• Accéder aux données de tous les étudiants actifs</li>
                   </ul>
                 </Col>
                 <Col md={6}>

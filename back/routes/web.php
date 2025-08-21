@@ -7,7 +7,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Route pour servir les photos des élèves
+// Route pour servir les photos des étudiants
 Route::get('/storage/students/photos/{filename}', function ($filename) {
     $path = 'students/photos/' . $filename;
     

@@ -75,7 +75,7 @@ const SchoolClasses = () => {
     const loadClasses = async () => {
         try {
             setLoading(true);
-            console.log('Loading salles with filters:', filters);
+            console.log('Loading spécialités with filters:', filters);
             let response;
             
             if (filters.school_id) {
@@ -86,15 +86,15 @@ const SchoolClasses = () => {
                 response = await secureApiEndpoints.schoolClasses.getAll();
             }
             
-            console.log('Salles response:', response);
+            console.log('Spécialités response:', response);
             if (response.success) {
                 setClasses(response.data || []);
             } else {
-                setError(response.message || 'Erreur lors du chargement des salles');
+                setError(response.message || 'Erreur lors du chargement des spécialités');
             }
         } catch (error) {
-            console.error('Erreur lors du chargement des salles:', error);
-            setError('Erreur lors du chargement des salles');
+            console.error('Erreur lors du chargement des spécialités:', error);
+            setError('Erreur lors du chargement des spécialités');
         } finally {
             setLoading(false);
         }
@@ -112,7 +112,7 @@ const SchoolClasses = () => {
     const handleDeleteClass = async (classItem) => {
         const result = await Swal.fire({
             title: 'Confirmer la suppression',
-            text: `Êtes-vous sûr de vouloir supprimer la salle "${classItem.name}" ?`,
+            text: `Êtes-vous sûr de vouloir supprimer la spécialité "${classItem.name}" ?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
@@ -126,7 +126,7 @@ const SchoolClasses = () => {
                 const response = await secureApiEndpoints.schoolClasses.delete(classItem.id);
                 if (response.success) {
                     loadClasses();
-                    Swal.fire('Supprimé!', 'La salle a été supprimée.', 'success');
+                    Swal.fire('Supprimé!', 'La spécialité a été supprimée.', 'success');
                 } else {
                     Swal.fire('Erreur!', response.message || 'Erreur lors de la suppression.', 'error');
                 }
@@ -154,7 +154,7 @@ const SchoolClasses = () => {
 
     const getLevelName = (levelId) => {
         const level = levels.find(l => l.id === levelId);
-        return level ? level.name : 'Spécialité inconnu';
+        return level ? level.name : 'Niveau inconnu';
     };
 
     const getFilteredLevels = () => {
@@ -163,7 +163,7 @@ const SchoolClasses = () => {
     };
 
     const groupedClasses = classes.reduce((acc, classItem) => {
-        const key = `${classItem.level?.school?.name || 'Sans école'} - ${classItem.level?.name || 'Sans spécialité'}`;
+        const key = `${classItem.level?.school?.name || 'Sans école'} - ${classItem.level?.name || 'Sans niveau'}`;
         if (!acc[key]) {
             acc[key] = [];
         }
@@ -197,14 +197,14 @@ const SchoolClasses = () => {
                 <div className="col-12">
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <h2 className="h4 mb-1">Gestion des Salles</h2>
+                            <h2 className="h4 mb-1">Gestion des Spécialités</h2>
                             <p className="text-muted mb-0">
-                                Gérez les Salles, leurs séries et montants de paiement
+                                Gérez les Spécialités, leurs séries et montants de paiement
                             </p>
                         </div>
                         <div className="d-flex gap-2">
                             <ImportExportButton
-                                title="Salles"
+                                title="Spécialités"
                                 apiBasePath="/api/school-classes"
                                 onImportSuccess={loadClasses}
                                 filters={filters}
@@ -215,7 +215,7 @@ const SchoolClasses = () => {
                                 onClick={handleCreateClass}
                             >
                                 <Plus size={16} />
-                                Nouvelle Salle
+                                Nouvelle Spécialité
                             </button>
                         </div>
                     </div>
@@ -248,7 +248,7 @@ const SchoolClasses = () => {
                                     </select>
                                 </div>
                                 <div className="col-md-4">
-                                    <label className="form-label">Spécialité</label>
+                                    <label className="form-label">Niveau</label>
                                     <select
                                         className="form-select"
                                         value={filters.level_id}
@@ -257,7 +257,7 @@ const SchoolClasses = () => {
                                             level_id: e.target.value
                                         }))}
                                     >
-                                        <option value="">Toutes les spécialités</option>
+                                        <option value="">Tout les niveaux</option>
                                         {getFilteredLevels().map(level => (
                                             <option key={level.id} value={level.id}>
                                                 {level.name}
@@ -309,16 +309,16 @@ const SchoolClasses = () => {
                         <div className="card">
                             <div className="card-body text-center py-5">
                                 {/* <BookOpen size={48} className="text-muted mb-3" /> */}
-                                <h5 className="text-muted">Aucune salle trouvée</h5>
+                                <h5 className="text-muted">Aucune spécialité trouvée</h5>
                                 <p className="text-muted mb-4">
-                                    Commencez par créer votre première salle
+                                    Commencez par créer votre première spécialité
                                 </p>
                                 <button
                                     className="btn btn-primary"
                                     onClick={handleCreateClass}
                                 >
                                     <Plus size={16} className="me-2" />
-                                    Créer une salle
+                                    Créer une spécialité
                                 </button>
                             </div>
                         </div>
@@ -331,7 +331,7 @@ const SchoolClasses = () => {
                                             <Building size={16} className="me-2 text-primary" />
                                             {groupKey}
                                             <span className="badge bg-primary ms-2">
-                                                {groupClasses.length} salle{groupClasses.length > 1 ? 's' : ''}
+                                                {groupClasses.length} spécialité{groupClasses.length > 1 ? 's' : ''}
                                             </span>
                                         </h6>
                                     </div>

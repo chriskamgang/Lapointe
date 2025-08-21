@@ -165,7 +165,7 @@ const StudentCard = ({ student, schoolYear, onPrint }) => {
 
             {/* Corps de la carte */}
             <div style={bodyStyle}>
-                {/* Photo de l'élève */}
+                {/* Photo de l'étudiant */}
                 <div>
                     <img 
                         src={getStudentPhotoUrl(student)} 
@@ -184,7 +184,7 @@ const StudentCard = ({ student, schoolYear, onPrint }) => {
                     />
                 </div>
 
-                {/* Informations de l'élève */}
+                {/* Informations de l'étudiant */}
                 <div style={infoStyle}>
                     <div>
                         <div style={{ fontSize: '7px', marginBottom: '1px', fontWeight: 'bold', color: '#2c3e50' }}>

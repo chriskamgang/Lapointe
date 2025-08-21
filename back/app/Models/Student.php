@@ -162,7 +162,7 @@ class Student extends Model
     }
 
     /**
-     * Générer un numéro d'élève unique selon le format: 25A00001
+     * Générer un numéro d'étudiant unique selon le format: 25A00001
      * Format: [Année][A][Numéro séquentiel sur 5 chiffres]
      */
     public static function generateStudentNumber($year, $seriesId)
@@ -184,7 +184,7 @@ class Student extends Model
             $lastNumber = intval(substr($lastStudent->student_number, -5));
             $newNumber = $lastNumber + 1;
         } else {
-            // Premier élève, commencer par 1
+            // Premier étudiant, commencer par 1
             $newNumber = 1;
         }
         

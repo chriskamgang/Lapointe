@@ -56,7 +56,7 @@ class ClassSeriesExport implements FromCollection, WithHeadings, WithMapping, Wi
             'Classe',
             'School',
             'Niveau',
-            'Nombre d\'Élèves',
+            'Nombre d\'Étudiants',
             'Professeur Principal',
             'Capacité Max',
             'Statut',

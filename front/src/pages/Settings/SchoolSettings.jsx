@@ -561,7 +561,7 @@ const SchoolSettings = () => {
                         }
                       />
                       <Form.Text className="text-muted">
-                        Réduction appliquée aux anciens élèves et aux nouveaux
+                        Réduction appliquée aux anciens étudiants et aux nouveaux
                         payant avant délai
                       </Form.Text>
                     </Form.Group>

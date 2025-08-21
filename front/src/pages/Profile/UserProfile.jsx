@@ -864,7 +864,7 @@ const UserProfile = () => {
                                                         <div className="alert alert-success">
                                                             <strong>Profil Enseignant :</strong>
                                                             <ul className="mb-0 mt-2">
-                                                                <li>Gestion des élèves de vos classes</li>
+                                                                <li>Gestion des étudiants de vos classes</li>
                                                                 <li>Suivi pédagogique et évaluations</li>
                                                                 <li>Accès aux outils d'enseignement</li>
                                                             </ul>
@@ -1071,7 +1071,7 @@ const UserProfile = () => {
                                             <strong>Note:</strong> Le changement d'année de travail affectera:
                                             <ul className="mb-0 mt-2">
                                                 <li>Les statistiques et rapports affichés</li>
-                                                <li>Les listes d'élèves et leurs données</li>
+                                                <li>Les listes d'étudiants et leurs données</li>
                                                 <li>Les calculs de paiements et frais</li>
                                                 <li>Toutes les fonctionnalités liées aux données académiques</li>
                                             </ul>

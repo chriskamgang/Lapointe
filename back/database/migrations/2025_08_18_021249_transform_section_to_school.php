@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Renommer schools en écoles (schools)
-        Schema::rename('schools', 'schools');
-        
+        Schema::rename('sections', 'schools');
+
         // 2. Ajouter des colonnes supplémentaires aux écoles
         Schema::table('schools', function (Blueprint $table) {
             $table->string('code', 10)->nullable()->after('name');
@@ -24,10 +24,25 @@ return new class extends Migration
 
         // 3. Adapter les niveaux pour l'université
         Schema::table('levels', function (Blueprint $table) {
-            $table->renameColumn('school_id', 'school_id');
+            $table->renameColumn('section_id', 'school_id');
             $table->string('level_code', 20)->nullable()->after('name');
             $table->integer('duration_years')->default(1)->after('level_code');
-            $table->enum('level_type', ['BTS', 'HND', 'LICENCE', 'LICENCE_PRO', 'BACHELOR', 'MASTER', 'CQP', 'DQP', 'TMS', 'INGENIERIE'])->after('duration_years');
+            $table->enum('level_type', [
+                'BTS',
+                'HND',
+                'LICENCE_ACA',
+                'LICENCE_PRO',
+                'PROFESSIONAL_LICENSE',
+                'BACHELOR',
+                'MASTER',
+                'PROFESSIONAL_MASTER',
+                'CQP',
+                'DQP',
+                'TMS',
+                'INGENIERIE',
+                'CYCLE_PREPA',
+                'DOUBLE_DIPLOMATION'
+            ])->after('duration_years');
         });
 
         // 4. Adapter les classes en spécialités
@@ -84,7 +99,14 @@ return new class extends Migration
             $table->foreignId('school_id')->constrained('schools')->onDelete('cascade');
             $table->string('level_type');
             $table->string('speciality');
+
+            // Ajouter toutes les colonnes de frais
+            $table->decimal('etude_dossier', 10, 2)->default(0);
             $table->decimal('inscription_fee', 10, 2)->default(40000);
+            $table->decimal('rames_papier', 10, 2)->default(0);
+            $table->decimal('tutelle_universitaire', 10, 2)->default(0);
+            $table->decimal('etablissement_diplome', 10, 2)->default(0);
+
             $table->decimal('first_installment', 10, 2);
             $table->decimal('second_installment', 10, 2);
             $table->decimal('third_installment', 10, 2);
@@ -109,7 +131,7 @@ return new class extends Migration
         Schema::dropIfExists('laptop_distributions');
         Schema::dropIfExists('university_scholarships');
         Schema::dropIfExists('university_fees');
-        
+
         Schema::table('students', function (Blueprint $table) {
             $table->dropColumn(['scholarship_amount', 'laptop_eligible', 'laptop_received', 'bts_mention']);
         });

@@ -32,7 +32,7 @@ export const sequenceTraductions = {
         totalOfPoints: 'Total des points',
         rank: 'Rang',
         seeBul: 'Voir le bulletin',
-        noStudent: 'Aucun élève dans cette classe',
+        noStudent: 'Aucun étudiant dans cette classe',
         downloadBul: 'Télécharger le bulletin',
         downloadBuls: 'Télécharger le bulletins',
         importNotes: 'Importer les notes',
@@ -71,7 +71,7 @@ export const sequenceTraductions = {
         totalOfPoints: 'Total des points',
         rank: 'Rang',
         seeBul: 'Voir le bulletin',
-        noStudent: 'Aucun élève dans cette classe',
+        noStudent: 'Aucun étudiant dans cette classe',
         downloadBul: 'Télécharger le bulletin',
         importNotes: 'Importer les notes',
     }

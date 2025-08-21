@@ -151,7 +151,7 @@ class LevelController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'school_id' => 'required|exists:school,id',
+            'school_id' => 'required|exists:schools,id',
             'description' => 'nullable|string',
             'order' => 'nullable|integer|min:0',
             'is_active' => 'boolean'
@@ -357,8 +357,8 @@ class LevelController extends Controller
             ];
 
             $csvData = "id,nom,school_id,description,statut\n";
-            $csvData .= ",CP1,13,Cours Préparatoire 1,1\n";
-            $csvData .= ",6ème,14,Classe de Sixième,1\n";
+            $csvData .= ",CP1,13,Classe Préparatoire 1,1\n";
+            $csvData .= ",SI,14,Sciences infirmières,1\n";
             $csvData .= "1,CE1,13,Cours Élémentaire 1,0\n";
 
             return Response::make($csvData, 200, $headers);

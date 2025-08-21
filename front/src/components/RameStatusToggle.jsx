@@ -39,7 +39,7 @@ const RameStatusToggle = ({ studentId, studentName, onStatusChange = null }) => 
     };
 
     const handleToggleRame = async (newValue) => {
-        const action = newValue ? 'apporté sa RAME' : 'pas apporté sa RAME';
+        const action = newValue ? 'apporté ses RAME' : 'pas apporté ses RAME';
         const icon = newValue ? 'success' : 'warning';
         
         const result = await Swal.fire({

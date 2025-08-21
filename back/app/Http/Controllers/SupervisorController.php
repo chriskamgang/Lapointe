@@ -152,14 +152,14 @@ class SupervisorController extends Controller
             ], 403);
         }
 
-        // Un surveillant général a accès à tous les élèves de l'établissement
+        // Un surveillant général a accès à tous les étudiants de l'établissement
 
         $today = Carbon::today();
         $eventType = $request->event_type;
 
         // Si mode automatique, déterminer le type d'événement selon le dernier scan
         if ($eventType === 'auto' || $eventType === null) {
-            // Obtenir la dernière activité de l'élève aujourd'hui (entrée ou sortie)
+            // Obtenir la dernière activité de l'étudiant aujourd'hui (entrée ou sortie)
             $lastActivity = Attendance::where('student_id', $studentId)
                 ->forDate($today)
                 ->whereIn('event_type', ['entry', 'exit'])
@@ -192,7 +192,7 @@ class SupervisorController extends Controller
             if ($lastActivity && $lastActivity->event_type === 'entry') {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cet élève est déjà entré aujourd\'hui à ' . $lastActivity->scanned_at->format('H:i') . '. Il doit d\'abord sortir avant de pouvoir rentrer.',
+                    'message' => 'Cet étudiant est déjà entré aujourd\'hui à ' . $lastActivity->scanned_at->format('H:i') . '. Il doit d\'abord sortir avant de pouvoir rentrer.',
                     'student_name' => $student->full_name,
                     'marked_at' => $lastActivity->scanned_at->format('H:i')
                 ], 422);
@@ -202,7 +202,7 @@ class SupervisorController extends Controller
             if (!$lastActivity) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Aucune entrée trouvée pour cet élève aujourd\'hui. Il doit d\'abord entrer.',
+                    'message' => 'Aucune entrée trouvée pour cet étudiant aujourd\'hui. Il doit d\'abord entrer.',
                     'student_name' => $student->full_name
                 ], 422);
             }
@@ -210,7 +210,7 @@ class SupervisorController extends Controller
             if ($lastActivity->event_type === 'exit') {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cet élève est déjà sorti aujourd\'hui à ' . $lastActivity->scanned_at->format('H:i') . '.',
+                    'message' => 'Cet étudiant est déjà sorti aujourd\'hui à ' . $lastActivity->scanned_at->format('H:i') . '.',
                     'student_name' => $student->full_name,
                     'marked_at' => $lastActivity->scanned_at->format('H:i')
                 ], 422);
@@ -428,7 +428,7 @@ class SupervisorController extends Controller
         ->get();
 
         // Obtenir les étudiants qui sont entrés aujourd'hui (ont au moins une entrée)
-        // Un élève est considéré comme présent s'il est entré au moins une fois, même s'il est sorti
+        // Un étudiant est considéré comme présent s'il est entré au moins une fois, même s'il est sorti
         $presentStudentIds = Attendance::where('school_class_id', $classId)
             ->where('attendance_date', $attendanceDate)
             ->where('event_type', 'entry') // Seules les entrées comptent comme présences
@@ -528,7 +528,7 @@ class SupervisorController extends Controller
         $allStudents = Student::where('is_active', true)->get();
 
         // Obtenir les étudiants qui sont entrés aujourd'hui (ont au moins une entrée)
-        // Un élève est considéré comme présent s'il est entré au moins une fois, même s'il est sorti
+        // Un étudiant est considéré comme présent s'il est entré au moins une fois, même s'il est sorti
         $presentStudentIds = Attendance::where('attendance_date', $attendanceDate)
             ->where('event_type', 'entry') // Seules les entrées comptent comme présences
             ->where('is_present', true) // S'assurer que c'est une vraie entrée (pas une absence marquée)
@@ -775,7 +775,7 @@ class SupervisorController extends Controller
             ->where('event_type', 'exit')
             ->count();
 
-        // Élèves qui sont entrés au moins une fois aujourd'hui (présents, même s'ils sont sortis)
+        // Étudiants qui sont entrés au moins une fois aujourd'hui (présents, même s'ils sont sortis)
         $studentsWhoEntered = Attendance::forDate($date)
             ->forSchoolYear($currentSchoolYear->id)
             ->where('event_type', 'entry')
@@ -783,7 +783,7 @@ class SupervisorController extends Controller
             ->pluck('student_id')
             ->unique();
 
-        // Élèves actuellement dans l'établissement (entrés mais pas encore sortis)
+        // Étudiants actuellement dans l'établissement (entrés mais pas encore sortis)
         $exitedStudentIds = Attendance::forDate($date)
             ->forSchoolYear($currentSchoolYear->id)
             ->where('event_type', 'exit')

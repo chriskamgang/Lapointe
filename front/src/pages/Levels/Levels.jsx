@@ -67,10 +67,10 @@ const Levels = () => {
             if (response.success) {
                 setLevels(response.data);
             } else {
-                setError(response.message || 'Erreur lors du chargement des spécialités');
+                setError(response.message || 'Erreur lors du chargement des niveaux');
             }
         } catch (error) {
-            setError('Erreur lors du chargement des spécialités');
+            setError('Erreur lors du chargement des niveaux');
             console.error('Error loading levels:', error);
         } finally {
             setLoading(false);
@@ -210,7 +210,7 @@ const Levels = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-96">
-                <LoadingSpinner text="Chargement des spécialités..." size="lg" />
+                <LoadingSpinner text="Chargement des niveaux..." size="lg" />
             </div>
         );
     }
@@ -221,15 +221,15 @@ const Levels = () => {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                        Gestion des Spécialités
+                        Gestion des Niveaux
                     </h1>
                     <p className="text-gray-600">
-                        Bienvenue {user?.name} - Gérez les spécialités des écoles de l'institut
+                        Bienvenue {user?.name} - Gérez les niveaux des écoles de l'institut
                     </p>
                 </div>
                 <div className="flex gap-2">
                     <ImportExportButton
-                        title="Spécialités"
+                        title="Niveaux"
                         apiBasePath="/api/levels"
                         onImportSuccess={loadLevels}
                         filters={{ school_id: filterSection !== 'all' ? filterSection : undefined }}
@@ -242,7 +242,7 @@ const Levels = () => {
                         }}
                     >
                         <Plus size={16} />
-                        Nouvelle Spécialité
+                        Nouveau Niveau
                     </Button>
                 </div>
             </div>
@@ -265,7 +265,7 @@ const Levels = () => {
                     <Card className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Total Spécialités</p>
+                                <p className="text-sm text-gray-600">Total Niveaux</p>
                                 <p className="text-2xl font-bold text-blue-600">
                                     {dashboardStats.stats.total_levels}
                                 </p>
@@ -279,7 +279,7 @@ const Levels = () => {
                     <Card className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Spécialités Actives</p>
+                                <p className="text-sm text-gray-600">Niveaux Actifs</p>
                                 <p className="text-2xl font-bold text-green-600">
                                     {dashboardStats.stats.active_levels}
                                 </p>
@@ -293,7 +293,7 @@ const Levels = () => {
                     <Card className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Spécialités Inactives</p>
+                                <p className="text-sm text-gray-600">Niveaux Inactifs</p>
                                 <p className="text-2xl font-bold text-red-600">
                                     {dashboardStats.stats.inactive_levels}
                                 </p>
@@ -307,7 +307,7 @@ const Levels = () => {
                     <Card className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Avec Classes</p>
+                                <p className="text-sm text-gray-600">Avec Spécialités</p>
                                 <p className="text-2xl font-bold text-purple-600">
                                     {dashboardStats.stats.levels_with_classes}
                                 </p>
@@ -333,7 +333,7 @@ const Levels = () => {
                                         <input
                                             type="text"
                                             className="form-control ps-5"
-                                            placeholder="Rechercher une spécialité..."
+                                            placeholder="Rechercher un niveau..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
@@ -361,9 +361,9 @@ const Levels = () => {
                                         value={filterActive}
                                         onChange={(e) => setFilterActive(e.target.value)}
                                     >
-                                        <option value="all">Toutes les spécialités</option>
-                                        <option value="active">Spécialités actives</option>
-                                        <option value="inactive">Spécialités inactives</option>
+                                        <option value="all">Tout les niveaux</option>
+                                        <option value="active">Niveaux actifs</option>
+                                        <option value="inactive">Niveaux inactifs</option>
                                     </select>
                                 </div>
                                 <div className="col-md-3 d-flex align-items-end">
@@ -405,7 +405,7 @@ const Levels = () => {
             {/* Levels List/Grid */}
             {filteredLevels.length === 0 ? (
                 <Card className="p-8 text-center">
-                    <p className="text-gray-500 mb-4">Aucune spécialité trouvé</p>
+                    <p className="text-gray-500 mb-4">Aucun niveau trouvé</p>
                     <Button
                         onClick={() => {
                             resetForm();
@@ -414,7 +414,7 @@ const Levels = () => {
                         className="flex items-center gap-2 mx-auto"
                     >
                         <Plus size={16} />
-                        Créer la première spécialité
+                        Créer le premier niveau
                     </Button>
                 </Card>
             ) : viewMode === 'grid' ? (
@@ -565,11 +565,11 @@ const Levels = () => {
                     setShowEditModal(false);
                     resetForm();
                 }}
-                title={selectedLevel ? 'Modifier la Spécialité' : 'Nouvelle Spécialité'}
+                title={selectedLevel ? 'Modifier le Niveau' : 'Nouveau Niveau'}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input
-                        label="Nom de la spécialité"
+                        label="Nom du niveau"
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -603,7 +603,7 @@ const Levels = () => {
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            placeholder="Description de la spécialité..."
+                            placeholder="Description du niveau..."
                             rows={3}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -627,7 +627,7 @@ const Levels = () => {
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <label htmlFor="is_active" className="ml-2 text-sm text-gray-700">
-                            Spécialité active
+                            Niveau actif
                         </label>
                     </div>
 
@@ -661,10 +661,10 @@ const Levels = () => {
             >
                 <div className="space-y-4">
                     <p className="text-gray-700">
-                        Êtes-vous sûr de vouloir supprimer la spécialité <strong>{selectedLevel?.name}</strong> ?
+                        Êtes-vous sûr de vouloir supprimer le niveau <strong>{selectedLevel?.name}</strong> ?
                     </p>
                     <p className="text-sm text-red-600">
-                        Cette action est irréversible et ne sera possible que si la spécialité ne contient aucune salle.
+                        Cette action est irréversible et ne sera possible que si le niveau ne contient aucune spécialité.
                     </p>
                     
                     <div className="flex justify-end gap-2 pt-4">

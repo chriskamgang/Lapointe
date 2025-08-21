@@ -24,7 +24,7 @@ export const trimTraductions = {
         totalOfPoints: 'Total des points',
         rank: 'Rang',
         seeBul: 'Voir le bulletin',
-        noStudent: 'Aucun élève dans cette classe',
+        noStudent: 'Aucun étudiant dans cette classe',
         downloadBul: 'Télécharger le bulletin',
     },
     fr: {
@@ -52,7 +52,7 @@ export const trimTraductions = {
         totalOfPoints: 'Total des points',
         rank: 'Rang',
         seeBul: 'Voir le bulletin',
-        noStudent: 'Aucun élève dans cette classe',
+        noStudent: 'Aucun étudiant dans cette classe',
         downloadBul: 'Télécharger le bulletin',
     }
 }

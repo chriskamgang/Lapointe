@@ -22,19 +22,19 @@ class SectionSeeder extends Seeder
             ],
             [
                 'name' => 'Primaire',
-                'description' => 'School pour les élèves du CP au CM2',
+                'description' => 'School pour les étudiants du CP au CM2',
                 'is_active' => true,
                 'order' => 2,
             ],
             [
                 'name' => 'Secondaire 1er Cycle',
-                'description' => 'School pour les élèves de la 6ème à la 3ème',
+                'description' => 'School pour les étudiants de la 6ème à la 3ème',
                 'is_active' => true,
                 'order' => 3,
             ],
             [
                 'name' => 'Secondaire 2nd Cycle',
-                'description' => 'School pour les élèves de la 2nde à la Terminale',
+                'description' => 'School pour les étudiants de la 2nde à la Terminale',
                 'is_active' => true,
                 'order' => 4,
             ],

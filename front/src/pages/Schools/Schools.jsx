@@ -220,7 +220,7 @@ const Schools = () => {
                         className="flex items-center gap-2"
                     >
                         <Plus size={16} />
-                        Nouvelle School
+                        Nouvelle Ecole
                     </Button>
                 </div>
             </div>
@@ -285,7 +285,7 @@ const Schools = () => {
                     <Card className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Avec Salle</p>
+                                <p className="text-sm text-gray-600">Avec Spécialités</p>
                                 <p className="text-2xl font-bold text-purple-600">
                                     {dashboardStats.stats.schools_with_classes}
                                 </p>
@@ -311,7 +311,7 @@ const Schools = () => {
                                         <input
                                             type="text"
                                             className="form-control ps-5"
-                                            placeholder="Rechercher une school..."
+                                            placeholder="Rechercher une école..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />

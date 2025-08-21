@@ -269,14 +269,14 @@ const AttendanceReportsSimple = () => {
                 </Col>
                 <Col md={3}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Rechercher un élève</Form.Label>
+                    <Form.Label>Rechercher un étudiant</Form.Label>
                     <InputGroup>
                       <InputGroup.Text>
                         <Search />
                       </InputGroup.Text>
                       <Form.Control
                         type="text"
-                        placeholder="Nom de l'élève..."
+                        placeholder="Nom de l'étudiant..."
                         value={filters.searchTerm}
                         onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
                       />
@@ -385,7 +385,7 @@ const AttendanceReportsSimple = () => {
                     <thead>
                       <tr>
                         <th>Date</th>
-                        <th>Élève</th>
+                        <th>Étudiant</th>
                         <th>Classe</th>
                         <th>Heure</th>
                         <th>Statut</th>

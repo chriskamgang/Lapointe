@@ -64,7 +64,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           items: [
             { name: "Années Scolaires", href: "/school-years", icon: <Calendar /> },
             { name: "Ecoles", href: "/schools", icon: <HospitalFill /> },
-            { name: "Niveau", href: "/levels", icon: <BookFill /> },
+            { name: "Niveaux", href: "/levels", icon: <BookFill /> },
             {
               name: "Spécialités",
               href: "/school-classes",
@@ -115,7 +115,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
         {
           title: "Comptabilité",
           items: [
-            { name: "Classes", href: "/class-comp", icon: <HouseHeartFill /> },
+            { name: "Spécialités", href: "/class-comp", icon: <HouseHeartFill /> },
             { name: "Statistiques", href: "/stats", icon: <BarChartFill /> },
             { name: "Rechercher", href: "/search", icon: <Search /> },
           ],
@@ -156,7 +156,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
               icon: <CashCoin />,
             },
             {
-              name: "Paiement Frais par Classe",
+              name: "Paiement Frais par Spécialités",
               href: "/reports/class-school-fees",
               icon: <Receipt />,
             },
@@ -205,7 +205,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           title: "Enseignement",
           items: [
             {
-              name: "Élèves",
+              name: "Étudiants",
               href: "/students/" + (user.class_id || "1"),
               icon: <PeopleFill />,
             },
@@ -357,10 +357,11 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           {(!isCollapsed || isMobile) && (
             <div>
               <div style={{ fontSize: "18px", fontWeight: "bold", color: primaryColor }}>
-                {schoolSettings.school_name
+                {/* {schoolSettings.school_name
                   ?.split(" ")
                   .map((word) => word.charAt(0))
-                  .join("") || "INSTITUT UNIVERSITAIRE DE LA POINTE"}
+                  .join("") || "INSTITUT UNIVERSITAIRE DE LA POINTE"} */}
+                  IUP
               </div>
               <div
                 style={{

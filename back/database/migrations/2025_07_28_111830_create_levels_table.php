@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('levels', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('school_id')->constrained()->onDelete('cascade');
+            $table->foreignId('section_id')->constrained()->onDelete('cascade');
             $table->text('description')->nullable();
             $table->integer('order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             
-            $table->index(['school_id', 'is_active']);
-            $table->index(['school_id', 'order']);
+            $table->index(['section_id', 'is_active']);
+            $table->index(['section_id', 'order']);
         });
     }
 

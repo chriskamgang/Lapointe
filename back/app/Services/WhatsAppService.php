@@ -226,7 +226,7 @@ class WhatsAppService
             "\n📄 *Référence:* {$payment->reference_number}" : '';
         
         return "✅ *PAIEMENT CONFIRMÉ - {$schoolName}*\n\n" .
-               "👤 *Élève:* {$student->full_name}\n" .
+               "👤 *Étudiant:* {$student->full_name}\n" .
                "📚 *Classe:* " . ($student->classSeries->name ?? 'N/A') . "\n" .
                "💳 *Méthode:* {$paymentMethodText}\n" .
                "💰 *Montant payé:* {$paymentAmount}" . $reductionText . "\n" .
@@ -248,7 +248,7 @@ class WhatsAppService
         
         return "REÇU DE PAIEMENT N° {$payment->id}\n" .
                "École: {$schoolName}\n" .
-               "Élève: {$student->full_name}\n" .
+               "Étudiant: {$student->full_name}\n" .
                "Montant: " . number_format($payment->total_amount, 0, ',', ' ') . " FCFA\n" .
                "Date: " . $payment->payment_date->format('d/m/Y H:i');
     }
@@ -264,7 +264,7 @@ class WhatsAppService
         // Gérer les absences
         if (!$attendance->is_present) {
             return "⚠️ *ABSENCE SIGNALÉE - {$schoolName}*\n\n" .
-                   "👤 *Élève:* {$student->full_name}\n" .
+                   "👤 *Étudiant:* {$student->full_name}\n" .
                    "📚 *Classe:* " . ($student->classSeries->name ?? 'N/A') . "\n" .
                    "📅 *Date:* " . $attendance->attendance_date->format('d/m/Y') . "\n" .
                    "🕐 *Heure de contrôle:* " . $attendance->scanned_at->format('H:i') . "\n\n" .
@@ -281,7 +281,7 @@ class WhatsAppService
             : 'a quitté l\'école';
         
         return "{$eventIcon} *{$eventText} DÉTECTÉE - {$schoolName}*\n\n" .
-               "👤 *Élève:* {$student->full_name}\n" .
+               "👤 *Étudiant:* {$student->full_name}\n" .
                "📚 *Classe:* " . ($student->classSeries->name ?? 'N/A') . "\n" .
                "🕐 *Heure:* " . $attendance->scanned_at->format('H:i') . "\n" .
                "📅 *Date:* " . $attendance->attendance_date->format('d/m/Y') . "\n\n" .

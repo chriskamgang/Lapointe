@@ -70,7 +70,7 @@ class AccountantController extends Controller
             ->withCount('series')
             ->get();
 
-            // Calculer le nombre total d'élèves par classe
+            // Calculer le nombre total d'étudiants par classe
             foreach ($classes as $class) {
                 $class->total_students = $class->series->sum('students_count');
             }
@@ -163,7 +163,7 @@ class AccountantController extends Controller
     }
 
     /**
-     * Obtenir les élèves d'une série pour les comptables (avec CRUD complet)
+     * Obtenir les étudiants d'une série pour les comptables (avec CRUD complet)
      */
     public function getSeriesStudents($seriesId)
     {
@@ -178,7 +178,7 @@ class AccountantController extends Controller
                 ], 400);
             }
 
-            // Récupérer les élèves
+            // Récupérer les étudiants
             $studentsQuery = Student::with(['schoolYear', 'classSeries'])
                 ->where('class_series_id', $seriesId)
                 ->where('is_active', true);
@@ -216,14 +216,14 @@ class AccountantController extends Controller
             Log::error('Error in AccountantController@getSeriesStudents: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération des élèves',
+                'message' => 'Erreur lors de la récupération des étudiants',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Obtenir les détails d'un élève pour inscription/modification
+     * Obtenir les détails d'un étudiant pour inscription/modification
      */
     public function getStudent($studentId)
     {
@@ -236,7 +236,7 @@ class AccountantController extends Controller
             if (!$student) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Élève non trouvé'
+                    'message' => 'Étudiant non trouvé'
                 ], 404);
             }
 
@@ -248,7 +248,7 @@ class AccountantController extends Controller
             Log::error('Error in AccountantController@getStudent: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération de l\'élève',
+                'message' => 'Erreur lors de la récupération de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }
