@@ -142,7 +142,7 @@ const AccountantClasses = () => {
             <div className="container-fluid py-4">
                 <div className="text-center py-5">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Chargement des classes...</span>
+                        <span className="visually-hidden">Chargement des spécialités...</span>
                     </div>
                 </div>
             </div>
@@ -156,9 +156,9 @@ const AccountantClasses = () => {
                 <div className="col-12">
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <h2 className="h4 mb-1">Gestion des Classes</h2>
+                            <h2 className="h4 mb-1">Gestion des Spécialités</h2>
                             <p className="text-muted mb-0">
-                                Visualisation des classes et gestion des étudiants (Mode Comptable)
+                                Visualisation des spécialités et gestion des étudiants (Mode Comptable)
                             </p>
                         </div>
                         <div className="d-flex align-items-center gap-2">
@@ -209,7 +209,7 @@ const AccountantClasses = () => {
                             <div className="d-flex justify-content-between">
                                 <div>
                                     <div className="fs-2 fw-bold">{stats.total_classes}</div>
-                                    <div>Classes</div>
+                                    <div>Spécialités</div>
                                 </div>
                                 <HouseHeartFill size={40} className="opacity-75" />
                             </div>
@@ -222,7 +222,7 @@ const AccountantClasses = () => {
                             <div className="d-flex justify-content-between">
                                 <div>
                                     <div className="fs-2 fw-bold">{stats.total_series}</div>
-                                    <div>Séries</div>
+                                    <div>Salle</div>
                                 </div>
                                 <Grid size={40} className="opacity-75" />
                             </div>
@@ -306,7 +306,7 @@ const AccountantClasses = () => {
                             <div className="card">
                                 <div className="card-body text-center py-5">
                                     <HouseHeartFill size={48} className="text-muted mb-3" />
-                                    <h5 className="text-muted">Aucune classe trouvée</h5>
+                                    <h5 className="text-muted">Aucune spécialité trouvée</h5>
                                     <p className="text-muted">
                                         {searchTerm 
                                             ? 'Aucune classe ne correspond à vos critères de recherche.'
@@ -316,7 +316,7 @@ const AccountantClasses = () => {
                                     {!searchTerm && Object.keys(groupedClasses).length === 0 && classes.length === 0 && (
                                         <div className="mt-3">
                                             <small className="text-muted">
-                                                Vérifiez que des classes ont été créées dans l'administration.
+                                                Vérifiez que des spécialités ont été créées dans l'administration.
                                             </small>
                                         </div>
                                     )}
@@ -344,7 +344,7 @@ const AccountantClasses = () => {
                                                     {typeof sectionData === 'object' && !Array.isArray(sectionData) 
                                                         ? Object.values(sectionData).reduce((total, levelClasses) => total + (Array.isArray(levelClasses) ? levelClasses.length : 0), 0)
                                                         : Array.isArray(sectionData) ? sectionData.length : 0
-                                                    } classe{(typeof sectionData === 'object' && !Array.isArray(sectionData) 
+                                                    } spécialité{(typeof sectionData === 'object' && !Array.isArray(sectionData) 
                                                         ? Object.values(sectionData).reduce((total, levelClasses) => total + (Array.isArray(levelClasses) ? levelClasses.length : 0), 0)
                                                         : Array.isArray(sectionData) ? sectionData.length : 0
                                                     ) > 1 ? 's' : ''}
@@ -363,7 +363,7 @@ const AccountantClasses = () => {
                                                                     <Grid size={16} className="me-2" />
                                                                     {levelKey}
                                                                     <span className="badge bg-secondary ms-2">
-                                                                        {levelClassesArray.length} classe{levelClassesArray.length > 1 ? 's' : ''}
+                                                                        {levelClassesArray.length} spécialité{levelClassesArray.length > 1 ? 's' : ''}
                                                                     </span>
                                                                 </h6>
                                                             </div>
@@ -383,7 +383,7 @@ const AccountantClasses = () => {
                                                             <div>
                                                                 <h6 className="mb-1">{classItem.name}</h6>
                                                                 <small className="text-muted">
-                                                                    {classItem.series_count || 0} série{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} étudiant{(classItem.total_students || 0) > 1 ? 's' : ''}
+                                                                    {classItem.series_count || 0} salle{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} étudiant{(classItem.total_students || 0) > 1 ? 's' : ''}
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -392,7 +392,7 @@ const AccountantClasses = () => {
                                                                 to={`/class-comp/${classItem.id}`}
                                                                 className="btn btn-sm btn-outline-primary"
                                                                 onClick={(e) => e.stopPropagation()}
-                                                                title="Voir les séries"
+                                                                title="Voir les salles"
                                                             >
                                                                 <Eye size={14} />
                                                             </Link>
@@ -406,7 +406,7 @@ const AccountantClasses = () => {
                                                                 <div className="col-12">
                                                                     <h6 className="text-primary mb-3">
                                                                         <PeopleFill size={16} className="me-2" />
-                                                                        Séries
+                                                                        Salles
                                                                     </h6>
                                                                     {classItem.series && classItem.series.length > 0 ? (
                                                                         <div className="list-group list-group-flush">
@@ -430,7 +430,7 @@ const AccountantClasses = () => {
                                                                             ))}
                                                                         </div>
                                                                     ) : (
-                                                                        <p className="text-muted">Aucune série configurée</p>
+                                                                        <p className="text-muted">Aucune salle configurée</p>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -459,7 +459,7 @@ const AccountantClasses = () => {
                                                                 <div>
                                                                     <h6 className="mb-1">{classItem.name}</h6>
                                                                     <small className="text-muted">
-                                                                        {classItem.series_count || 0} série{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} étudiant{(classItem.total_students || 0) > 1 ? 's' : ''}
+                                                                        {classItem.series_count || 0} salle{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} étudiant{(classItem.total_students || 0) > 1 ? 's' : ''}
                                                                     </small>
                                                                 </div>
                                                             </div>
@@ -468,7 +468,7 @@ const AccountantClasses = () => {
                                                                     to={`/class-comp/${classItem.id}`}
                                                                     className="btn btn-sm btn-outline-primary"
                                                                     onClick={(e) => e.stopPropagation()}
-                                                                    title="Voir les séries"
+                                                                    title="Voir les salles"
                                                                 >
                                                                     <Eye size={14} />
                                                                 </Link>
@@ -482,7 +482,7 @@ const AccountantClasses = () => {
                                                                     <div className="col-12">
                                                                         <h6 className="text-primary mb-3">
                                                                             <PeopleFill size={16} className="me-2" />
-                                                                            Séries
+                                                                            Salles
                                                                         </h6>
                                                                         {classItem.series && classItem.series.length > 0 ? (
                                                                             <div className="list-group list-group-flush">
@@ -529,7 +529,7 @@ const AccountantClasses = () => {
                             <div className="card">
                                 <div className="card-body text-center py-5">
                                     <HouseHeartFill size={48} className="text-muted mb-3" />
-                                    <h5 className="text-muted">Aucune classe trouvée</h5>
+                                    <h5 className="text-muted">Aucune spécialité trouvée</h5>
                                     <p className="text-muted">
                                         {searchTerm 
                                             ? 'Aucune classe ne correspond à vos critères de recherche.'
@@ -552,7 +552,7 @@ const AccountantClasses = () => {
                                                 </small>
                                             </div>
                                             <span className="badge bg-primary">
-                                                {classe.series_count || 0} série{(classe.series_count || 0) > 1 ? 's' : ''}
+                                                {classe.series_count || 0} salle{(classe.series_count || 0) > 1 ? 's' : ''}
                                             </span>
                                         </div>
                                         
@@ -564,7 +564,7 @@ const AccountantClasses = () => {
                                                 to={`/class-comp/${classe.id}`}
                                                 className="btn btn-primary btn-sm"
                                             >
-                                                Voir les séries
+                                                Voir les salle
                                             </Link>
                                         </div>
                                     </div>
@@ -584,9 +584,9 @@ const AccountantClasses = () => {
                                         <thead className="table-light">
                                             <tr>
                                                 <th>Classe</th>
-                                                <th>School</th>
+                                                <th>Ecole</th>
                                                 <th>Niveau</th>
-                                                <th>Séries</th>
+                                                <th>Spécialité</th>
                                                 <th>Étudiants</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -599,7 +599,7 @@ const AccountantClasses = () => {
                                                     <td>{classe.level?.name}</td>
                                                     <td>
                                                         <span className="badge bg-light text-dark">
-                                                            {classe.series_count || 0} série{(classe.series_count || 0) > 1 ? 's' : ''}
+                                                            {classe.series_count || 0} salle{(classe.series_count || 0) > 1 ? 's' : ''}
                                                         </span>
                                                     </td>
                                                     <td>{classe.total_students || 0} étudiant{(classe.total_students || 0) > 1 ? 's' : ''}</td>
@@ -608,7 +608,7 @@ const AccountantClasses = () => {
                                                             to={`/class-comp/${classe.id}`}
                                                             className="btn btn-sm btn-primary"
                                                         >
-                                                            Voir les séries
+                                                            Voir les salles
                                                         </Link>
                                                     </td>
                                                 </tr>
