@@ -80,7 +80,7 @@ class StudentsImportableExport implements FromCollection, WithHeadings, WithMapp
             'sexe',
             'nom_parent',
             'telephone_parent',
-            'email_parent',
+            'telephone',
             'adresse',
             'statut_etudiant',
             'statut'
@@ -101,7 +101,7 @@ class StudentsImportableExport implements FromCollection, WithHeadings, WithMapp
             $student->gender ?? $student->sex ?? 'M',
             $student->parent_name ?? $student->father_name ?? '',
             $student->parent_phone ?? $student->phone_number ?? '',
-            $student->parent_email ?? $student->email ?? '',
+            $student->phone ?? '',
             $student->address ?? '',
             $student->student_status ?? ($student->is_new ? 'nouveau' : 'ancien'),
             $student->is_active ? '1' : '0'

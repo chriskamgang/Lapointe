@@ -261,7 +261,7 @@ class StudentController extends Controller
             'gender' => 'required|in:M,F',
             'parent_name' => 'required|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
-            'parent_email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'class_series_id' => 'required|integer|exists:class_series,id',
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' // 5MB max
@@ -344,7 +344,7 @@ class StudentController extends Controller
             'gender' => 'required|in:M,F',
             'parent_name' => 'required|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
-            'parent_email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'class_series_id' => 'required|exists:class_series,id',
             'school_year_id' => 'nullable|exists:school_years,id', // Optionnel lors de la modification
@@ -423,7 +423,7 @@ class StudentController extends Controller
             'gender' => 'required|in:M,F',
             'parent_name' => 'required|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
-            'parent_email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'class_series_id' => 'required|exists:class_series,id',
             'school_year_id' => 'nullable|exists:school_years,id', // Make nullable for update
@@ -561,7 +561,7 @@ class StudentController extends Controller
                     'Sexe',
                     'Nom du parent',
                     'Téléphone parent',
-                    'Email parent',
+                    'Téléphone étudiant',
                     'Adresse'
                 ], ';');
 
@@ -576,7 +576,7 @@ class StudentController extends Controller
                         $student->gender === 'M' ? 'Masculin' : 'Féminin',
                         $student->parent_name,
                         $student->parent_phone,
-                        $student->parent_email,
+                        $student->phone,
                         $student->address
                     ], ';');
                 }
@@ -715,6 +715,7 @@ class StudentController extends Controller
                 <th style="width: 8%;">Sexe</th>
                 <th style="width: 20%;">Parent</th>
                 <th style="width: 12%;">Téléphone</th>
+                <th style="width: 12%;">Téléphone étudiant</th>
             </tr>
         </thead>
         <tbody>';
@@ -729,6 +730,7 @@ class StudentController extends Controller
                 ($student->gender === 'M' ? 'M' : 'F') . '</td>
                 <td>' . $student->parent_name . '</td>
                 <td>' . $student->parent_phone . '</td>
+                <td>' . $student->phone . '</td>
             </tr>';
         }
 
@@ -919,7 +921,7 @@ class StudentController extends Controller
                         'gender' => $gender,
                         'parent_name' => trim($row[5] ?? ''),
                         'parent_phone' => trim($row[6] ?? null),
-                        'parent_email' => trim($row[7] ?? null),
+                        'phone' => trim($row[7] ?? null),
                         'address' => trim($row[8] ?? null),
                         'class_series_id' => $classSeriesId,
                         'school_year_id' => $workingYear->id,
@@ -1724,7 +1726,7 @@ class StudentController extends Controller
                 'Content-Disposition' => 'attachment; filename="template_eleves.csv"'
             ];
 
-            $csvData = "id,nom,prenom,date_naissance,lieu_naissance,sexe,nom_parent,telephone_parent,email_parent,adresse,statut_etudiant,statut\n";
+            $csvData = "id,nom,prenom,date_naissance,lieu_naissance,sexe,nom_parent,telephone_parent,telephone,adresse,statut_etudiant,statut\n";
             $csvData .= ",DUPONT,Jean,01/01/2010,Douala,M,Marie DUPONT,123456789,marie@example.com,Douala,nouveau,1\n";
             $csvData .= ",MARTIN,Sophie,15/06/2009,Yaoundé,F,Paul MARTIN,987654321,paul@example.com,Yaoundé,ancien,1\n";
             $csvData .= "123,BERNARD,Alice,12/03/2009,Douala,F,Pierre BERNARD,654321987,pierre@example.com,Douala,ancien,0\n";

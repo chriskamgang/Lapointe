@@ -169,10 +169,10 @@ const SortableStudent = ({ student, handleEdit, handleDelete, handlePrintCard, h
                             <span>{student.parent_phone}</span>
                         </div>
                     )}
-                    {student.parent_email && (
+                    {student.phone && (
                         <div className="d-flex align-items-center small text-muted">
                             <Envelope size={12} className="me-2 flex-shrink-0" />
-                            <span>{student.parent_email}</span>
+                            <span>{student.phone}</span>
                         </div>
                     )}
                 </div>
@@ -254,7 +254,7 @@ const SeriesStudents = () => {
         gender: 'M',
         parent_name: '',
         parent_phone: '',
-        parent_email: '',
+        phone: '',
         address: '',
         class_series_id: seriesId,
         student_status: 'new',
@@ -571,7 +571,7 @@ const SeriesStudents = () => {
             gender: student.gender || 'M',
             parent_name: student.parent_name || '',
             parent_phone: student.parent_phone || '',
-            parent_email: student.parent_email || '',
+            phone: student.phone || '',
             address: student.address || '',
             class_series_id: seriesId,
             student_status: student.student_status || 'new',
@@ -842,7 +842,7 @@ const SeriesStudents = () => {
             'Sexe (M/F)',
             'Nom du parent',
             'Téléphone parent (optionnel)',
-            'Email parent (optionnel)',
+            'Téléphone étudiant (optionnel)',
             'Adresse (optionnel)'
         ];
         
@@ -855,7 +855,7 @@ const SeriesStudents = () => {
                 'M',
                 'NGUEME Paul',
                 '690123456',
-                'parent@email.com',
+                '658895223',
                 'Bonanjo, Douala'
             ],
             [
@@ -866,7 +866,7 @@ const SeriesStudents = () => {
                 'F',
                 'TCHOUA Pierre',
                 '691234567',
-                'marie.parent@email.com',
+                '654477852',
                 'Melen, Yaoundé'
             ]
         ];
@@ -1105,7 +1105,7 @@ const SeriesStudents = () => {
             gender: 'M',
             parent_name: '',
             parent_phone: '',
-            parent_email: '',
+            phone: '',
             address: '',
             class_series_id: seriesId,
             student_status: 'new',
@@ -1706,12 +1706,12 @@ const SeriesStudents = () => {
                                         </div>
                                         <div className="col-md-6">
                                             <div className="mb-3">
-                                                <label className="form-label">Email parent</label>
+                                                <label className="form-label">Téléphone étudiant</label>
                                                 <input
-                                                    type="email"
+                                                    type="tel"
                                                     className="form-control"
-                                                    value={formData.parent_email}
-                                                    onChange={(e) => setFormData({...formData, parent_email: e.target.value})}
+                                                    value={formData.phone}
+                                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
                                                 />
                                             </div>
                                         </div>
@@ -1827,7 +1827,7 @@ const SeriesStudents = () => {
                                             required
                                         />
                                         <div className="form-text">
-                                            Le fichier doit contenir les colonnes : Nom, Prénom, Date naissance, Lieu naissance, Sexe, Nom parent, Téléphone parent (optionnel), Email parent (optionnel), Adresse (optionnel)
+                                            Le fichier doit contenir les colonnes : Nom, Prénom, Date naissance, Lieu naissance, Sexe, Nom parent, Téléphone parent (optionnel), Téléphone étudiant (optionnel), Adresse (optionnel)
                                             <br />
                                             <small className="text-muted">💡 Cliquez sur "Modèle CSV" pour télécharger un exemple de format</small>
                                         </div>
