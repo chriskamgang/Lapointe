@@ -31,6 +31,8 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentFolderController;
 use App\Http\Controllers\ClassesSeriesController;
 use App\Http\Controllers\TeacherAttendanceController;
+use App\Http\Controllers\SchoolEquipmentController;
+use App\Http\Controllers\UniversityScholarshipController;
 
 
 // Routes d'authentification
@@ -573,5 +575,55 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/teacher/{teacherId}/detailed-stats', [TeacherAttendanceController::class, 'getDetailedTeacherStats'])->middleware(['role:admin,surveillant_general']);
         Route::get('/teacher/{teacherId}/day-movements', [TeacherAttendanceController::class, 'getDayMovements'])->middleware(['role:admin,surveillant_general']);
         Route::put('/teacher/{teacherId}/work-schedule', [TeacherAttendanceController::class, 'updateWorkSchedule'])->middleware(['role:admin']);
+    });
+
+    // Routes pour les équipements scolaires
+    Route::prefix('school-equipment')->group(function () {
+        // Routes accessibles aux admins, comptables et surveillants généraux (lecture)
+        Route::get('/school/{schoolId}/equipment', [SchoolEquipmentController::class, 'getEquipmentBySchool'])
+            ->middleware(['role:admin,accountant,comptable_superieur,surveillant_general']);
+        Route::get('/school-code/{schoolCode}/equipment', [SchoolEquipmentController::class, 'getEquipmentBySchoolCode'])
+            ->middleware(['role:admin,accountant,comptable_superieur,surveillant_general']);
+        Route::get('/school-code/{schoolCode}/required-clothing', [SchoolEquipmentController::class, 'getRequiredClothing'])
+            ->middleware(['role:admin,accountant,comptable_superieur,surveillant_general']);
+
+        // Routes CRUD pour la gestion des équipements (admins seulement)
+        Route::middleware(['role:admin'])->group(function () {
+            Route::get('/', [SchoolEquipmentController::class, 'index']); // Lister tous les équipements
+            Route::get('/stats', [SchoolEquipmentController::class, 'getStats']); // Statistiques
+            Route::post('/', [SchoolEquipmentController::class, 'store']); // Créer un équipement
+            Route::get('/{id}', [SchoolEquipmentController::class, 'show']); // Afficher un équipement
+            Route::put('/{id}', [SchoolEquipmentController::class, 'update']); // Mettre à jour
+            Route::delete('/{id}', [SchoolEquipmentController::class, 'destroy']); // Supprimer
+            Route::patch('/{id}/toggle-status', [SchoolEquipmentController::class, 'toggleStatus']); // Activer/désactiver
+            Route::post('/reorder', [SchoolEquipmentController::class, 'reorder']); // Réordonner
+        });
+    });
+
+    // Routes pour les bourses universitaires
+    Route::prefix('scholarships')->group(function () {
+        // Routes de consultation
+        Route::get('/', [UniversityScholarshipController::class, 'index'])
+            ->middleware(['role:admin,accountant,comptable_superieur']);
+        Route::get('/school/{schoolId}', [UniversityScholarshipController::class, 'getBySchool'])
+            ->middleware(['role:admin,accountant,comptable_superieur']);
+        Route::get('/school-code/{schoolCode}', [UniversityScholarshipController::class, 'getBySchoolCode'])
+            ->middleware(['role:admin,accountant,comptable_superieur']);
+        Route::get('/student/{studentId}/calculate', [UniversityScholarshipController::class, 'calculateStudentScholarship'])
+            ->middleware(['role:admin,accountant,comptable_superieur']);
+            
+        // Routes de gestion (admin uniquement)
+        Route::post('/', [UniversityScholarshipController::class, 'store'])
+            ->middleware(['role:admin']);
+        Route::get('/{id}', [UniversityScholarshipController::class, 'show'])
+            ->middleware(['role:admin']);
+        Route::put('/{id}', [UniversityScholarshipController::class, 'update'])
+            ->middleware(['role:admin']);
+        Route::delete('/{id}', [UniversityScholarshipController::class, 'destroy'])
+            ->middleware(['role:admin']);
+        Route::post('/student/{studentId}/apply', [UniversityScholarshipController::class, 'applyScholarshipToStudent'])
+            ->middleware(['role:admin']);
+        Route::post('/school/{schoolId}/update-all', [UniversityScholarshipController::class, 'updateSchoolScholarships'])
+            ->middleware(['role:admin']);
     });
 });

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\UniversityScholarship;
 use App\Models\School;
+use App\Models\Student;
+use App\Services\ScholarshipService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -193,6 +195,128 @@ class UniversityScholarshipController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $scholarships
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des bourses',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculer la bourse d'un étudiant spécifique
+     */
+    public function calculateStudentScholarship($studentId)
+    {
+        try {
+            $student = Student::with(['classSeries.schoolClass.level.school'])->findOrFail($studentId);
+            $scholarshipService = new ScholarshipService();
+            
+            $scholarshipData = $scholarshipService->calculateScholarship($student);
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'student' => [
+                        'id' => $student->id,
+                        'nom' => $student->nom,
+                        'prenom' => $student->prenom,
+                        'bts_mention' => $student->bts_mention
+                    ],
+                    'school' => $student->classSeries->schoolClass->level->school->name,
+                    'school_code' => $student->classSeries->schoolClass->level->school->code,
+                    'level_type' => $student->classSeries->schoolClass->level->level_type,
+                    'scholarship' => $scholarshipData
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors du calcul de la bourse',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Appliquer automatiquement la bourse à un étudiant
+     */
+    public function applyScholarshipToStudent($studentId)
+    {
+        try {
+            $student = Student::with(['classSeries.schoolClass.level.school'])->findOrFail($studentId);
+            $scholarshipService = new ScholarshipService();
+            
+            $result = $scholarshipService->applyScholarshipToStudent($student);
+            
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+                'data' => $result['data']
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'application de la bourse',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Mettre à jour les bourses pour tous les étudiants d'une école
+     */
+    public function updateSchoolScholarships($schoolId)
+    {
+        try {
+            $scholarshipService = new ScholarshipService();
+            $result = $scholarshipService->updateScholarshipsForSchool($schoolId);
+            
+            return response()->json([
+                'success' => true,
+                'message' => "Bourses mises à jour pour {$result['updated']} étudiants sur {$result['total_students']}",
+                'data' => $result
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la mise à jour des bourses',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtenir les bourses par code d'école (plus simple à utiliser)
+     */
+    public function getBySchoolCode($schoolCode)
+    {
+        try {
+            $school = School::where('code', $schoolCode)->firstOrFail();
+            $scholarships = UniversityScholarship::active()
+                ->where('school_id', $school->id)
+                ->orderBy('level_type')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'school' => [
+                        'id' => $school->id,
+                        'name' => $school->name,
+                        'code' => $school->code
+                    ],
+                    'scholarships' => $scholarships,
+                    'summary' => [
+                        'total_scholarships' => $scholarships->count(),
+                        'total_amount' => $scholarships->sum('scholarship_amount'),
+                        'with_laptop' => $scholarships->where('laptop_included', true)->count(),
+                        'level_types' => $scholarships->pluck('level_type')->unique()->values()
+                    ]
+                ],
+                'message' => 'Bourses récupérées avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([

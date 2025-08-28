@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\SchoolSetting;
+use App\Services\ReceiptCustomizationService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PaymentController extends Controller
@@ -739,7 +740,7 @@ class PaymentController extends Controller
     {
         try {
             $payment = Payment::with([
-                'student.classSeries.schoolClass',
+                'student.classSeries.schoolClass.level.school',
                 'paymentDetails.paymentTranche',
                 'schoolYear',
                 'createdByUser'
@@ -747,8 +748,9 @@ class PaymentController extends Controller
 
             $schoolSettings = \App\Models\SchoolSetting::getSettings();
 
-            // Générer le HTML du reçu
-            $receiptHtml = $this->generateReceiptHtml($payment, $schoolSettings);
+            // Utiliser le service de personnalisation des reçus
+            $receiptCustomizationService = new ReceiptCustomizationService();
+            $receiptHtml = $receiptCustomizationService->generateCustomizedReceiptHtml($payment, $schoolSettings);
 
             return response()->json([
                 'success' => true,
