@@ -6,13 +6,13 @@ import { getLang } from '../utils/lang'
 function Error404() {
   return (
     <div className='conError'>
-        <h1 class="text-center ">404</h1>
-        <div class="content_box_404">
-            <h3 class="h2">
+        <h1 className="text-center ">404</h1>
+        <div className="content_box_404">
+            <h3 className="h2">
               {error404Traductions[getLang()].error}
             </h3>
         
-            <Link to={'/class'} class="link_404">{error404Traductions[getLang()].help} </Link>
+            <Link to={'/class'} className="link_404">{error404Traductions[getLang()].help} </Link>
         </div>
     </div>
   )

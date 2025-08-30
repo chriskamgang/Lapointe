@@ -1,5 +1,7 @@
 import React from 'react';
 import { useSchool } from '../contexts/SchoolContext';
+import { scholarshipUtils } from '../services/scholarshipApi';
+import StudentScholarshipCard from './Students/StudentScholarshipCard';
 import defaultPhoto from '../images/1.png';
 import cameroonFlag from '../images/carte.jpeg'; // On utilisera le drapeau intégré dans l'image de référence
 
