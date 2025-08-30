@@ -89,6 +89,12 @@ import TestInventory from "./pages/Inventory/TestInventory";
 // Documents
 import DocumentsManager from "./pages/Documents/DocumentsManager";
 
+// Equipment
+import SchoolEquipment from "./pages/Equipment/SchoolEquipment";
+import EquipmentManagement from "./pages/Equipment/EquipmentManagement";
+
+// Scholarships
+import ScholarshipManagement from "./pages/Scholarships/ScholarshipManagement";
 
 // Components
 import Sidebar from "./components/Sidebar";
@@ -233,6 +239,33 @@ const AppContent = () => {
                   <ProtectedRoute>
                     <DocumentsManager />
                   </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/equipment"
+                element={
+                  <ProtectedRoute>
+                    <SchoolEquipment />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/equipment-management"
+                element={
+                  <AdminRoute>
+                    <EquipmentManagement />
+                  </AdminRoute>
+                }
+              />
+
+              <Route
+                path="/scholarship-management"
+                element={
+                  <AdminRoute>
+                    <ScholarshipManagement />
+                  </AdminRoute>
                 }
               />
 

@@ -11,6 +11,8 @@ import {
     Calendar,
     Archive,
     FolderFill,
+    BagFill,
+    Award,
 } from 'react-bootstrap-icons'
 import logo from '../images/logo.png'
 import { useAuth } from '../hooks/useAuth';
@@ -94,6 +96,9 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           items: [
             { name: "Inventaire", href: "/inventory", icon: <Archive /> },
             { name: "Documents", href: "/documents", icon: <FolderFill /> },
+            { name: "Équipements par École", href: "/equipment", icon: <BagFill /> },
+            { name: "Gestion Équipements", href: "/equipment-management", icon: <GearFill /> },
+            { name: "Gestion Bourses", href: "/scholarship-management", icon: <Award /> },
             { name: "Rechercher", href: "/search", icon: <Search /> },
             { name: "Statistiques", href: "/stats", icon: <BarChartFill /> },
           ],
@@ -125,6 +130,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           items: [
             { name: "Inventaire", href: "/inventory", icon: <Archive /> },
             { name: "Documents", href: "/documents", icon: <FolderFill /> },
+            { name: "Équipements", href: "/equipment", icon: <BagFill /> },
           ],
         },
         {
@@ -189,6 +195,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           title: "Outils",
           items: [
             { name: "Documents", href: "/documents", icon: <FolderFill /> },
+            { name: "Équipements", href: "/equipment", icon: <BagFill /> },
           ],
         },
         {
