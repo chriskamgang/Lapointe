@@ -73,7 +73,7 @@ class SearchController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Global search error: ' . $e->getMessage());
+            Log::error('Global search error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la recherche',
@@ -393,7 +393,7 @@ class SearchController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Quick search error: ' . $e->getMessage());
+            Log::error('Quick search error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la recherche rapide'

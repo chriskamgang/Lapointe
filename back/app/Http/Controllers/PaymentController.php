@@ -18,16 +18,23 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\SchoolSetting;
 use App\Services\ReceiptCustomizationService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\StudentEquipmentStatus;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
     protected $paymentStatusService;
     protected $discountCalculatorService;
+    protected $receiptCustomizationService;
 
-    public function __construct(PaymentStatusService $paymentStatusService, DiscountCalculatorService $discountCalculatorService)
-    {
+    public function __construct(
+        PaymentStatusService $paymentStatusService,
+        DiscountCalculatorService $discountCalculatorService,
+        ReceiptCustomizationService $receiptCustomizationService
+    ) {
         $this->paymentStatusService = $paymentStatusService;
         $this->discountCalculatorService = $discountCalculatorService;
+        $this->receiptCustomizationService = $receiptCustomizationService;
     }
 
     private function getUserWorkingYear()
@@ -42,6 +49,9 @@ class PaymentController extends Controller
         return SchoolYear::where('is_current', true)->first() ?? SchoolYear::where('is_active', true)->first();
     }
 
+    /**
+     * Amélioration de getStudentPaymentInfo pour mieux calculer les montants avec bourses
+     */
     public function getStudentPaymentInfo($studentId)
     {
         try {
@@ -57,24 +67,33 @@ class PaymentController extends Controller
 
             $paymentStatus = $this->paymentStatusService->getStatusForStudent($student, $workingYear);
 
-            // La réponse inclut maintenant `payment_status` pour la compatibilité frontend
+            // Calculer les montants effectifs avec les bourses appliquées
+            $scholarshipAmount = $paymentStatus->total_scholarship_amount;
+            $effectiveRemaining = max(0, $paymentStatus->total_remaining - $scholarshipAmount);
+
             $response_data = [
                 'student' => $student,
                 'school_year' => $workingYear,
-                'payment_status' => $paymentStatus->tranche_status, // Montants normaux
-                'total_required' => $paymentStatus->total_required, // Montants normaux affichés
+                'payment_status' => $paymentStatus->tranche_status,
+                'total_required' => $paymentStatus->total_required,
                 'total_paid' => $paymentStatus->total_paid,
                 'total_remaining' => $paymentStatus->total_remaining,
-                'total_scholarship_amount' => $paymentStatus->total_scholarship_amount,
+                'total_scholarship_amount' => $scholarshipAmount,
                 'has_scholarships' => $paymentStatus->has_scholarships,
+                'effective_remaining' => $effectiveRemaining, // Nouveau: montant effectif après bourse
                 'existing_payments' => $paymentStatus->existing_payments,
                 'discount_info' => [
-                    'is_eligible' => $paymentStatus->is_eligible_for_discount,
+                    'is_eligible' => $paymentStatus->is_eligible_for_discount && !$paymentStatus->has_scholarships, // Pas de réduction si bourse
                     'deadline' => $paymentStatus->discount_deadline ? $paymentStatus->discount_deadline->format('d/m/Y') : null,
                     'percentage' => $paymentStatus->discount_percentage,
                     'amount' => $paymentStatus->discount_amount,
                     'amount_to_pay_with_discount' => $paymentStatus->amount_to_pay_with_discount,
                 ],
+                'scholarship_info' => [
+                    'has_scholarship' => $paymentStatus->has_scholarships,
+                    'scholarship_amount' => $scholarshipAmount,
+                    'scholarship_details' => $this->getScholarshipDetails($student),
+                ]
             ];
 
             return response()->json(['success' => true, 'data' => $response_data]);
@@ -86,6 +105,57 @@ class PaymentController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Obtenir les détails de la bourse d'un étudiant
+     */
+    private function getScholarshipDetails($student)
+    {
+        $scholarship = $this->discountCalculatorService->getClassScholarship($student);
+
+        if (!$scholarship) {
+            return null;
+        }
+
+        $schoolCode = $student->classSeries->schoolClass->level->school->code;
+        $levelType = $student->classSeries->schoolClass->level->level_type;
+
+        return [
+            'type' => $scholarship->scholarship_type ?? 'class_scholarship',
+            'amount' => $scholarship->amount,
+            'school_code' => $schoolCode,
+            'level_type' => $levelType,
+            'tranche_name' => $scholarship->paymentTranche->name ?? '',
+            'description' => $this->getScholarshipDescription($schoolCode, $levelType, $scholarship),
+            'is_active' => $scholarship->is_active,
+        ];
+    }
+
+    /**
+     * Obtenir la description de la bourse
+     */
+    private function getScholarshipDescription($schoolCode, $levelType, $scholarship)
+    {
+        $descriptions = [
+            'INSSAS' => [
+                'BTS' => 'Bourse automatique niveau BTS/HND',
+                'LICENCE_PRO' => 'Bourse automatique Licence Professionnelle',
+                'MASTER_PRO' => 'Bourse automatique Master Professionnel'
+            ],
+            'ESGIT' => [
+                'LICENCE_PRO' => 'Bourse selon mention obtenue au BTS',
+                'INGENIERIE' => 'Bourse Ingénierie 3ème année'
+            ],
+            'ESSIT' => [
+                'INGENIERIE_SC' => 'Bourse Ingénierie Second Cycle'
+            ],
+            'ISTPM' => [
+                'CQP' => 'Bourse automatique CQP/DQP'
+            ]
+        ];
+
+        return $descriptions[$schoolCode][$levelType] ?? 'Bourse de classe - ' . number_format($scholarship->amount, 0, ',', ' ') . ' FCFA';
     }
 
     public function getStudentPaymentHistory($studentId)
@@ -164,6 +234,9 @@ class PaymentController extends Controller
         }
     }
 
+    /**
+     * Méthode améliorée pour traiter les paiements avec bourses
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -175,6 +248,8 @@ class PaymentController extends Controller
             'payment_date' => 'required|date',
             'versement_date' => 'required|date',
             'apply_global_discount' => 'nullable|boolean',
+            'apply_scholarship' => 'nullable|boolean', // Nouveau paramètre
+            'scholarship_amount' => 'nullable|numeric|min:0', // Nouveau paramètre
         ]);
 
         if ($validator->fails()) {
@@ -194,6 +269,15 @@ class PaymentController extends Controller
 
             $paymentStatus = $this->paymentStatusService->getStatusForStudent($student, $workingYear);
 
+            // Validation du montant en tenant compte des bourses
+            $effectiveRemaining = $paymentStatus->total_remaining;
+            if ($paymentStatus->has_scholarships) {
+                $effectiveRemaining = max(0, $paymentStatus->total_remaining - $paymentStatus->total_scholarship_amount);
+            }
+
+            // Vérifier si l'étudiant a activé les bourses
+            $hasScholarship = $student->has_scholarship_enabled && $this->discountCalculatorService->getClassScholarship($student) !== null;
+
             if ($request->amount > $paymentStatus->total_remaining) {
                 return response()->json([
                     'success' => false,
@@ -201,25 +285,14 @@ class PaymentController extends Controller
                 ], 422);
             }
 
-            // Déterminer le type de paiement et calculer les réductions/bourses
-            $paymentType = 'normal'; // Par défaut
+            // Déterminer le type de paiement
+            $paymentType = 'normal';
 
-            // Vérification de sécurité : un étudiant ne peut pas avoir à la fois une bourse ET une réduction
-            $hasScholarship = $this->discountCalculatorService->getClassScholarship($student) !== null;
-
-            // Si le frontend demande explicitement une réduction globale
-            if ($request->apply_global_discount === true) {
-                \Log::info('Frontend requests global discount');
-
-                // SÉCURITÉ : Refuser si l'étudiant a une bourse
-                if ($hasScholarship) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Cet étudiant bénéficie déjà d\'une bourse de classe. Les bourses et réductions ne sont pas cumulables.'
-                    ], 422);
-                }
-
-                // Vérifier que l'étudiant est bien éligible
+            // Logique de détermination du type de paiement (scholarship vs global_discount vs normal)
+            if ($hasScholarship && $request->apply_scholarship) {
+                $paymentType = 'scholarship';
+            } elseif ($request->apply_global_discount === true && !$hasScholarship) {
+                // Vérifications d'éligibilité pour les réductions globales
                 $isEligible = $this->discountCalculatorService->isEligibleForGlobalDiscount(
                     $student,
                     $request->amount,
@@ -228,26 +301,9 @@ class PaymentController extends Controller
                     $paymentStatus->has_existing_payments
                 );
 
-                \Log::info('Discount eligibility check', [
-                    'is_eligible' => $isEligible,
-                    'amount' => $request->amount,
-                    'total_remaining' => $paymentStatus->total_remaining,
-                    'versement_date' => $request->versement_date,
-                    'has_existing_payments' => $paymentStatus->has_existing_payments
-                ]);
-
                 if ($isEligible) {
                     $paymentType = 'global_discount';
                 }
-            } else {
-                // Sinon, utiliser la logique automatique
-                $paymentType = $this->discountCalculatorService->getPaymentType(
-                    $student,
-                    $request->amount,
-                    $paymentStatus->total_remaining,
-                    $request->versement_date,
-                    $paymentStatus->has_existing_payments
-                );
             }
 
             $discountResult = [];
@@ -255,7 +311,6 @@ class PaymentController extends Controller
 
             switch ($paymentType) {
                 case 'scholarship':
-                    // Cas avec bourse
                     $scholarshipInfo = $this->calculateScholarshipInfo($student, $paymentStatus->payment_tranches);
                     $discountResult = [
                         'final_amount' => $request->amount,
@@ -266,13 +321,12 @@ class PaymentController extends Controller
                     break;
 
                 case 'global_discount':
-                    // Cas avec réduction globale - le montant frontend est déjà réduit
                     $discountPercentage = $this->discountCalculatorService->getDiscountPercentage();
-                    $originalAmount = $request->amount / (1 - $discountPercentage / 100); // Recalculer le montant original
+                    $originalAmount = $request->amount / (1 - $discountPercentage / 100);
                     $discountAmount = $originalAmount - $request->amount;
 
                     $discountResult = [
-                        'final_amount' => $request->amount, // Utiliser le montant déjà réduit du frontend
+                        'final_amount' => $request->amount,
                         'has_reduction' => true,
                         'reduction_amount' => $discountAmount,
                         'discount_reason' => "Réduction {$discountPercentage}% - Paiement intégral avant échéance"
@@ -284,7 +338,6 @@ class PaymentController extends Controller
                     break;
 
                 default:
-                    // Cas normal
                     $discountResult = [
                         'final_amount' => $request->amount,
                         'has_reduction' => false,
@@ -292,8 +345,8 @@ class PaymentController extends Controller
                         'discount_reason' => null
                     ];
                     $scholarshipInfo = [
-                        'has_scholarship' => false,
-                        'scholarship_amount' => 0
+                        'has_scholarship' => $hasScholarship,
+                        'scholarship_amount' => $request->scholarship_amount ?? 0
                     ];
                     break;
             }
@@ -322,20 +375,10 @@ class PaymentController extends Controller
                 'discount_reason' => $discountResult['discount_reason']
             ]);
 
-            // Debug: Log du type de paiement
-            \Log::info('Payment allocation debug', [
-                'payment_type' => $paymentType,
-                'apply_global_discount' => $request->apply_global_discount,
-                'student_id' => $student->id,
-                'amount' => $request->amount
-            ]);
-
             // Allouer le paiement selon le type
             if ($paymentType === 'global_discount') {
-                \Log::info('Using global discount allocation');
                 $this->allocatePaymentToTranchesWithGlobalDiscount($payment, $student, $workingYear, $paymentStatus->payment_tranches);
             } else {
-                \Log::info('Using normal allocation');
                 $this->allocatePaymentToTranches($payment, $student, $workingYear, $paymentStatus->payment_tranches);
             }
 
@@ -343,23 +386,12 @@ class PaymentController extends Controller
 
             $payment->load(['paymentDetails.paymentTranche', 'student', 'schoolYear']);
 
-            // Envoyer la notification WhatsApp avec le reçu au parent
+            // Notification WhatsApp
             try {
                 $whatsAppService = new \App\Services\WhatsAppService();
                 $whatsAppService->sendPaymentNotification($payment);
-
-                \Log::info('Notification de paiement WhatsApp envoyée', [
-                    'payment_id' => $payment->id,
-                    'student_id' => $payment->student_id,
-                    'parent_phone' => $payment->student->parent_phone ?? 'N/A'
-                ]);
             } catch (\Exception $e) {
-                \Log::warning('Erreur lors de l\'envoi de la notification WhatsApp pour paiement', [
-                    'payment_id' => $payment->id,
-                    'student_id' => $payment->student_id,
-                    'error' => $e->getMessage()
-                ]);
-                // Ne pas faire échouer le paiement si l'envoi WhatsApp échoue
+                Log::warning('Erreur envoi notification WhatsApp: ' . $e->getMessage());
             }
 
             return response()->json([
@@ -428,17 +460,23 @@ class PaymentController extends Controller
     /**
      * Marquer la RAME comme payée physiquement
      */
-    public function payRamePhysically(Request $request, $studentId)
+    public function payRamePhysically(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:students,id',
             'notes' => 'nullable|string|max:1000',
-            'payment_date' => 'required|date',
-            'versement_date' => 'required|date',
+            'payment_date' => 'nullable|date',
+            'versement_date' => 'nullable|date',
+            'reference_number' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => 'Données invalides', 'errors' => $validator->errors()], 422);
         }
+
+        $studentId = $request->input('student_id');
+        $paymentDate = $request->input('payment_date', now()->toDateString());
+        $versementDate = $request->input('versement_date', now()->toDateString());
 
         try {
             $workingYear = $this->getUserWorkingYear();
@@ -488,18 +526,18 @@ class PaymentController extends Controller
 
             DB::beginTransaction();
 
-            $receiptNumber = Payment::generateReceiptNumber($workingYear, $request->payment_date);
+            $receiptNumber = Payment::generateReceiptNumber($workingYear, $paymentDate);
 
             // Créer le paiement RAME physique
             $payment = Payment::create([
                 'student_id' => $studentId,
                 'school_year_id' => $workingYear->id,
                 'total_amount' => $rameTranche->default_amount,
-                'payment_date' => $request->payment_date,
-                'versement_date' => $request->versement_date,
+                'payment_date' => $paymentDate,
+                'versement_date' => $versementDate,
                 'validation_date' => now(),
                 'payment_method' => 'rame_physical',
-                'reference_number' => null,
+                'reference_number' => $request->input('reference_number'),
                 'notes' => $request->notes ?? 'Paiement RAME physique',
                 'created_by_user_id' => Auth::id(),
                 'receipt_number' => $receiptNumber,
@@ -748,9 +786,8 @@ class PaymentController extends Controller
 
             $schoolSettings = \App\Models\SchoolSetting::getSettings();
 
-            // Utiliser le service de personnalisation des reçus
-            $receiptCustomizationService = new ReceiptCustomizationService();
-            $receiptHtml = $receiptCustomizationService->generateCustomizedReceiptHtml($payment, $schoolSettings);
+            // Utiliser le service de personnalisation des reçus injecté
+            $receiptHtml = $this->receiptCustomizationService->generateCustomizedReceiptHtml($payment, $schoolSettings);
 
             return response()->json([
                 'success' => true,
@@ -761,7 +798,7 @@ class PaymentController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error generating receipt: ' . $e->getMessage());
+            Log::error('Error generating receipt: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la génération du reçu',
@@ -797,9 +834,8 @@ class PaymentController extends Controller
 
             // Retourner le PDF en téléchargement
             return $pdf->download($filename);
-
         } catch (\Exception $e) {
-            \Log::error('Error generating PDF receipt: ' . $e->getMessage());
+            Log::error('Error generating PDF receipt: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la génération du PDF',
@@ -1763,12 +1799,12 @@ class PaymentController extends Controller
                 $logoData = base64_encode(file_get_contents($logoPath));
                 $logoMimeType = mime_content_type($logoPath);
                 $logoBase64 = "data:{$logoMimeType};base64,{$logoData}";
-                \Log::info('Logo base64 generated successfully from: ' . $schoolSettings->school_logo);
+                Log::info('Logo base64 generated successfully from: ' . $schoolSettings->school_logo);
             } else {
-                \Log::info('Logo file not found at: ' . $logoPath);
+                Log::info('Logo file not found at: ' . $logoPath);
             }
         } else {
-            \Log::info('No school logo configured');
+            Log::info('No school logo configured');
         }
 
         // Réutiliser exactement la même logique que generateReceiptHtml mais optimisé pour PDF
@@ -2356,5 +2392,896 @@ class PaymentController extends Controller
         </html>";
 
         return $html;
+    }
+
+    /**
+     * Créer le paiement principal
+     */
+    private function createMainPayment($request, $student, $schoolYear)
+    {
+        $receiptNumber = Payment::generateReceiptNumber($schoolYear, $request->payment_date, rand(1, 9999));
+
+        return Payment::create([
+            'student_id' => $student->id,
+            'school_year_id' => $schoolYear->id,
+            'total_amount' => $request->total_amount,
+            'payment_date' => $request->payment_date,
+            'versement_date' => $request->versement_date ?? $request->payment_date,
+            'validation_date' => now(),
+            'payment_method' => $request->payment_method,
+            'reference_number' => $request->reference_number ?? null,
+            'notes' => $request->notes ?? null,
+            'created_by_user_id' => Auth::id(),
+            'receipt_number' => $receiptNumber,
+            'is_rame_physical' => false,
+            'has_scholarship' => false,
+            'scholarship_amount' => 0,
+            'has_reduction' => false,
+            'reduction_amount' => 0,
+            'discount_reason' => null
+        ]);
+    }
+
+    /**
+     * Mettre à jour le statut global de paiement de l'étudiant
+     */
+    private function updateStudentPaymentStatus($student, $schoolYear)
+    {
+        // Cette méthode peut être utilisée pour mettre à jour des champs de statut
+        // sur l'étudiant si nécessaire, ou pour déclencher des notifications
+
+        // Par exemple, marquer l'étudiant comme ayant des paiements en cours
+        $student->update([
+            'has_payments' => true,
+            'last_payment_date' => now()
+        ]);
+
+        // Ou calculer et stocker le total payé
+        $totalPaid = Payment::where('student_id', $student->id)
+            ->where('school_year_id', $schoolYear->id)
+            ->sum('total_amount');
+
+        // Log pour debugging
+        Log::info('Statut de paiement mis à jour', [
+            'student_id' => $student->id,
+            'total_paid' => $totalPaid,
+            'updated_at' => now()
+        ]);
+    }
+
+    /**
+     * Obtenir les informations détaillées de bourse d'un étudiant
+     */
+    private function getScholarshipInfo($student)
+    {
+        $scholarshipAmount = $this->getScholarshipAmount($student);
+
+        if ($scholarshipAmount <= 0) {
+            return [
+                'eligible' => false,
+                'amount' => 0,
+                'type' => null,
+                'school_code' => $student->classSeries->schoolClass->level->school->code
+            ];
+        }
+
+        $schoolCode = $student->classSeries->schoolClass->level->school->code;
+        $levelType = $student->classSeries->schoolClass->level->level_type;
+
+        // Déterminer le type de bourse selon l'école
+        $scholarshipType = 'automatique';
+        if ($schoolCode === 'ESGIT' && $levelType === 'LICENCE_PRO') {
+            $scholarshipType = 'mention_bts';
+        }
+
+        return [
+            'eligible' => true,
+            'amount' => $scholarshipAmount,
+            'type' => $scholarshipType,
+            'school_code' => $schoolCode,
+            'level_type' => $levelType,
+            'conditions' => $this->getScholarshipConditions($schoolCode, $levelType)
+        ];
+    }
+
+    /**
+     * Obtenir les conditions de bourse selon l'école et le niveau
+     */
+    private function getScholarshipConditions($schoolCode, $levelType)
+    {
+        $conditions = [];
+
+        switch ($schoolCode) {
+            case 'INSSAS':
+                $conditions[] = 'Bourse automatique selon le niveau d\'études';
+                $conditions[] = 'BTS/HND: 50k FCFA (niveau 1), 100k FCFA (niveaux 2+)';
+                $conditions[] = 'Double Diplomation: 50k FCFA (niveau 1), 100k FCFA (niveaux 2+)';
+                $conditions[] = 'Licence Pro: 100k FCFA';
+                $conditions[] = 'Master Pro: 150k FCFA (niveaux 1-2)';
+                break;
+
+            case 'ESGIT':
+                if ($levelType === 'LICENCE_PRO') {
+                    $conditions[] = 'Bourse selon mention obtenue au BTS';
+                    $conditions[] = 'Passable: 50k FCFA';
+                    $conditions[] = 'Assez Bien: 100k FCFA';
+                    $conditions[] = 'Bien: 120k FCFA';
+                    $conditions[] = 'Très Bien: 150k FCFA + laptop offert';
+                } else {
+                    $conditions[] = 'Ingénierie 3ème année: 50k FCFA par an';
+                }
+                break;
+
+            case 'ESSIT':
+                $conditions[] = 'Ingénierie Second Cycle: 50k FCFA par an';
+                $conditions[] = 'Niveaux 3, 4 et 5 éligibles';
+                break;
+
+            case 'ISTPM':
+                $conditions[] = 'Bourse automatique: 25k FCFA par an';
+                $conditions[] = 'Applicable à tous les CQP et DQP';
+                break;
+        }
+
+        return $conditions;
+    }
+
+    /**
+     * Obtenir le statut de paiement pour un étudiant (version simplifiée)
+     */
+    private function getPaymentStatusForStudent($student, $schoolYear)
+    {
+        // Utiliser le service existant
+        return $this->paymentStatusService->getStatusForStudent($student, $schoolYear);
+    }
+
+    /**
+     * Obtenir les équipements requis pour un étudiant (version détaillée)
+     */
+    public function getStudentRequiredEquipments($studentId)
+    {
+        try {
+            $student = Student::with([
+                'classSeries.schoolClass.level.school'
+            ])->findOrFail($studentId);
+
+            $requiredEquipments = $this->getRequiredEquipmentsForStudent($student);
+            $equipmentPrices = [];
+
+            foreach ($requiredEquipments as $equipmentType => $isRequired) {
+                if ($isRequired) {
+                    $equipmentPrices[$equipmentType] = [
+                        'required' => true,
+                        'price' => $this->getEquipmentPrice($equipmentType, $student),
+                        'label' => $this->getEquipmentLabel($equipmentType)
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'student' => $student,
+                    'required_equipments' => $equipmentPrices,
+                    'school_code' => $student->classSeries->schoolClass->level->school->code
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des équipements requis',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtenir le libellé d'un équipement
+     */
+    private function getEquipmentLabel($equipmentType)
+    {
+        $labels = [
+            'polo' => 'Polo École',
+            'blouse' => 'Blouse Médicale',
+            'laptop' => 'Ordinateur Portable',
+            'rame' => 'Rames de Papier'
+        ];
+
+        return $labels[$equipmentType] ?? ucfirst($equipmentType);
+    }
+
+    /**
+     * Marquer un équipement comme payé lors d'un paiement
+     */
+    private function markEquipmentAsPaid($student, $schoolYear, $equipmentType, $amount, $paymentReference)
+    {
+        StudentEquipmentStatus::updateOrCreate([
+            'student_id' => $student->id,
+            'school_year_id' => $schoolYear->id,
+            'equipment_type' => $equipmentType
+        ], [
+            'has_paid_for' => true,
+            'paid_date' => Carbon::now(),
+            'notes' => "Paiement de {$amount} FCFA - Réf: {$paymentReference}"
+        ]);
+    }
+
+    /**
+     * Obtenir le statut complet d'un étudiant avec équipements et bourses
+     */
+    public function getCompleteStudentStatus($studentId)
+    {
+        try {
+            $student = Student::with([
+                'classSeries.schoolClass.level.school'
+            ])->findOrFail($studentId);
+
+            $schoolYear = SchoolYear::where('is_working_year', true)->first();
+
+            // Statut de paiement
+            $paymentStatus = $this->paymentStatusService->getStatusForStudent($student, $schoolYear);
+
+            // Statut des équipements
+            $equipmentStatus = StudentEquipmentStatus::where([
+                'student_id' => $studentId,
+                'school_year_id' => $schoolYear->id
+            ])->get()->keyBy('equipment_type');
+
+            // Informations de bourse
+            $scholarshipInfo = $this->getScholarshipInfo($student);
+
+            // Équipements requis avec prix
+            $requiredEquipments = $this->getRequiredEquipmentsForStudent($student);
+            $equipmentDetails = [];
+
+            foreach ($requiredEquipments as $equipmentType => $isRequired) {
+                if ($isRequired) {
+                    $status = $equipmentStatus->get($equipmentType);
+                    $equipmentDetails[$equipmentType] = [
+                        'required' => true,
+                        'price' => $this->getEquipmentPrice($equipmentType, $student),
+                        'label' => $this->getEquipmentLabel($equipmentType),
+                        'has_paid' => $status ? $status->has_paid_for : false,
+                        'has_received' => $status ? $status->has_received : false,
+                        'brought_physical' => $status ? $status->brought_physical : false,
+                        'paid_date' => $status ? $status->paid_date : null,
+                        'received_date' => $status ? $status->received_date : null
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'student' => $student,
+                    'payment_status' => $paymentStatus,
+                    'equipment_details' => $equipmentDetails,
+                    'scholarship_info' => $scholarshipInfo,
+                    'summary' => [
+                        'total_required_payment' => $paymentStatus->total_required,
+                        'total_paid' => $paymentStatus->total_paid,
+                        'total_remaining' => $paymentStatus->total_remaining,
+                        'scholarship_reduction' => $scholarshipInfo['amount'],
+                        'effective_remaining' => max(0, $paymentStatus->total_remaining - $scholarshipInfo['amount'])
+                    ]
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération du statut complet',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Traiter un paiement avec gestion des équipements
+     */
+    public function processPaymentWithEquipment(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:students,id',
+            'payment_details' => 'required|array',
+            'payment_details.*.tranche_id' => 'required|exists:payment_tranches,id',
+            'payment_details.*.amount' => 'required|numeric|min:0',
+            'total_amount' => 'required|numeric|min:0',
+            'payment_method' => 'required|string',
+            'equipment_payments' => 'array',
+            'equipment_payments.*.type' => 'required_with:equipment_payments|in:polo,blouse,laptop,rame',
+            'equipment_payments.*.amount' => 'required_with:equipment_payments|numeric|min:0',
+            'rames_physical' => 'boolean'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $student = Student::findOrFail($request->student_id);
+            $schoolYear = SchoolYear::where('is_working_year', true)->first();
+
+            // Créer le paiement principal (logique existante)
+            $payment = $this->createMainPayment($request, $student, $schoolYear);
+
+            // Traiter les paiements d'équipements
+            if (!empty($request->equipment_payments)) {
+                foreach ($request->equipment_payments as $equipmentPayment) {
+                    $this->processEquipmentPayment(
+                        $student,
+                        $schoolYear,
+                        $equipmentPayment,
+                        $payment
+                    );
+                }
+            }
+
+            // Gestion spéciale pour les rames physiques
+            if ($request->rames_physical) {
+                $this->handlePhysicalRames($student, $schoolYear);
+            }
+
+            // Mettre à jour le statut global de paiement de l'étudiant
+            $this->updateStudentPaymentStatus($student, $schoolYear);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'payment' => $payment->load(['paymentDetails.paymentTranche', 'student']),
+                    'equipment_status' => $this->getStudentEquipmentStatus($student, $schoolYear)
+                ],
+                'message' => 'Paiement traité avec succès'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors du traitement du paiement',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Traiter le paiement d'un équipement
+     */
+    private function processEquipmentPayment($student, $schoolYear, $equipmentPayment, $mainPayment)
+    {
+        // Vérifier si l'équipement est requis pour cet étudiant
+        $requiredEquipments = $this->getRequiredEquipmentsForStudent($student);
+
+        if (
+            !isset($requiredEquipments[$equipmentPayment['type']]) ||
+            !$requiredEquipments[$equipmentPayment['type']]
+        ) {
+            throw new \Exception("L'équipement {$equipmentPayment['type']} n'est pas requis pour cet étudiant");
+        }
+
+        // Vérifier le montant
+        $expectedPrice = $this->getEquipmentPrice($equipmentPayment['type'], $student);
+        if ($equipmentPayment['amount'] < $expectedPrice) {
+            throw new \Exception("Montant insuffisant pour {$equipmentPayment['type']}. Prix attendu: {$expectedPrice} FCFA");
+        }
+
+        // Enregistrer le statut de l'équipement
+        StudentEquipmentStatus::updateOrCreate([
+            'student_id' => $student->id,
+            'school_year_id' => $schoolYear->id,
+            'equipment_type' => $equipmentPayment['type']
+        ], [
+            'has_paid_for' => true,
+            'paid_date' => Carbon::now(),
+            'notes' => "Paiement de {$equipmentPayment['amount']} FCFA - Réf: {$mainPayment->receipt_number}"
+        ]);
+    }
+
+    /**
+     * Gérer les rames physiques
+     */
+    private function handlePhysicalRames($student, $schoolYear)
+    {
+        StudentEquipmentStatus::updateOrCreate([
+            'student_id' => $student->id,
+            'school_year_id' => $schoolYear->id,
+            'equipment_type' => 'rame'
+        ], [
+            'brought_physical' => true,
+            'has_paid_for' => true, // Considéré comme payé
+            'paid_date' => Carbon::now(),
+            'notes' => 'Rames apportées physiquement par l\'étudiant'
+        ]);
+    }
+
+    /**
+     * Obtenir le statut des équipements d'un étudiant
+     */
+    private function getStudentEquipmentStatus($student, $schoolYear)
+    {
+        return StudentEquipmentStatus::where([
+            'student_id' => $student->id,
+            'school_year_id' => $schoolYear->id
+        ])->get();
+    }
+
+    /**
+     * Calculer le montant total avec réductions de bourses
+     */
+    /*public function calculateTotalWithScholarships($student, $schoolYear, $paymentDetails)
+    {
+        $baseTotal = collect($paymentDetails)->sum('amount');
+        $scholarshipAmount = $this->getScholarshipAmount($student);
+
+        return [
+            'base_total' => $baseTotal,
+            'scholarship_reduction' => $scholarshipAmount,
+            'final_total' => max(0, $baseTotal - $scholarshipAmount),
+            'scholarship_info' => $this->getScholarshipInfo($student)
+        ];
+    }*/
+
+    /**
+     * Obtenir les informations de bourse d'un étudiant
+     */
+    private function getScholarshipAmount($student)
+    {
+        $schoolCode = $student->classSeries->schoolClass->level->school->code;
+        $levelType = $student->classSeries->schoolClass->level->level_type;
+        $currentLevel = $student->current_level ?? 1;
+
+        switch ($schoolCode) {
+            case 'INSSAS':
+                if (in_array($levelType, ['BTS', 'HND'])) {
+                    return $currentLevel === 1 ? 50000 : 100000;
+                }
+                if ($levelType === 'DOUBLE_DIPLOMATION') {
+                    return $currentLevel === 1 ? 50000 : 100000;
+                }
+                if ($levelType === 'LICENCE_PRO') {
+                    return 100000;
+                }
+                if ($levelType === 'MASTER_PRO' && $currentLevel <= 2) {
+                    return 150000;
+                }
+                break;
+
+            case 'ESGIT':
+                if ($levelType === 'LICENCE_PRO') {
+                    // Bourses selon mention BTS
+                    $btsMention = $student->bts_mention ?? 'passable';
+                    $scholarships = [
+                        'passable' => 50000,
+                        'assez_bien' => 100000,
+                        'bien' => 120000,
+                        'tres_bien' => 150000
+                    ];
+                    return $scholarships[$btsMention] ?? 50000;
+                }
+                if ($levelType === 'INGENIERIE') {
+                    return 50000; // 3ème année
+                }
+                break;
+
+            case 'ESSIT':
+                if ($levelType === 'INGENIERIE_SC') {
+                    return 50000; // Niveaux 3, 4, 5
+                }
+                break;
+
+            case 'ISTPM':
+                return 25000; // CQP et DQP
+                break;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Déterminer les équipements requis pour un étudiant
+     */
+    private function getRequiredEquipmentsForStudent($student)
+    {
+        $schoolCode = $student->classSeries->schoolClass->level->school->code;
+        $levelType = $student->classSeries->schoolClass->level->level_type;
+
+        $equipment = [
+            'polo' => false,
+            'blouse' => false,
+            'laptop' => false,
+            'rame' => true // Par défaut toutes les écoles sauf ISTMS
+        ];
+
+        // Cas spécial ISTMS - pas de rames
+        if ($schoolCode === 'ISTMS') {
+            $equipment['rame'] = false;
+            $equipment['blouse'] = true;
+            return $equipment;
+        }
+
+        // INSSAS : Toujours blouses
+        if ($schoolCode === 'INSSAS') {
+            $equipment['blouse'] = true;
+            $equipment['laptop'] = in_array($levelType, ['LICENCE_ACA', 'DOUBLE_DIPLOMATION', 'LICENCE_PRO']);
+            return $equipment;
+        }
+
+        // ESGIT : Polos et laptops
+        if ($schoolCode === 'ESGIT') {
+            $equipment['polo'] = true;
+            $equipment['laptop'] = true;
+            return $equipment;
+        }
+
+        // ESJEC : Polos et laptops pour BTS
+        if ($schoolCode === 'ESJEC') {
+            $equipment['polo'] = true;
+            $equipment['laptop'] = ($levelType === 'BTS');
+            return $equipment;
+        }
+
+        // ESSIT : Polos et laptops
+        if ($schoolCode === 'ESSIT') {
+            $equipment['polo'] = true;
+            $equipment['laptop'] = true;
+            return $equipment;
+        }
+
+        // ISTPM : Blouse pour santé, polo pour autres
+        if ($schoolCode === 'ISTPM') {
+            $healthSpecialties = ['Technicien', 'Auxiliaire', 'Assistant', 'Délégué', 'Vendeur'];
+            $isHealthSpecialty = collect($healthSpecialties)->some(function ($specialty) use ($student) {
+                return stripos($student->classSeries->schoolClass->name, $specialty) !== false;
+            });
+
+            $equipment['blouse'] = $isHealthSpecialty;
+            $equipment['polo'] = !$isHealthSpecialty;
+            return $equipment;
+        }
+
+        return $equipment;
+    }
+
+    /**
+     * Obtenir le prix d'un équipement
+     */
+    private function getEquipmentPrice($equipmentType, $student)
+    {
+        $schoolCode = $student->classSeries->schoolClass->level->school->code;
+
+        $prices = [
+            'INSSAS' => ['blouse' => 7500, 'rame' => 22500],
+            'ESGIT' => ['polo' => 6500, 'rame' => 22500],
+            'ESJEC' => ['polo' => 6500, 'rame' => 22500],
+            'ESSIT' => ['polo' => 6500, 'rame' => 22500],
+            'ISTPM' => ['polo' => 6500, 'blouse' => 7500, 'rame' => 18500],
+            'ISTMS' => ['blouse' => 7500]
+        ];
+
+        return $prices[$schoolCode][$equipmentType] ?? 0;
+    }
+
+    /**
+     * Obtenir un récapitulatif complet pour un étudiant
+     */
+    public function getStudentPaymentSummary($studentId)
+    {
+        try {
+            $student = Student::with([
+                'classSeries.schoolClass.level.school'
+            ])->findOrFail($studentId);
+
+            $schoolYear = SchoolYear::where('is_working_year', true)->first();
+
+            // Statut de paiement classique
+            $paymentStatus = $this->getPaymentStatusForStudent($student, $schoolYear);
+
+            // Statut des équipements
+            $equipmentStatus = $this->getStudentEquipmentStatus($student, $schoolYear);
+
+            // Informations de bourse
+            $scholarshipAmount = $this->getScholarshipAmount($student);
+
+            // Montants ajustés avec bourses
+            $adjustedAmounts = $this->calculateAdjustedAmounts($paymentStatus, $scholarshipAmount);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'student' => $student,
+                    'payment_status' => $paymentStatus,
+                    'equipment_status' => $equipmentStatus,
+                    'scholarship_amount' => $scholarshipAmount,
+                    'adjusted_amounts' => $adjustedAmounts,
+                    'required_equipments' => $this->getRequiredEquipmentsForStudent($student)
+                ],
+                'message' => 'Récapitulatif récupéré avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération du récapitulatif',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculer les montants ajustés avec les bourses
+     */
+    private function calculateAdjustedAmounts($paymentStatus, $scholarshipAmount)
+    {
+        $adjustedAmounts = [];
+
+        foreach ($paymentStatus['tranche_status'] as $tranche) {
+            // Appliquer la bourse seulement sur les tranches de scolarité principales
+            $scholarshipApplicable = strpos(strtolower($tranche['tranche_name']), 'tranche') !== false;
+            $reduction = $scholarshipApplicable ? $scholarshipAmount : 0;
+
+            $adjustedAmount = max(0, $tranche['required_amount'] - $reduction);
+            $remainingAmount = max(0, $adjustedAmount - $tranche['amount_paid']);
+
+            $adjustedAmounts[] = [
+                'tranche_name' => $tranche['tranche_name'],
+                'original_amount' => $tranche['required_amount'],
+                'scholarship_reduction' => $reduction,
+                'adjusted_amount' => $adjustedAmount,
+                'amount_paid' => $tranche['amount_paid'],
+                'remaining_amount' => $remainingAmount,
+                'is_complete' => $remainingAmount === 0
+            ];
+        }
+
+        return $adjustedAmounts;
+    }
+
+    /**
+     * Traiter un paiement générique
+     * Route: POST /payments/process-payment
+     */
+    public function processPayment(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:students,id',
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|string|in:cash,card,transfer,check',
+            'reference_number' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+            'payment_date' => 'nullable|date',
+            'versement_date' => 'nullable|date',
+            'apply_global_discount' => 'nullable|boolean',
+            'equipment_actions' => 'nullable|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $workingYear = $this->getUserWorkingYear();
+            if (!$workingYear) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Aucune année scolaire définie'
+                ], 400);
+            }
+
+            $student = Student::with('classSeries.schoolClass')->find($request->student_id);
+            if (!$student) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Étudiant non trouvé'
+                ], 404);
+            }
+
+            // Préparer les données de paiement avec valeurs par défaut
+            $paymentData = [
+                'student_id' => $request->student_id,
+                'amount' => $request->amount,
+                'payment_method' => $request->payment_method,
+                'reference_number' => $request->reference_number,
+                'notes' => $request->notes,
+                'payment_date' => $request->payment_date ?? now()->format('Y-m-d'),
+                'versement_date' => $request->versement_date ?? now()->format('Y-m-d'),
+                'apply_global_discount' => $request->apply_global_discount ?? false,
+            ];
+
+            // Utiliser la méthode store existante pour traiter le paiement
+            $storeRequest = new Request($paymentData);
+            $response = $this->store($storeRequest);
+
+            $responseData = json_decode($response->getContent(), true);
+
+            if ($response->getStatusCode() === 201 && $responseData['success']) {
+                // Traiter les actions d'équipement si fournies
+                if (!empty($request->equipment_actions)) {
+                    $this->processEquipmentActions($request->equipment_actions, $student, $workingYear);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $responseData['data'],
+                    'message' => 'Paiement traité avec succès'
+                ]);
+            } else {
+                return $response;
+            }
+        } catch (\Exception $e) {
+            Log::error('Error in PaymentController@processPayment: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors du traitement du paiement',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtenir le statut de paiement pour un étudiant spécifique
+     * Route: GET /payments/student/{studentId}/status
+     */
+    public function getStudentStatus($studentId)
+    {
+        try {
+            $workingYear = $this->getUserWorkingYear();
+            if (!$workingYear) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Aucune année scolaire définie'
+                ], 400);
+            }
+
+            $student = Student::with(['classSeries.schoolClass'])->find($studentId);
+            if (!$student) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Étudiant non trouvé'
+                ], 404);
+            }
+
+            // Obtenir le statut de paiement détaillé
+            $paymentStatus = $this->paymentStatusService->getStatusForStudent($student, $workingYear);
+
+            // Obtenir les paiements existants
+            $existingPayments = Payment::with(['paymentDetails.paymentTranche'])
+                ->where('student_id', $studentId)
+                ->where('school_year_id', $workingYear->id)
+                ->orderBy('payment_date', 'desc')
+                ->get();
+
+            // Calculer les statistiques de paiement
+            $totalPaid = $existingPayments->sum('total_amount');
+            $totalScholarships = $existingPayments->sum('scholarship_amount');
+            $totalReductions = $existingPayments->sum('reduction_amount');
+
+            // Vérifier le statut RAME
+            $rameStatus = $this->getRameStatus($studentId);
+            $rameData = json_decode($rameStatus->getContent(), true);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'student' => [
+                        'id' => $student->id,
+                        'student_number' => $student->student_number,
+                        'first_name' => $student->first_name,
+                        'last_name' => $student->last_name,
+                        'class_name' => $student->classSeries->schoolClass->name ?? '',
+                        'series_name' => $student->classSeries->name ?? ''
+                    ],
+                    'school_year' => $workingYear,
+                    'payment_summary' => [
+                        'total_required' => $paymentStatus->total_required,
+                        'total_paid' => $paymentStatus->total_paid,
+                        'total_remaining' => $paymentStatus->total_remaining,
+                        'total_scholarships' => $totalScholarships,
+                        'total_reductions' => $totalReductions,
+                        'has_scholarships' => $paymentStatus->has_scholarships,
+                        'payment_count' => $existingPayments->count(),
+                        'last_payment_date' => $existingPayments->first()?->payment_date
+                    ],
+                    'tranche_status' => $paymentStatus->tranche_status,
+                    'recent_payments' => $existingPayments->take(5),
+                    'rame_status' => $rameData['data'] ?? null,
+                    'is_fully_paid' => $paymentStatus->total_remaining <= 0,
+                    'discount_info' => [
+                        'is_eligible' => $paymentStatus->is_eligible_for_discount ?? false,
+                        'deadline' => $paymentStatus->discount_deadline ? $paymentStatus->discount_deadline->format('d/m/Y') : null,
+                        'percentage' => $paymentStatus->discount_percentage ?? 0,
+                    ]
+                ],
+                'message' => 'Statut de paiement récupéré avec succès'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in PaymentController@getStudentStatus: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération du statut de paiement',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Traiter les actions d'équipement associées à un paiement
+     */
+    private function processEquipmentActions($equipmentActions, $student, $schoolYear)
+    {
+        try {
+            foreach ($equipmentActions as $equipmentType => $action) {
+                if ($action) {
+                    StudentEquipmentStatus::updateOrCreate([
+                        'student_id' => $student->id,
+                        'school_year_id' => $schoolYear->id,
+                        'equipment_type' => str_replace('_remis', '', $equipmentType)
+                    ], [
+                        'has_received' => true,
+                        'received_date' => Carbon::now(),
+                        'notes' => "Marqué comme remis lors du paiement"
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Error processing equipment actions: ' . $e->getMessage());
+            // Ne pas faire échouer le paiement si les actions d'équipement échouent
+        }
+    }
+
+    /**
+     * Calculer les totaux avec les bourses (méthode utilitaire)
+     * Route: POST /payments/calculate-with-scholarships
+     */
+    public function calculateTotalWithScholarships(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:students,id',
+            'payment_details' => 'required|array',
+            'payment_details.*.tranche_id' => 'required|exists:payment_tranches,id',
+            'payment_details.*.amount' => 'required|numeric|min:0'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Données invalides',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $student = Student::with(['classSeries.schoolClass'])->findOrFail($request->student_id);
+            $workingYear = $this->getUserWorkingYear();
+
+            $baseTotal = collect($request->payment_details)->sum('amount');
+            $scholarshipAmount = $this->getScholarshipAmount($student);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'base_total' => $baseTotal,
+                    'scholarship_reduction' => $scholarshipAmount,
+                    'final_total' => max(0, $baseTotal - $scholarshipAmount),
+                    'scholarship_info' => $this->getScholarshipInfo($student),
+                    'calculation_date' => now()->format('Y-m-d H:i:s')
+                ],
+                'message' => 'Calcul avec bourses effectué avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors du calcul avec bourses',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

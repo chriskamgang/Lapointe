@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
-class DatabaseSeeder extends Seeder
+class EnhancedDatabaseSeeder extends Seeder
 {
     public function run(): void
     {

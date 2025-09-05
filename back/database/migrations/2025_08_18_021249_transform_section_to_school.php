@@ -47,7 +47,7 @@ return new class extends Migration
 
         // 4. Adapter les classes en spécialités
         Schema::table('school_classes', function (Blueprint $table) {
-            $table->string('speciality_code', 20)->nullable()->after('name');
+            $table->string('speciality_code', 100)->nullable()->after('name');
             $table->integer('max_capacity')->default(40)->after('description');
             $table->text('career_prospects')->nullable()->after('max_capacity');
             $table->json('admission_requirements')->nullable()->after('career_prospects');
@@ -62,14 +62,22 @@ return new class extends Migration
         // 6. Créer table pour les bourses universitaires
         Schema::create('university_scholarships', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('school_id')->constrained('schools')->onDelete('cascade');
-            $table->string('level_type');
+            $table->foreignId('school_id')->constrained()->onDelete('cascade');
+            $table->string('level_type', 50);
             $table->string('formation_name');
-            $table->decimal('scholarship_amount', 10, 2)->default(0);
+            $table->string('speciality_code')->nullable();
+            $table->string('speciality_category')->nullable();
+            $table->decimal('scholarship_amount', 10, 2);
+            $table->decimal('level_1_amount', 10, 2)->nullable();
+            $table->decimal('level_2_plus_amount', 10, 2)->nullable();
             $table->boolean('laptop_included')->default(false);
             $table->text('conditions')->nullable();
+            $table->json('eligibility_criteria')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+
+            $table->unique(['school_id', 'level_type', 'speciality_code'], 'unique_school_scholarship');
+            $table->index(['school_id', 'level_type']);
         });
 
         // 7. Créer table pour la distribution d'ordinateurs

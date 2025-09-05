@@ -36,6 +36,16 @@ class PaymentTranche extends Model
     }
 
     /**
+     * Relation plusieurs-à-plusieurs avec les classes scolaires.
+     */
+    public function schoolClasses()
+    {
+        return $this->belongsToMany(SchoolClass::class, 'class_payment_amounts', 'payment_tranche_id', 'class_id')
+            ->withPivot('amount')
+            ->withTimestamps();
+    }
+
+    /**
      * Scope pour les tranches actives
      */
     public function scopeActive($query)

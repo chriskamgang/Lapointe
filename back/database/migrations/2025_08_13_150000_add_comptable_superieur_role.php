@@ -19,7 +19,7 @@ return new class extends Migration
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'teacher', 'accountant', 'user', 'surveillant_general', 'general_accountant', 'comptable_superieur') NOT NULL DEFAULT 'user'");
         
         // Log de l'opération
-        \Log::info('Migration: Ajout du rôle comptable_superieur dans la table users');
+        Log::info('Migration: Ajout du rôle comptable_superieur dans la table users');
     }
 
     /**
@@ -39,6 +39,6 @@ return new class extends Migration
         // Revenir à l'enum sans le rôle comptable_superieur
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'teacher', 'accountant', 'user', 'surveillant_general', 'general_accountant') NOT NULL DEFAULT 'user'");
         
-        \Log::info('Migration: Suppression du rôle comptable_superieur de la table users');
+        Log::info('Migration: Suppression du rôle comptable_superieur de la table users');
     }
 };

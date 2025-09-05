@@ -52,13 +52,13 @@ class StudentController extends Controller
     {
         try {
             if (!$photo || !$photo->isValid()) {
-                \Log::error('Photo upload failed: Invalid photo file');
+                Log::error('Photo upload failed: Invalid photo file');
                 return null;
             }
 
             // Vérifier si GD est disponible
             if (!extension_loaded('gd')) {
-                \Log::warning('GD extension not available, storing original image');
+                Log::warning('GD extension not available, storing original image');
                 // Fallback: stocker l'image sans redimensionnement
                 $extension = $photo->getClientOriginalExtension() ?: 'jpg';
                 $filename = 'student_' . $studentNumber . '_' . time() . '.' . $extension;
@@ -75,13 +75,13 @@ class StudentController extends Controller
             // Validation du type de fichier
             $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
             if (!in_array($photo->getMimeType(), $allowedMimes)) {
-                \Log::error('Photo upload failed: Invalid mime type', ['mime' => $photo->getMimeType()]);
+                Log::error('Photo upload failed: Invalid mime type', ['mime' => $photo->getMimeType()]);
                 throw new \Exception('Format de fichier non supporté. Utilisez JPG, PNG ou GIF.');
             }
 
             // Validation de la taille (max 5MB)
             if ($photo->getSize() > 5 * 1024 * 1024) {
-                \Log::error('Photo upload failed: File too large', ['size' => $photo->getSize()]);
+                Log::error('Photo upload failed: File too large', ['size' => $photo->getSize()]);
                 throw new \Exception('La taille de l\'image ne doit pas dépasser 5MB.');
             }
 
@@ -100,7 +100,7 @@ class StudentController extends Controller
             $image = imagecreatefromstring($imageData);
 
             if (!$image) {
-                \Log::error('Photo upload failed: Could not create image from string');
+                Log::error('Photo upload failed: Could not create image from string');
                 // Fallback: stocker l'image sans redimensionnement
                 $path = $photo->storeAs($uploadPath, $filename, 'public');
                 return $path;
@@ -156,7 +156,7 @@ class StudentController extends Controller
 
             return $uploadPath . '/' . $filename;
         } catch (\Exception $e) {
-            \Log::error('Photo upload failed with exception: ' . $e->getMessage());
+            Log::error('Photo upload failed with exception: ' . $e->getMessage());
             // Si le traitement échoue, essayer de stocker l'image sans redimensionnement
             try {
                 $extension = $photo->getClientOriginalExtension() ?: 'jpg';
@@ -168,10 +168,10 @@ class StudentController extends Controller
                 }
 
                 $path = $photo->storeAs($uploadPath, $filename, 'public');
-                \Log::info('Photo stored without processing: ' . $path);
+                Log::info('Photo stored without processing: ' . $path);
                 return $path;
             } catch (\Exception $fallbackException) {
-                \Log::error('Fallback photo upload also failed: ' . $fallbackException->getMessage());
+                Log::error('Fallback photo upload also failed: ' . $fallbackException->getMessage());
                 throw new \Exception('Impossible de sauvegarder la photo.');
             }
         }
@@ -225,7 +225,7 @@ class StudentController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error in getByClassSeries: ' . $e->getMessage());
+            Log::error('Error in getByClassSeries: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la récupération des étudiants',
@@ -240,8 +240,8 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         // Debug: afficher les données reçues
-        \Log::info('Student creation request data:', $request->all());
-        \Log::info('Student creation files:', $request->allFiles());
+        Log::info('Student creation request data:', $request->all());
+        Log::info('Student creation files:', $request->allFiles());
 
         // Obtenir l'année de travail de l'utilisateur
         $workingYear = $this->getUserWorkingYear();
@@ -261,7 +261,7 @@ class StudentController extends Controller
             'gender' => 'required|in:M,F',
             'parent_name' => 'required|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
-            'phone' => 'nullable|string|max:20',
+            'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'class_series_id' => 'required|integer|exists:class_series,id',
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' // 5MB max
@@ -295,17 +295,22 @@ class StudentController extends Controller
             $studentData['order'] = $maxOrder + 1; // Ajouter à la fin par défaut
             $studentData['is_active'] = true;
             
-            // Convertir les chaînes boolean en vrais boolean
+            // Gérer le champ has_scholarship_enabled
             if (isset($studentData['has_scholarship_enabled'])) {
                 $studentData['has_scholarship_enabled'] = filter_var($studentData['has_scholarship_enabled'], FILTER_VALIDATE_BOOLEAN);
+            } else {
+                // Par défaut, activer les bourses si l'étudiant est éligible
+                $studentData['has_scholarship_enabled'] = true;
             }
 
-            // Combiner nom + prénom pour le champ legacy 'name'
+            if (!isset($studentData['bts_mention'])) {
+                $studentData['bts_mention'] = null;
+            }
+
             if (!empty($studentData['last_name']) && !empty($studentData['first_name'])) {
                 $studentData['name'] = $studentData['last_name'] . ' ' . $studentData['first_name'];
             }
 
-            // Gérer l'upload de photo
             if ($request->hasFile('photo')) {
                 $photoPath = $this->handlePhotoUpload($request->file('photo'), $studentNumber);
                 $studentData['photo'] = $photoPath;
@@ -323,6 +328,7 @@ class StudentController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Student creation failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la création de l\'étudiant',
@@ -344,7 +350,7 @@ class StudentController extends Controller
             'gender' => 'required|in:M,F',
             'parent_name' => 'required|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
-            'phone' => 'nullable|string|max:20',
+            'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'class_series_id' => 'required|exists:class_series,id',
             'school_year_id' => 'nullable|exists:school_years,id', // Optionnel lors de la modification
@@ -371,6 +377,9 @@ class StudentController extends Controller
             // Convertir les chaînes boolean en vrais boolean
             if (isset($updateData['has_scholarship_enabled'])) {
                 $updateData['has_scholarship_enabled'] = filter_var($updateData['has_scholarship_enabled'], FILTER_VALIDATE_BOOLEAN);
+            } else {
+                // Par défaut, activer les bourses si l'étudiant est éligible
+                $updateData['has_scholarship_enabled'] = true;
             }
 
             // Combiner nom + prénom pour le champ legacy 'name'
@@ -406,14 +415,32 @@ class StudentController extends Controller
         }
     }
 
+    // Dans StudentController.php
+public function show(Student $student)
+{
+    try {
+        $student->load(['classSeries.schoolClass.level.school']);
+        
+        return response()->json([
+            'success' => true,
+            'data' => $student
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Erreur lors de la récupération de l\'étudiant'
+        ], 500);
+    }
+}
+
     /**
      * Mettre à jour un étudiant avec photo (via POST pour FormData)
      */
     public function updateWithPhoto(Request $request, Student $student)
     {
         // Debug: logger les données reçues
-        \Log::info('Student update with photo request data:', $request->all());
-        \Log::info('Student update with photo files:', $request->allFiles());
+        Log::info('Student update with photo request data:', $request->all());
+        Log::info('Student update with photo files:', $request->allFiles());
 
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
@@ -423,7 +450,7 @@ class StudentController extends Controller
             'gender' => 'required|in:M,F',
             'parent_name' => 'required|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
-            'phone' => 'nullable|string|max:20',
+            'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'class_series_id' => 'required|exists:class_series,id',
             'school_year_id' => 'nullable|exists:school_years,id', // Make nullable for update
@@ -432,7 +459,7 @@ class StudentController extends Controller
         ]);
 
         if ($validator->fails()) {
-            \Log::error('Student update with photo validation failed:', $validator->errors()->toArray());
+            Log::error('Student update with photo validation failed:', $validator->errors()->toArray());
             return response()->json([
                 'success' => false,
                 'message' => 'Données invalides',
@@ -454,6 +481,9 @@ class StudentController extends Controller
             // Convertir les chaînes boolean en vrais boolean
             if (isset($updateData['has_scholarship_enabled'])) {
                 $updateData['has_scholarship_enabled'] = filter_var($updateData['has_scholarship_enabled'], FILTER_VALIDATE_BOOLEAN);
+            } else {
+                // Par défaut, activer les bourses si l'étudiant est éligible
+                $updateData['has_scholarship_enabled'] = true;
             }
 
             // Combiner nom + prénom pour le champ legacy 'name'
@@ -576,7 +606,7 @@ class StudentController extends Controller
                         $student->gender === 'M' ? 'Masculin' : 'Féminin',
                         $student->parent_name,
                         $student->parent_phone,
-                        $student->phone,
+                        $student->phone_number,
                         $student->address
                     ], ';');
                 }
@@ -730,7 +760,7 @@ class StudentController extends Controller
                 ($student->gender === 'M' ? 'M' : 'F') . '</td>
                 <td>' . $student->parent_name . '</td>
                 <td>' . $student->parent_phone . '</td>
-                <td>' . $student->phone . '</td>
+                <td>' . $student->phone_number . '</td>
             </tr>';
         }
 
@@ -921,7 +951,7 @@ class StudentController extends Controller
                         'gender' => $gender,
                         'parent_name' => trim($row[5] ?? ''),
                         'parent_phone' => trim($row[6] ?? null),
-                        'phone' => trim($row[7] ?? null),
+                        'phone_number' => trim($row[7] ?? null),
                         'address' => trim($row[8] ?? null),
                         'class_series_id' => $classSeriesId,
                         'school_year_id' => $workingYear->id,
@@ -971,7 +1001,7 @@ class StudentController extends Controller
                 'data' => $years
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error in getSchoolYears: ' . $e->getMessage());
+            Log::error('Error in getSchoolYears: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la récupération des années scolaires',
@@ -1189,7 +1219,7 @@ class StudentController extends Controller
             ]);
 
             // Log du transfert
-            \Log::info('Student transfer completed', [
+            Log::info('Student transfer completed', [
                 'student_id' => $student->id,
                 'student_name' => $student->first_name . ' ' . $student->last_name,
                 'from_series' => $oldSeries ? $oldSeries->name : 'Aucune série',
@@ -1234,7 +1264,7 @@ class StudentController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Student transfer failed', [
+            Log::error('Student transfer failed', [
                 'student_id' => $student->id,
                 'class_series_id' => $request->class_series_id,
                 'error' => $e->getMessage(),

@@ -47,7 +47,7 @@ class StatsController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('Stats error: ' . $e->getMessage());
+            Log::error('Stats error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors du chargement des statistiques',

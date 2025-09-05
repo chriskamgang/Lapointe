@@ -152,7 +152,7 @@ class NeedController extends Controller
                 $need->update(['whatsapp_sent' => $result]);
             } catch (\Exception $e) {
                 // Ne pas faire échouer la création si l'envoi WhatsApp échoue
-                \Log::error('Erreur envoi WhatsApp pour besoin #' . $need->id . ': ' . $e->getMessage());
+                Log::error('Erreur envoi WhatsApp pour besoin #' . $need->id . ': ' . $e->getMessage());
             }
 
             $need->load(['user', 'approvedBy']);
@@ -230,7 +230,7 @@ class NeedController extends Controller
                 // Notification au demandeur
                 $this->whatsappService->sendStatusUpdateNotificationToRequester($need, $previousStatus);
             } catch (\Exception $e) {
-                \Log::error('Erreur envoi WhatsApp pour approbation besoin #' . $need->id . ': ' . $e->getMessage());
+                Log::error('Erreur envoi WhatsApp pour approbation besoin #' . $need->id . ': ' . $e->getMessage());
             }
 
             $need->load(['user', 'approvedBy']);
@@ -293,7 +293,7 @@ class NeedController extends Controller
                 // Notification au demandeur
                 $this->whatsappService->sendStatusUpdateNotificationToRequester($need, $previousStatus);
             } catch (\Exception $e) {
-                \Log::error('Erreur envoi WhatsApp pour rejet besoin #' . $need->id . ': ' . $e->getMessage());
+                Log::error('Erreur envoi WhatsApp pour rejet besoin #' . $need->id . ': ' . $e->getMessage());
             }
 
             $need->load(['user', 'approvedBy']);

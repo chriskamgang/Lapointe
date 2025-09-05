@@ -1,18 +1,18 @@
-import { 
-    HospitalFill, HouseHeartFill, 
-    PeopleFill, GearFill, Search, 
-    BookFill, FileTextFill,
-    BarChartFill, List, CreditCard,
-    PersonCircle, BoxArrowRight, CashCoin,
-    Receipt, People, JournalBookmarkFill,
-    Clipboard2PlusFill,
-    ClipboardCheckFill,
-    QrCodeScan,
-    Calendar,
-    Archive,
-    FolderFill,
-    BagFill,
-    Award,
+import {
+  HospitalFill, HouseHeartFill,
+  PeopleFill, GearFill, Search,
+  BookFill, FileTextFill,
+  BarChartFill, List, CreditCard,
+  PersonCircle, BoxArrowRight, CashCoin,
+  Receipt, People, JournalBookmarkFill,
+  Clipboard2PlusFill,
+  ClipboardCheckFill,
+  QrCodeScan,
+  Calendar,
+  Archive,
+  FolderFill,
+  BagFill,
+  Award,
 } from 'react-bootstrap-icons'
 import logo from '../images/logo.png'
 import { useAuth } from '../hooks/useAuth';
@@ -51,10 +51,11 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
   // Les données utilisateur sont directement disponibles via le hook useAuth
 
   // Navigation schools based on user role
+  // Dans ton Sidebar.jsx existant, remplacer la fonction getNavigationSchools par celle-ci :
+
   const getNavigationSchools = () => {
     if (!user || !user.role) {
       return [];
-
     }
 
     const userRole = user.role;
@@ -92,13 +93,25 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           ],
         },
         {
+          title: "Gestion Équipements & Bourses", // 🆕 NOUVELLE SECTION
+          items: [
+            { name: "Équipements par École", href: "/equipment", icon: <BagFill /> },
+            { name: "Distribution Équipements", href: "/equipment-distribution", icon: <GearFill /> },
+            { name: "Historique Distribution", href: "/equipment-history", icon: <Archive /> },
+            { name: "Gestion Bourses", href: "/scholarship-management", icon: <Award /> },
+            { name: "Configuration Bourses", href: "/university-scholarships", icon: <Award /> },
+            {
+              name: "Paiements avec Équipements", // 🆕 NOUVELLE PAGE
+              href: "/payment-equipment",
+              icon: <CashCoin />,
+            },
+          ],
+        },
+        {
           title: "Outils",
           items: [
             { name: "Inventaire", href: "/inventory", icon: <Archive /> },
             { name: "Documents", href: "/documents", icon: <FolderFill /> },
-            { name: "Équipements par École", href: "/equipment", icon: <BagFill /> },
-            { name: "Gestion Équipements", href: "/equipment-management", icon: <GearFill /> },
-            { name: "Gestion Bourses", href: "/scholarship-management", icon: <Award /> },
             { name: "Rechercher", href: "/search", icon: <Search /> },
             { name: "Statistiques", href: "/stats", icon: <BarChartFill /> },
           ],
@@ -108,8 +121,8 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           items: [
             { name: "Gestion des Besoins", href: "/needs-management", icon: <ClipboardCheckFill /> },
             { name: "Mes Besoins", href: "/my-needs", icon: <Clipboard2PlusFill /> },
-            { name: 'Utilisateurs', href: '/user-management', icon: <People/> },
-            { name: 'Surveillants Généraux', href: '/supervisor-assignments', icon: <PersonCircle/> },
+            { name: 'Utilisateurs', href: '/user-management', icon: <People /> },
+            { name: 'Surveillants Généraux', href: '/supervisor-assignments', icon: <PersonCircle /> },
             { name: "Profil", href: "/profile", icon: <PersonCircle /> },
             { name: "Paramètres", href: "/settings", icon: <GearFill /> },
           ],
@@ -126,11 +139,19 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           ],
         },
         {
+          title: "Équipements & Bourses", // 🆕 NOUVELLE SECTION
+          items: [
+            { name: "Équipements par École", href: "/equipment", icon: <BagFill /> },
+            { name: "Distribution Équipements", href: "/equipment-distribution", icon: <GearFill /> },
+            { name: "Historique Distribution", href: "/equipment-history", icon: <Archive /> },
+            { name: "Gestion Bourses", href: "/scholarship-management", icon: <Award /> },
+          ],
+        },
+        {
           title: "Outils",
           items: [
             { name: "Inventaire", href: "/inventory", icon: <Archive /> },
             { name: "Documents", href: "/documents", icon: <FolderFill /> },
-            { name: "Équipements", href: "/equipment", icon: <BagFill /> },
           ],
         },
         {
@@ -140,6 +161,11 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
               name: "États de Paiements",
               href: "/payment-reports",
               icon: <Receipt />,
+            },
+            {
+              name: "Paiements avec Équipements", // 🆕 NOUVELLE PAGE
+              href: "/payment-equipment",
+              icon: <CashCoin />,
             },
           ],
         },
@@ -192,10 +218,16 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           ],
         },
         {
+          title: "Équipements", // 🆕 NOUVELLE SECTION
+          items: [
+            { name: "Équipements par École", href: "/equipment", icon: <BagFill /> },
+            { name: "Distribution Équipements", href: "/equipment-distribution", icon: <GearFill /> },
+          ],
+        },
+        {
           title: "Outils",
           items: [
             { name: "Documents", href: "/documents", icon: <FolderFill /> },
-            { name: "Équipements", href: "/equipment", icon: <BagFill /> },
           ],
         },
         {
@@ -224,6 +256,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           title: "Outils",
           items: [
             { name: "Documents", href: "/documents", icon: <FolderFill /> },
+            { name: "Équipements", href: "/equipment", icon: <BagFill /> }, // 🆕 ACCÈS EN LECTURE
             { name: "Mes Besoins", href: "/my-needs", icon: <Clipboard2PlusFill /> },
             { name: "Rechercher", href: "/search", icon: <Search /> },
             { name: "Profil", href: "/profile", icon: <PersonCircle /> },
@@ -318,9 +351,8 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
 
       {/* Sidebar */}
       <div
-        className={`sidebar ${isCollapsed ? "collapsed" : ""} ${
-          isMobile && isOpen ? "mobile-open" : ""
-        }`}
+        className={`sidebar ${isCollapsed ? "collapsed" : ""} ${isMobile && isOpen ? "mobile-open" : ""
+          }`}
         style={{
           position: "fixed",
           left: 0,
@@ -368,7 +400,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
                   ?.split(" ")
                   .map((word) => word.charAt(0))
                   .join("") || "INSTITUT UNIVERSITAIRE DE LA POINTE"} */}
-                  IUP
+                IUP
               </div>
               <div
                 style={{

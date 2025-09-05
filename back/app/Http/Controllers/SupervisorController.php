@@ -235,7 +235,7 @@ class SupervisorController extends Controller
                 $whatsAppService->sendAttendanceNotification($attendance);
             } catch (\Exception $notificationError) {
                 // Log l'erreur mais continue le processus
-                \Log::warning('Erreur notification WhatsApp: ' . $notificationError->getMessage());
+                Log::warning('Erreur notification WhatsApp: ' . $notificationError->getMessage());
             }
 
             $eventLabel = $eventType === 'entry' ? 'Entrée' : 'Sortie';
@@ -254,7 +254,7 @@ class SupervisorController extends Controller
             ]);
         } catch (\Exception $e) {
             // Log l'erreur pour debugging
-            \Log::error('Erreur enregistrement attendance: ' . $e->getMessage(), [
+            Log::error('Erreur enregistrement attendance: ' . $e->getMessage(), [
                 'student_id' => $studentId,
                 'event_type' => $eventType,
                 'supervisor_id' => $request->supervisor_id,
@@ -473,13 +473,13 @@ class SupervisorController extends Controller
                         ]);
                     } catch (\Exception $e) {
                         // Log l'erreur mais ne pas faire échouer l'opération
-                        \Log::warning('Erreur notification WhatsApp absence: ' . $e->getMessage());
+                        Log::warning('Erreur notification WhatsApp absence: ' . $e->getMessage());
                     }
 
                     $createdCount++;
                 } catch (\Exception $e) {
                     // Log l'erreur mais continuer avec les autres étudiants
-                    \Log::error('Erreur création attendance absence: ' . $e->getMessage());
+                    Log::error('Erreur création attendance absence: ' . $e->getMessage());
                 }
             }
         }
@@ -578,7 +578,7 @@ class SupervisorController extends Controller
                             ]);
                         } catch (\Exception $e) {
                             // Log l'erreur mais ne pas faire échouer l'opération
-                            \Log::warning('Erreur notification WhatsApp absence: ' . $e->getMessage());
+                            Log::warning('Erreur notification WhatsApp absence: ' . $e->getMessage());
                         }
 
                         $createdCount++;
@@ -592,7 +592,7 @@ class SupervisorController extends Controller
                         
                     } catch (\Exception $e) {
                         // Log l'erreur mais continuer avec les autres étudiants
-                        \Log::error('Erreur création attendance absence: ' . $e->getMessage());
+                        Log::error('Erreur création attendance absence: ' . $e->getMessage());
                     }
                 }
             }

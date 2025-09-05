@@ -3,441 +3,354 @@
 namespace App\Services;
 
 use App\Models\Payment;
-use App\Models\School;
 use App\Models\SchoolSetting;
-use App\Models\PaymentTranche;
-use App\Services\BilingualViewService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ReceiptCustomizationService
 {
-    /**
-     * Générer le HTML personnalisé du reçu selon l'école
-     */
+    protected $paymentStatusService;
+
+    public function __construct(PaymentStatusService $paymentStatusService)
+    {
+        $this->paymentStatusService = $paymentStatusService;
+    }
+
     public function generateCustomizedReceiptHtml($payment, $schoolSettings)
     {
         $student = $payment->student;
-        $school = $student->classSeries->schoolClass->level->school;
-        $level = $student->classSeries->schoolClass->level;
-        $schoolClass = $student->classSeries->schoolClass ?? null;
-        
-        // Service bilingue pour INSSAS
-        $bilingualService = new BilingualViewService();
-        $translations = $bilingualService->getTranslations(
-            $level->level_type,
-            $schoolClass ? $schoolClass->name : null
-        );
-        $t = $translations['translations'];
-        $language = $translations['language'];
-        
-        // Obtenir les couleurs et styles par école
-        $schoolStyle = $this->getSchoolStyle($school);
-        
-        // Générer les lignes de frais complètes
-        $feeLines = $this->generateCompleteFeeLines($payment, $school, $t);
-        
-        // Formatage des montants selon la langue
-        $formatAmount = function ($amount) use ($bilingualService, $language) {
-            return $bilingualService->formatAmount($amount, $language);
+        if (!$student) {
+            throw new \Exception("Étudiant non trouvé pour le paiement ID: {$payment->id}");
+        }
+
+        $classSeries = $student->classSeries;
+        $schoolClass = $classSeries ? $classSeries->schoolClass : null;
+        $level = $schoolClass ? $schoolClass->level : null;
+        $school = $level ? $level->school : null;
+
+        $paymentStatus = $this->paymentStatusService->getStatusForStudent($student, $payment->schoolYear);
+
+        $formatAmount = function ($amount) {
+            return number_format($amount, 0, ', ', ' ');
         };
 
-        $workingYear = $payment->schoolYear;
+        $logoUrl = '';
+        if ($schoolSettings->school_logo && Storage::exists('public/' . $schoolSettings->school_logo)) {
+            $logoUrl = asset('storage/' . $schoolSettings->school_logo);
+        } else {
+            $logoUrl = asset('assets/logo.png');
+        }
+
+        $institutName = $schoolSettings->school_name ?? 'INSTITUT UNIVERSITAIRE DE LA POINTE';
+        $schoolName = $school ? $school->name : 'École non définie';
+        $location = $schoolSettings->school_address ?? 'Bafoussam';
+        $companyNumber = 'M06T216274500L';
+        $email = $schoolSettings->school_email ?? 'contact@iu-pointe.fr';
+        $website = $schoolSettings->school_website ?? 'www.iu-pointe.fr';
+        $phone = $schoolSettings->school_phone ?? '+237 655 12 49 21';
+
+        $receiptNumber = $payment->receipt_number;
+        $paymentDate = Carbon::parse($payment->payment_date)->format('d/m/Y');
+        $currentDateTime = now()->format('d/m/Y à H:i');
+
+        $totalRequired = $paymentStatus->total_required;
+        $totalPaid = $paymentStatus->total_paid;
+        $remainingAmount = $paymentStatus->total_remaining;
+        
+        $isFirstPayment = ($totalPaid - $payment->total_amount) == 0;
+        $hasScholarship = $payment->has_scholarship && $payment->scholarship_amount > 0 && $isFirstPayment;
+
+        $paymentDeadline = $paymentStatus->discount_deadline ? $paymentStatus->discount_deadline->format('d/m/Y') : 'N/A';
+
+        $receiptContent = '';
+        for ($copy = 1; $copy <= 2; $copy++) {
+            $receiptContent .= $this->generateReceiptCopy(
+                $logoUrl,
+                $institutName,
+                $schoolName,
+                $location,
+                $companyNumber,
+                $email,
+                $website,
+                $phone,
+                $receiptNumber,
+                $paymentDate,
+                $currentDateTime,
+                $student,
+                $schoolClass,
+                $classSeries,
+                $payment,
+                $formatAmount,
+                $totalRequired,
+                $totalPaid,
+                $remainingAmount,
+                $hasScholarship,
+                $paymentDeadline,
+                $schoolSettings
+            );
+        }
 
         $html = "
-        <div style='font-family: Arial, sans-serif; font-size: 12px; color: {$schoolStyle['text_color']};'>
-            <div style='width: 100%; max-width: 800px; margin: 0 auto;'>
-                
-                <!-- En-tête école -->
-                <div style='text-align: center; margin-bottom: 20px; border-bottom: 2px solid {$schoolStyle['primary_color']}; padding-bottom: 15px;'>
-                    <div style='display: flex; align-items: center; justify-content: center;'>
-                        " . ($this->getSchoolLogo($school) ? "<img src='{$this->getSchoolLogo($school)}' style='width: 80px; height: 80px; margin-right: 20px;' />" : "") . "
-                        <div>
-                            <h1 style='margin: 0; font-size: 18px; color: {$schoolStyle['primary_color']}; font-weight: bold;'>{$schoolSettings->school_name}</h1>
-                            <h2 style='margin: 5px 0; font-size: 16px; color: {$schoolStyle['secondary_color']}; font-weight: bold;'>{$school->name}</h2>
-                            <div style='font-size: 11px; color: {$schoolStyle['text_color']};'>
-                                <div>{$schoolSettings->school_address}</div>
-                                <div>Tél: {$schoolSettings->school_phone} | Email: {$schoolSettings->school_email}</div>
-                                <div style='font-weight: bold; color: {$schoolStyle['accent_color']};'>{$this->getSchoolMotto($school)}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Titre du reçu -->
-                <div style='text-align: center; margin: 20px 0;'>
-                    <h2 style='margin: 0; font-size: 16px; color: {$schoolStyle['primary_color']}; border: 2px solid {$schoolStyle['primary_color']}; padding: 8px 16px; display: inline-block;'>
-                        " . strtoupper($t['payment_receipt']) . " N° {$payment->receipt_number}
-                    </h2>
-                </div>
-
-                <!-- Informations étudiant -->
-                <div style='background-color: {$schoolStyle['bg_light']}; border: 1px solid {$schoolStyle['border_color']}; padding: 12px; margin-bottom: 15px; border-radius: 5px;'>
-                    <div style='display: flex; justify-content: space-between;'>
-                        <div style='width: 60%;'>
-                            <div><strong>{$t['last_name']} {$t['first_name']}:</strong> {$student->nom} {$student->prenom}</div>
-                            <div><strong>{$t['registration_number']}:</strong> {$student->matricule}</div>
-                            <div><strong>{$t['date_of_birth']}:</strong> " . ($student->date_naissance ? $bilingualService->formatDate($student->date_naissance, $language) : 'N/A') . "</div>
-                        </div>
-                        <div style='width: 35%;'>
-                            <div><strong>{$t['class']}:</strong> " . ($schoolClass ? $schoolClass->name : 'N/A') . "</div>
-                            <div><strong>{$t['series']}:</strong> " . ($student->classSeries ? $student->classSeries->code : 'N/A') . "</div>
-                            <div><strong>{$t['school_year']}:</strong> {$workingYear->name}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Détail complet des frais -->
-                <div style='margin-bottom: 20px;'>
-                    <h3 style='color: {$schoolStyle['primary_color']}; border-bottom: 1px solid {$schoolStyle['primary_color']}; padding-bottom: 5px; margin-bottom: 10px;'>
-                        DÉTAIL DES FRAIS PAYÉS
-                    </h3>
-                    
-                    <table style='width: 100%; border-collapse: collapse; margin-bottom: 15px;'>
-                        <thead>
-                            <tr style='background-color: {$schoolStyle['primary_color']}; color: white;'>
-                                <th style='border: 1px solid #000; padding: 8px; text-align: left;'>DÉSIGNATION</th>
-                                <th style='border: 1px solid #000; padding: 8px; text-align: center; width: 100px;'>MONTANT (FCFA)</th>
-                                <th style='border: 1px solid #000; padding: 8px; text-align: center; width: 100px;'>STATUT</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {$feeLines}
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Récapitulatif financier -->
-                <div style='display: flex; justify-content: space-between; margin-bottom: 20px;'>
-                    <div style='width: 48%; border: 1px solid {$schoolStyle['border_color']}; padding: 10px; border-radius: 5px;'>
-                        <h4 style='color: {$schoolStyle['primary_color']}; margin-top: 0;'>RÉCAPITULATIF PAIEMENT</h4>
-                        <div><strong>Date de paiement:</strong> " . \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') . "</div>
-                        <div><strong>Mode de paiement:</strong> {$payment->payment_method}</div>
-                        <div><strong>Référence:</strong> {$payment->reference_number}</div>
-                        <div style='color: {$schoolStyle['accent_color']}; font-weight: bold; font-size: 14px; margin-top: 8px;'>
-                            <strong>Montant total payé: " . $formatAmount($payment->total_amount) . " FCFA</strong>
-                        </div>
-                    </div>
-                    
-                    <div style='width: 48%; border: 1px solid {$schoolStyle['border_color']}; padding: 10px; border-radius: 5px;'>
-                        <h4 style='color: {$schoolStyle['primary_color']}; margin-top: 0;'>INFORMATIONS COMPLÉMENTAIRES</h4>
-                        " . $this->getSchoolSpecificInfo($school, $student, $payment) . "
-                    </div>
-                </div>
-
-                <!-- Mentions légales et signatures -->
-                <div style='margin-top: 30px; border-top: 1px solid {$schoolStyle['border_color']}; padding-top: 15px;'>
-                    <div style='display: flex; justify-content: space-between; margin-bottom: 20px;'>
-                        <div style='width: 45%; text-align: center;'>
-                            <div style='border: 1px dashed {$schoolStyle['border_color']}; height: 60px; margin-bottom: 5px;'></div>
-                            <div><strong>Signature de l'étudiant</strong></div>
-                        </div>
-                        <div style='width: 45%; text-align: center;'>
-                            <div style='border: 1px dashed {$schoolStyle['border_color']}; height: 60px; margin-bottom: 5px;'></div>
-                            <div><strong>Cachet et signature de l'école</strong></div>
-                        </div>
-                    </div>
-                    
-                    <div style='font-size: 10px; text-align: center; color: {$schoolStyle['muted_color']}; border-top: 1px solid {$schoolStyle['border_color']}; padding-top: 10px;'>
-                        <div>Les frais de scolarité et d'étude de dossier ne sont pas remboursables en cas d'abandon ou d'exclusion.</div>
-                        <div>Ce reçu fait foi du paiement effectué - À conserver précieusement</div>
-                        <div style='margin-top: 5px; font-style: italic;'>Généré le " . now()->format('d/m/Y à H:i') . " par le système {$schoolSettings->school_name}</div>
-                    </div>
-                </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <title>Reçu de Paiement - {$receiptNumber}</title>
+            <style>
+                @page {
+                    size: A4 landscape;
+                    margin: 0.5cm;
+                }
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    font-size: 9px;
+                    line-height: 1.3;
+                    color: #333;
+                }
+                .receipt-main-container {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 5mm;
+                }
+                .receipt-copy {
+                    width: 140mm;
+                    height: 175mm;
+                    padding: 5mm;
+                    border: 1px solid #000;
+                    box-sizing: border-box;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    border-bottom: 2px solid #000;
+                    padding-bottom: 3mm;
+                    margin-bottom: 3mm;
+                }
+                .header-left .logo-section {
+                    margin-bottom: 2mm;
+                }
+                .header-left .logo-section img {
+                    width: 25mm;
+                    height: auto;
+                }
+                .header-left .institute-info h2 {
+                    margin: 0; font-size: 11px; font-weight: bold; color: #000;
+                }
+                .header-left .institute-info h3 {
+                    margin: 0; font-size: 10px; color: #000;
+                }
+                .header-left .institute-info div {
+                    font-size: 8px; margin-top: 1px;
+                }
+                .receipt-title-section {
+                    text-align: right;
+                }
+                .receipt-title {
+                    font-size: 14px; font-weight: bold; margin: 0 0 1mm 0;
+                }
+                .receipt-date { font-size: 10px; }
+                .payment-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 8px;
+                    margin-bottom: 3mm;
+                }
+                .payment-table th, .payment-table td {
+                    border: 1px solid #999;
+                    padding: 1.5mm;
+                    text-align: center;
+                }
+                .payment-table th { background-color: #f2f2f2; font-weight: bold; }
+                .payment-table .text-left { text-align: left; }
+                .payment-table .text-right { text-align: right; }
+                .scholarship-row td { background-color: #e8f5e9; font-weight: bold; }
+                .summary-section {
+                    border-top: 1px solid #000;
+                    padding-top: 2mm;
+                    margin-top: 2mm;
+                }
+                .summary-line {
+                    display: flex;
+                    justify-content: flex-end;
+                    margin-bottom: 1mm;
+                }
+                .summary-line span {
+                    display: inline-block;
+                    width: 30mm;
+                    text-align: right;
+                }
+                .summary-line span.label { font-weight: normal; }
+                .summary-line span.value { font-weight: bold; }
+                .bottom-section {
+                    border-top: 1px solid #000;
+                    padding-top: 2mm;
+                    margin-top: 2mm;
+                    font-size: 8px;
+                }
+                .signature-section {
+                    margin-top: auto; /* Pushes to the bottom */
+                    padding-top: 5mm;
+                    text-align: center;
+                }
+                .signature-line {
+                    border-top: 1px dotted #000;
+                    width: 60mm;
+                    margin: 0 auto;
+                    padding-top: 1mm;
+                    font-size: 9px;
+                }
+                .footer {
+                    font-size: 7px;
+                    color: #666;
+                    text-align: center;
+                    border-top: 1px solid #eee;
+                    padding-top: 2mm;
+                    margin-top: 3mm;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='receipt-main-container'>
+               {$receiptContent}
             </div>
-        </div>";
+        </body>
+        </html>
+        ";
 
         return $html;
     }
 
-    /**
-     * Obtenir le style personnalisé par école
-     */
-    private function getSchoolStyle($school)
-    {
-        switch ($school->code) {
-            case 'INSSAS':
-                return [
-                    'primary_color' => '#2E8B57',      // Vert médical
-                    'secondary_color' => '#4682B4',     // Bleu acier
-                    'accent_color' => '#DC143C',        // Rouge
-                    'text_color' => '#2F4F4F',          // Gris foncé
-                    'bg_light' => '#F0FFF0',            // Vert très clair
-                    'border_color' => '#2E8B57',
-                    'muted_color' => '#708090'
-                ];
-            
-            case 'ESGIT':
-                return [
-                    'primary_color' => '#1E3A8A',       // Bleu tech
-                    'secondary_color' => '#3B82F6',     // Bleu clair
-                    'accent_color' => '#F59E0B',        // Orange
-                    'text_color' => '#1F2937',
-                    'bg_light' => '#EBF8FF',
-                    'border_color' => '#1E3A8A',
-                    'muted_color' => '#6B7280'
-                ];
-                
-            case 'ESJEC':
-                return [
-                    'primary_color' => '#7C2D12',       // Brun juridique
-                    'secondary_color' => '#A16207',     // Or foncé
-                    'accent_color' => '#DC2626',        // Rouge
-                    'text_color' => '#374151',
-                    'bg_light' => '#FEF3C7',
-                    'border_color' => '#7C2D12',
-                    'muted_color' => '#6B7280'
-                ];
-                
-            case 'ESSIT':
-                return [
-                    'primary_color' => '#B45309',       // Orange BTP
-                    'secondary_color' => '#D97706',     // Orange vif
-                    'accent_color' => '#EF4444',        // Rouge sécurité
-                    'text_color' => '#374151',
-                    'bg_light' => '#FFF7ED',
-                    'border_color' => '#B45309',
-                    'muted_color' => '#6B7280'
-                ];
-                
-            case 'ISTPM':
-                return [
-                    'primary_color' => '#6366F1',       // Indigo formation
-                    'secondary_color' => '#8B5CF6',     // Violet
-                    'accent_color' => '#EF4444',        // Rouge
-                    'text_color' => '#374151',
-                    'bg_light' => '#EEF2FF',
-                    'border_color' => '#6366F1',
-                    'muted_color' => '#6B7280'
-                ];
-                
-            case 'ISTMS':
-                return [
-                    'primary_color' => '#059669',       // Vert santé
-                    'secondary_color' => '#10B981',     // Vert clair
-                    'accent_color' => '#F59E0B',        // Amber
-                    'text_color' => '#374151',
-                    'bg_light' => '#ECFDF5',
-                    'border_color' => '#059669',
-                    'muted_color' => '#6B7280'
-                ];
-                
-            default:
-                return [
-                    'primary_color' => '#1F2937',
-                    'secondary_color' => '#374151',
-                    'accent_color' => '#EF4444',
-                    'text_color' => '#111827',
-                    'bg_light' => '#F9FAFB',
-                    'border_color' => '#D1D5DB',
-                    'muted_color' => '#6B7280'
-                ];
-        }
-    }
+    private function generateReceiptCopy(
+        $logoUrl,
+        $institutName,
+        $schoolName,
+        $location,
+        $companyNumber,
+        $email,
+        $website,
+        $phone,
+        $receiptNumber,
+        $paymentDate,
+        $currentDateTime,
+        $student,
+        $schoolClass,
+        $classSeries,
+        $payment,
+        $formatAmount,
+        $totalRequired,
+        $totalPaid,
+        $remainingAmount,
+        $hasScholarship,
+        $paymentDeadline,
+        $schoolSettings
+    ) {
+        $tableRows = '';
+        $rowNumber = 1;
+        $totalTTC_sum = 0;
 
-    /**
-     * Générer les lignes complètes des frais
-     */
-    private function generateCompleteFeeLines($payment, $school, $translations)
-    {
-        $bilingualService = new BilingualViewService();
-        $language = $bilingualService->getTranslations($payment->student->classSeries->schoolClass->level->level_type)['language'];
-        
-        $formatAmount = function ($amount) use ($bilingualService, $language) {
-            return $bilingualService->formatAmount($amount, $language);
-        };
-
-        $lines = '';
-        $student = $payment->student;
-        $workingYear = $payment->schoolYear;
-
-        // Récupérer toutes les tranches possibles
-        $allTranches = PaymentTranche::orderBy('order')->get();
-        
-        // Récupérer les paiements de cet étudiant pour cette année
-        $studentPayments = Payment::where('student_id', $student->id)
-            ->where('school_year_id', $workingYear->id)
-            ->with(['paymentDetails.paymentTranche'])
-            ->get();
-
-        // Créer un mapping des tranches payées
-        $paidTranches = [];
-        foreach ($studentPayments as $studentPayment) {
-            foreach ($studentPayment->paymentDetails as $detail) {
-                $trancheId = $detail->payment_tranche_id;
-                if (!isset($paidTranches[$trancheId])) {
-                    $paidTranches[$trancheId] = 0;
-                }
-                $paidTranches[$trancheId] += $detail->amount;
-            }
-        }
-
-        // Ajouter d'abord les frais spéciaux selon l'école
-        $lines .= $this->getSchoolSpecificFeeLines($school, $student, $paidTranches, $formatAmount);
-
-        // Ensuite ajouter les tranches de scolarité payées dans ce paiement
         foreach ($payment->paymentDetails as $detail) {
-            $tranche = $detail->paymentTranche;
-            $status = '<span style="color: #059669; font-weight: bold;">✓ PAYÉ</span>';
-            
-            $lines .= "
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 6px;'>{$tranche->description}</td>
-                    <td style='border: 1px solid #ddd; padding: 6px; text-align: right;'>" . $formatAmount($detail->amount) . "</td>
-                    <td style='border: 1px solid #ddd; padding: 6px; text-align: center;'>{$status}</td>
-                </tr>
-            ";
+            $trancheName = $detail->paymentTranche->name;
+            $totalTTC = $detail->amount_allocated;
+            $totalTTC_sum += $totalTTC;
+
+            $tableRows .= "
+            <tr>
+                <td class='text-left'>{$trancheName}</td>
+                <td>REF-" . str_pad($rowNumber, 2, '0', STR_PAD_LEFT) . "</td>
+                <td class='text-right'>{$formatAmount($totalTTC)}</td>
+                <td class='text-right'>{$formatAmount($totalTTC)}</td>
+                <td class='text-right'>0%</td>
+                <td class='text-right'>0</td>
+                <td class='text-right'>{$formatAmount($totalTTC)}</td>
+            </tr>";
+            $rowNumber++;
         }
 
-        return $lines;
-    }
-
-    /**
-     * Obtenir les lignes de frais spécifiques à l'école
-     */
-    private function getSchoolSpecificFeeLines($school, $student, $paidTranches, $formatAmount)
-    {
-        $lines = '';
-
-        // Montants par école selon le UniversitySeeder
-        switch ($school->code) {
-            case 'INSSAS':
-                $lines .= $this->addFeeLineIfExists('Frais Étude Dossier', 10000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Inscription', 200000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Rames Papier', '6 rames', $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Tutelle Universitaire', 50000, $paidTranches, $formatAmount);
-                break;
-                
-            case 'ESGIT':
-                $lines .= $this->addFeeLineIfExists('Frais Étude Dossier', 5000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Inscription', 40000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Rames Papier', '4 rames', $paidTranches, $formatAmount);
-                break;
-                
-            case 'ESJEC':
-                $lines .= $this->addFeeLineIfExists('Frais Étude Dossier', 10000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Inscription', 50000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Rames Papier', '4 rames', $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Tutelle Universitaire', 50000, $paidTranches, $formatAmount);
-                break;
-                
-            case 'ESSIT':
-                $lines .= $this->addFeeLineIfExists('Frais Étude Dossier', 8000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Inscription', 45000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Rames Papier', '4 rames', $paidTranches, $formatAmount);
-                break;
-                
-            case 'ISTPM':
-                $lines .= $this->addFeeLineIfExists('Frais Étude Dossier', 5000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Inscription', 20000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Rames Papier', '2 rames', $paidTranches, $formatAmount);
-                break;
-                
-            case 'ISTMS':
-                $lines .= $this->addFeeLineIfExists('Frais Étude Dossier', 8000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Inscription', 35000, $paidTranches, $formatAmount);
-                $lines .= $this->addFeeLineIfExists('Rames Papier', '3 rames', $paidTranches, $formatAmount);
-                break;
+        if ($hasScholarship) {
+            $scholarshipAmount = $payment->scholarship_amount;
+            $totalTTC_sum -= $scholarshipAmount;
+            $tableRows .= "
+            <tr class='scholarship-row'>
+                <td class='text-left'>Bourse d'études</td>
+                <td>BOURSE</td>
+                <td class='text-right'>-{$formatAmount($scholarshipAmount)}</td>
+                <td class='text-right'>-{$formatAmount($scholarshipAmount)}</td>
+                <td class='text-right'>0%</td>
+                <td class='text-right'>0</td>
+                <td class='text-right'>-{$formatAmount($scholarshipAmount)}</td>
+            </tr>";
         }
 
-        return $lines;
-    }
+        return "
+        <div class='receipt-copy'>
+            <div class='header'>
+                <div class='header-left'>
+                    <div class='logo-section'>
+                        <img src='{$logoUrl}' alt='Logo Institut'>
+                    </div>
+                    <div class='institute-info'>
+                        <h2>{$institutName}</h2>
+                        <h3>{$schoolName}</h3>
+                        <div>{$location}</div>
+                        <div><strong>N° Contribuable:</strong> {$companyNumber}</div>
+                        <div><strong>Email:</strong> {$email}</div>
+                        <div><strong>Web:</strong> {$website}</div>
+                        <div><strong>Tél:</strong> {$phone}</div>
+                    </div>
+                </div>
+                <div class='receipt-title-section'>
+                    <div class='receipt-title'>Reçu de paiement N° {$receiptNumber}</div>
+                    <div class='receipt-date'>Date: {$paymentDate}</div>
+                </div>
+            </div>
 
-    /**
-     * Ajouter une ligne de frais si elle existe dans les paiements
-     */
-    private function addFeeLineIfExists($trancheName, $expectedAmount, $paidTranches, $formatAmount)
-    {
-        $tranche = PaymentTranche::where('name', $trancheName)->first();
-        
-        if ($tranche && isset($paidTranches[$tranche->id])) {
-            $paidAmount = $paidTranches[$tranche->id];
-            $status = '<span style="color: #059669; font-weight: bold;">✓ PAYÉ</span>';
-            
-            $displayAmount = is_numeric($expectedAmount) ? $formatAmount($paidAmount) : $expectedAmount;
-            
-            return "
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 6px;'>{$tranche->description}</td>
-                    <td style='border: 1px solid #ddd; padding: 6px; text-align: right;'>{$displayAmount}</td>
-                    <td style='border: 1px solid #ddd; padding: 6px; text-align: center;'>{$status}</td>
-                </tr>
-            ";
-        }
-        
-        return '';
-    }
+            <table class='payment-table'>
+                <thead>
+                    <tr>
+                        <th style='width: 34%'>Désignation</th>
+                        <th style='width: 10%'>Réf.</th>
+                        <th style='width: 12%'>PU HT</th>
+                        <th style='width: 12%'>Total HT</th>
+                        <th style='width: 8%'>TVA</th>
+                        <th style='width: 12%'>Total TVA</th>
+                        <th style='width: 12%'>TOTAL TTC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {$tableRows}
+                </tbody>
+            </table>
 
-    /**
-     * Obtenir le logo de l'école
-     */
-    private function getSchoolLogo($school)
-    {
-        // Pour l'instant, utiliser le logo principal
-        // Plus tard, on pourra avoir des logos spécifiques par école
-        $schoolSetting = SchoolSetting::getSettings();
-        if ($schoolSetting->school_logo) {
-            $logoPath = storage_path('app/public/' . $schoolSetting->school_logo);
-            if (file_exists($logoPath)) {
-                return 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
-            }
-        }
-        return null;
-    }
+            <div class='summary-section'>
+                <div class='summary-line'><span class='label'>Total HT:</span><span class='value'>{$formatAmount($totalTTC_sum)}</span></div>
+                <div class='summary-line'><span class='label'>Total TVA:</span><span class='value'>0 FCFA</span></div>
+                <div class='summary-line'><span class='label'>Total TTC:</span><span class='value'>{$formatAmount($totalTTC_sum)}</span></div>
+            </div>
 
-    /**
-     * Obtenir la devise de l'école
-     */
-    private function getSchoolMotto($school)
-    {
-        $mottos = [
-            'INSSAS' => 'Excellence en Sciences de la Santé',
-            'ESGIT' => 'Innovation Technologique et Génie Informatique',
-            'ESJEC' => 'Droit, Justice et Excellence Académique',
-            'ESSIT' => 'Bâtir l\'Avenir avec Excellence',
-            'ISTPM' => 'Formation Professionnelle de Qualité',
-            'ISTMS' => 'Santé, Médecine et Service'
-        ];
-        
-        return $mottos[$school->code] ?? 'Excellence et Formation de Qualité';
-    }
+            <div class='bottom-section'>
+                <div><strong>Montant déjà payé:</strong> {$formatAmount($totalPaid)}</div>
+                <div><strong>Reste à payer:</strong> {$formatAmount($remainingAmount)}</div>
+                <div><strong>Date limite de règlement:</strong> {$paymentDeadline}</div>
+                <hr>
+                <div><strong>Banque:</strong> CCA</div>
+                <div><strong>IBAN:</strong> 10039-10001-01357922101-64</div>
+                <div>LE PAIEMENT DES FRAIS DE SCOLARITE SE FAIT DANS LE COMPTE INSSAS n 10039-10001-01357922101-64 CCA BANK BAFOUSSAM</div>
+            </div>
 
-    /**
-     * Obtenir les informations spécifiques à l'école
-     */
-    private function getSchoolSpecificInfo($school, $student, $payment)
-    {
-        $info = '';
-        
-        switch ($school->code) {
-            case 'INSSAS':
-                if ($student->scholarship_amount > 0) {
-                    $info .= "<div><strong>Bourse INSSAS:</strong> " . number_format($student->scholarship_amount, 0, ',', ' ') . " FCFA</div>";
-                }
-                if ($student->laptop_eligible) {
-                    $info .= "<div style='color: #059669;'><strong>✓ Éligible ordinateur portable</strong></div>";
-                }
-                $info .= "<div><strong>Formation:</strong> Sciences de la Santé</div>";
-                break;
-                
-            case 'ESGIT':
-                if ($student->bts_mention) {
-                    $info .= "<div><strong>Mention BTS:</strong> {$student->bts_mention}</div>";
-                }
-                if ($student->scholarship_amount > 0) {
-                    $info .= "<div><strong>Bourse ESGIT:</strong> " . number_format($student->scholarship_amount, 0, ',', ' ') . " FCFA</div>";
-                }
-                break;
-                
-            case 'ISTPM':
-                if ($student->scholarship_amount > 0) {
-                    $info .= "<div><strong>Bourse ISTPM:</strong> " . number_format($student->scholarship_amount, 0, ',', ' ') . " FCFA</div>";
-                }
-                break;
-        }
-        
-        if (empty($info)) {
-            $info = "<div>Année scolaire: {$payment->schoolYear->name}</div>";
-        }
-        
-        return $info;
+            <div class='signature-section'>
+                <div class='signature-line'>Cachet et signature de l'école</div>
+            </div>
+
+            <div class='footer'>
+                Les frais de scolarité et d'étude de dossier ne sont pas remboursables en cas d'abandon ou d'exclusion.
+                Ce reçu fait foi du paiement effectué - À conserver précieusement<br>
+                Généré le {$currentDateTime} par le système {$institutName}
+            </div>
+        </div>";
     }
 }
