@@ -841,7 +841,7 @@ export const secureApiEndpoints = {
         }
     },
 
-    // === STUDENT RAME (Simplified) ===
+    // === STUDENT Rames de papier (Simplified) ===
     studentRame: {
         getStatus: (studentId) => secureApi.get(`/student-rame/student/${studentId}/status`),
         updateStatus: (studentId, data) => secureApi.post(`/student-rame/student/${studentId}/update`, data),

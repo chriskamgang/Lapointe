@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('student_rame_status', function (Blueprint $table) {
-            $table->date('deposit_date')->nullable()->after('marked_date')->comment('Date de dépôt physique de la RAME');
+            $table->date('deposit_date')->nullable()->after('marked_date')->comment('Date de dépôt physique de la Rames de papier');
         });
     }
 

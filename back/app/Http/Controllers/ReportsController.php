@@ -334,7 +334,7 @@ class ReportsController extends Controller
     }
 
     /**
-     * Rapport d'état des RAME - Liste des étudiants avec détails RAME (espèces/physique/pas payé)
+     * Rapport d'état des Rames de papier - Liste des étudiants avec détails Rames de papier (espèces/physique/pas payé)
      */
     public function getRameReport(Request $request)
     {
@@ -353,22 +353,22 @@ class ReportsController extends Controller
             $classId = $request->get('classId');
             $seriesId = $request->get('seriesId');
 
-            // Récupérer la tranche RAME
+            // Récupérer la tranche Rames de papier
             $rameTranche = PaymentTranche::active()
                 ->where(function ($query) {
-                    $query->where('name', 'RAME')
-                        ->orWhere('name', 'like', '%RAME%');
+                    $query->where('name', 'Rames de papier')
+                        ->orWhere('name', 'like', '%Rames de papier%');
                 })
                 ->first();
 
             if (!$rameTranche) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tranche RAME non trouvée'
+                    'message' => 'Tranche Rames de papier non trouvée'
                 ], 404);
             }
 
-            // Récupérer tous les étudiants avec leurs informations RAME
+            // Récupérer tous les étudiants avec leurs informations Rames de papier
             $studentsQuery = Student::with([
                 'classSeries.schoolClass.level.school',
                 'payments.paymentDetails.paymentTranche',
@@ -403,7 +403,7 @@ class ReportsController extends Controller
                 try {
                     $rameAmount = $rameTranche->getAmountForStudent($student, true, false, true, true) ?? 0; // Avec bourses OU réductions
                 } catch (\Exception $e) {
-                    Log::warning("Erreur getAmountForStudent RAME pour {$student->id}: " . $e->getMessage());
+                    Log::warning("Erreur getAmountForStudent Rames de papier pour {$student->id}: " . $e->getMessage());
                     $rameAmount = 0;
                 }
 
@@ -412,13 +412,13 @@ class ReportsController extends Controller
                 $paymentDate = null;
                 $rameStatus = $student->rameStatus; // Relation vers student_rame_status
 
-                // Vérifier d'abord le statut RAME physique dans student_rame_status
+                // Vérifier d'abord le statut Rames de papier physique dans student_rame_status
                 if ($rameStatus && $rameStatus->has_brought_rame) {
                     $rameType = 'physical';
-                    $rameQuantity = 1; // Quantité = 1 si RAME physique apportée
+                    $rameQuantity = 1; // Quantité = 1 si Rames de papier physique apportée
                     $paymentDate = $rameStatus->marked_date;
                 } else {
-                    // Sinon, vérifier les paiements RAME électroniques
+                    // Sinon, vérifier les paiements Rames de papier électroniques
                     $ramePaidAmount = 0;
                     foreach ($student->payments as $payment) {
                         foreach ($payment->paymentDetails as $detail) {
@@ -513,11 +513,11 @@ class ReportsController extends Controller
             $startDate = $request->get('startDate', $workingYear->start_date);
             $endDate = $request->get('endDate', $workingYear->end_date ?: now()->toDateString());
 
-            // Récupérer toutes les tranches (hors RAME)
+            // Récupérer toutes les tranches (hors Rames de papier)
             $paymentTranches = PaymentTranche::active()
                 ->where(function ($query) {
-                    $query->where('name', '!=', 'RAME')
-                        ->where('name', 'not like', '%RAME%');
+                    $query->where('name', '!=', 'Rames de papier')
+                        ->where('name', 'not like', '%Rames de papier%');
                 })
                 ->ordered()
                 ->get();
@@ -1160,7 +1160,7 @@ class ReportsController extends Controller
         $titles = [
             'insolvable' => 'Rapport État Insolvable',
             'payments' => 'Rapport État des Paiements',
-            'rame' => 'Rapport État des RAME',
+            'rame' => 'Rapport État des Rames de papier',
             'scholarships_discounts' => 'Rapport États Bourses et Rabais',
             'recovery' => 'Rapport de Recouvrement'
         ];
@@ -1372,7 +1372,7 @@ class ReportsController extends Controller
     }
 
     /**
-     * Générer le contenu du rapport RAME
+     * Générer le contenu du rapport Rames de papier
      */
     private function generateRameContent($reportData)
     {
@@ -1391,7 +1391,7 @@ class ReportsController extends Controller
                 <tr>
                     <th>Étudiant</th>
                     <th>Classe/Série</th>
-                    <th class='text-right'>Montant RAME</th>
+                    <th class='text-right'>Montant Rames de papier</th>
                     <th class='text-center'>Quantité</th>
                     <th class='text-center'>Type</th>
                     <th class='text-center'>Statut</th>
@@ -1623,7 +1623,7 @@ class ReportsController extends Controller
                     $seriesData['total_collected'] += $trancheAmount;
                 }
 
-                // Ajouter les paiements RAME physiques séparément
+                // Ajouter les paiements Rames de papier physiques séparément
                 $ramePhysicalAmount = Payment::where('school_year_id', $workingYear->id)
                     ->where('is_rame_physical', true)
                     ->whereHas('student', function ($query) use ($series) {
@@ -1631,9 +1631,9 @@ class ReportsController extends Controller
                     })->sum('total_amount');
 
                 if ($ramePhysicalAmount > 0) {
-                    $seriesData['tranches']['RAME Physique'] = [
+                    $seriesData['tranches']['Rames de papier Physique'] = [
                         'tranche_id' => 'rame_physical',
-                        'tranche_name' => 'RAME Physique',
+                        'tranche_name' => 'Rames de papier Physique',
                         'amount_collected' => $ramePhysicalAmount
                     ];
                     $seriesData['total_collected'] += $ramePhysicalAmount;
@@ -1656,7 +1656,7 @@ class ReportsController extends Controller
             foreach ($paymentTranches as $tranche) {
                 $trancheGrandTotals[$tranche->name] = 0;
             }
-            $trancheGrandTotals['RAME Physique'] = 0;
+            $trancheGrandTotals['Rames de papier Physique'] = 0;
 
             foreach ($seriesSummary as $series) {
                 foreach ($series['tranches'] as $trancheName => $trancheData) {
@@ -1714,7 +1714,7 @@ class ReportsController extends Controller
     private function getPaymentMethodLabel($method, $isRamePhysical = false)
     {
         if ($isRamePhysical) {
-            return 'RAME Physique';
+            return 'Rames de papier Physique';
         }
 
         $methods = [
@@ -1828,7 +1828,7 @@ class ReportsController extends Controller
                     $paymentTranches[$trancheName]['total'] += $detail->amount_allocated;
                 }
 
-                // Méthode de paiement avec gestion RAME physique
+                // Méthode de paiement avec gestion Rames de papier physique
                 $paymentMethod = $payment->is_rame_physical ? 'rame_physical' : $payment->payment_method;
                 $paymentMethodLabel = $this->getPaymentMethodLabel($payment->payment_method, $payment->is_rame_physical);
 
@@ -2182,7 +2182,7 @@ class ReportsController extends Controller
                         } elseif (strpos($trancheName, '5') !== false && strpos($trancheName, 'tranche') !== false) {
                             $paymentType = 'Trch5';
                         } elseif (strpos($trancheName, 'rame') !== false) {
-                            $paymentType = 'RAME';
+                            $paymentType = 'Rames de papier';
                         } elseif (strpos($trancheName, 'examen') !== false) {
                             $paymentType = 'Exam';
                         } else {
@@ -2518,9 +2518,9 @@ class ReportsController extends Controller
                     if ($tranche) {
                         $trancheName = strtolower($tranche->name);
                         
-                        // Exclure la RAME qui n'est pas un paiement financier
+                        // Exclure la Rames de papier qui n'est pas un paiement financier
                         if (stripos($trancheName, 'rame') !== false) {
-                            continue; // Ignorer la RAME dans les calculs financiers
+                            continue; // Ignorer la Rames de papier dans les calculs financiers
                         }
                         
                         if (stripos($trancheName, 'inscription') !== false) {
@@ -2667,9 +2667,9 @@ class ReportsController extends Controller
                         if ($tranche) {
                             $trancheName = strtolower($tranche->name);
                             
-                            // Exclure la RAME qui n'est pas un paiement financier
+                            // Exclure la Rames de papier qui n'est pas un paiement financier
                             if (stripos($trancheName, 'rame') !== false) {
-                                continue; // Ignorer la RAME dans les calculs financiers
+                                continue; // Ignorer la Rames de papier dans les calculs financiers
                             }
                             
                             if (stripos($trancheName, 'inscription') !== false) {

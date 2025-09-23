@@ -473,14 +473,14 @@ const Reports = () => {
             const rameData = data.students.map((student) => ({
               Étudiant: cleanValue(student?.student?.full_name),
               "Classe/Série": cleanValue(student?.student?.class_series),
-              "Statut RAME": cleanValue(student?.rame_status),
+              "Statut Rames de papier": cleanValue(student?.rame_status),
               "Date de Paiement": cleanValue(
                 student?.rame_details?.payment_date
               ),
             }));
 
             const worksheet = XLSX.utils.json_to_sheet(rameData);
-            XLSX.utils.book_append_sheet(workbook, worksheet, "État RAME");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "État Rames de papier");
           }
           break;
 
@@ -1041,7 +1041,7 @@ const Reports = () => {
     <Card>
       <Card.Header>
         <h5 className="mb-0">
-          État des RAME - Détails par étudiant (espèces/physique/pas payé)
+          État des Rames de papier - Détails par étudiant (espèces/physique/pas payé)
         </h5>
       </Card.Header>
       <Card.Body>
@@ -1942,7 +1942,7 @@ const Reports = () => {
               <Nav.Item>
                 <Nav.Link eventKey="rame">
                   <FileEarmarkText className="me-2" />
-                  État RAME
+                  État Rames de papier
                 </Nav.Link>
               </Nav.Item>
               <Nav.Item>

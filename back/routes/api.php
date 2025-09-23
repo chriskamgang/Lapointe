@@ -584,7 +584,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/generate-all-qrs', [SupervisorController::class, 'generateAllStudentQRs'])->middleware(['role:admin']);
     });
 
-    // Routes pour la gestion RAME simplifiée
+    // Routes pour la gestion Rames de papier simplifiée
     Route::prefix('student-rame')->middleware(['role:admin,accountant'])->group(function () {
         Route::get('/student/{studentId}/status', [StudentRameController::class, 'getRameStatus']);
         Route::post('/student/{studentId}/update', [StudentRameController::class, 'updateRameStatus']);

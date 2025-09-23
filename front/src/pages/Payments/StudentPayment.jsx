@@ -344,7 +344,7 @@ const StudentPayment = () => {
 
   const handleRamesPhysiques = async () => {
     const result = await Swal.fire({
-      title: 'Payer la RAME physiquement', html: `            <p>Confirmez-vous que l'étudiant <strong>${student?.first_name} ${student?.last_name}</strong> a apporté sa RAME physiquement ?</p>            <div class=\"mt-3\">                <label for=\"rameNotes\" class=\"form-label\">Notes (optionnel):</label>                <textarea id=\"rameNotes\" class=\"form-control\" placeholder=\"Commentaires sur le paiement RAME...\"></textarea>            </div>        `, icon: 'question', showCancelButton: true, confirmButtonText: 'Oui, marquer comme payé', cancelButtonText: 'Annuler', confirmButtonColor: '#28a745',
+      title: 'Payer la Rames de papier physiquement', html: `            <p>Confirmez-vous que l'étudiant <strong>${student?.first_name} ${student?.last_name}</strong> a apporté sa Rames de papier physiquement ?</p>            <div class=\"mt-3\">                <label for=\"rameNotes\" class=\"form-label\">Notes (optionnel):</label>                <textarea id=\"rameNotes\" class=\"form-control\" placeholder=\"Commentaires sur le paiement Rames de papier...\"></textarea>            </div>        `, icon: 'question', showCancelButton: true, confirmButtonText: 'Oui, marquer comme payé', cancelButtonText: 'Annuler', confirmButtonColor: '#28a745',
       preConfirm: () => {
         const notes = document.getElementById('rameNotes').value;
         return { notes };
@@ -355,11 +355,11 @@ const StudentPayment = () => {
         setPaymentLoading(true);
         // Utiliser le même système que les autres équipements        
         await handleEquipmentAction('rame', 'mark_physical_rames');
-        Swal.fire({ title: 'Succès !', text: 'RAME marquée comme payée physiquement', icon: 'success', timer: 2000, showConfirmButton: false });
+        Swal.fire({ title: 'Succès !', text: 'Rames de papier marquée comme payée physiquement', icon: 'success', timer: 2000, showConfirmButton: false });
         await loadStudentData();
       } catch (error) {
-        console.error('Error paying RAME:', error);
-        Swal.fire('Erreur', error.message || 'Erreur lors du paiement RAME', 'error');
+        console.error('Error paying Rames de papier:', error);
+        Swal.fire('Erreur', error.message || 'Erreur lors du paiement Rames de papier', 'error');
       } finally {
         setPaymentLoading(false);
       }
@@ -562,7 +562,7 @@ const StudentPayment = () => {
 
                     {/* Enhanced equipment actions */}
                     <div className="d-flex flex-column gap-2">
-                      {/* RAME special handling */}
+                      {/* Rames de papier special handling */}
                       {equipment.equipment_type === 'rame' && (
                         <Button
                           variant={equipment.brought_physical ? "success" : "outline-info"}
@@ -948,7 +948,7 @@ const StudentPayment = () => {
   };
 
   const getPaymentMethodLabel = (method, isRamePhysical = false) => {
-    if (isRamePhysical) return 'RAME Physique';
+    if (isRamePhysical) return 'Rames de papier Physique';
     const methods = {
       cash: 'Banque',
       card: 'Espèces',
@@ -1153,7 +1153,7 @@ const StudentPayment = () => {
                             </Badge>
                             {!status.rame_paid && (
                               <Button variant="outline-primary" size="sm" className="ms-2" onClick={handleRamesPhysiques}>
-                                Payer RAME
+                                Payer Rames de papier
                               </Button>
                             )}
                           </>

@@ -29,26 +29,26 @@ const RameStatusToggle = ({ studentId, studentName, onStatusChange = null }) => 
             if (response.success) {
                 setRameStatus(response.data);
             } else {
-                console.error('Erreur lors du chargement du statut RAME:', response.message);
+                console.error('Erreur lors du chargement du statut Rames de papier:', response.message);
             }
         } catch (error) {
-            console.error('Erreur lors du chargement du statut RAME:', error);
+            console.error('Erreur lors du chargement du statut Rames de papier:', error);
         } finally {
             setLoading(false);
         }
     };
 
     const handleToggleRame = async (newValue) => {
-        const action = newValue ? 'apporté ses RAME' : 'pas apporté ses RAME';
+        const action = newValue ? 'apporté ses Rames de papier' : 'pas apporté ses Rames de papier';
         const icon = newValue ? 'success' : 'warning';
         
         const result = await Swal.fire({
-            title: 'Confirmer le statut RAME',
+            title: 'Confirmer le statut Rames de papier',
             html: `
                 <p>Confirmez-vous que <strong>${studentName}</strong> a <strong>${action}</strong> ?</p>
                 <div class="mt-3">
                     <label for="rameNotes" class="form-label">Notes (optionnel):</label>
-                    <textarea id="rameNotes" class="form-control" placeholder="Commentaires sur le statut RAME..."></textarea>
+                    <textarea id="rameNotes" class="form-control" placeholder="Commentaires sur le statut Rames de papier..."></textarea>
                 </div>
             `,
             icon: icon,
@@ -93,7 +93,7 @@ const RameStatusToggle = ({ studentId, studentName, onStatusChange = null }) => 
                 console.error('Erreur lors de la mise à jour:', error);
                 Swal.fire({
                     title: 'Erreur',
-                    text: error.message || 'Erreur lors de la mise à jour du statut RAME',
+                    text: error.message || 'Erreur lors de la mise à jour du statut Rames de papier',
                     icon: 'error'
                 });
             } finally {
@@ -107,7 +107,7 @@ const RameStatusToggle = ({ studentId, studentName, onStatusChange = null }) => 
             <Card className="border-info">
                 <Card.Body className="text-center py-3">
                     <Spinner animation="border" size="sm" className="me-2" />
-                    Chargement du statut RAME...
+                    Chargement du statut Rames de papier...
                 </Card.Body>
             </Card>
         );
@@ -117,7 +117,7 @@ const RameStatusToggle = ({ studentId, studentName, onStatusChange = null }) => 
         <Card className={`border-${rameStatus.has_brought_rame ? 'success' : 'warning'} mb-3`}>
             <Card.Header className={`bg-${rameStatus.has_brought_rame ? 'success' : 'warning'} text-white d-flex align-items-center`}>
                 <CupHot size={18} className="me-2" />
-                <strong>Statut RAME</strong>
+                <strong>Statut Rames de papier</strong>
             </Card.Header>
             <Card.Body>
                 <div className="d-flex align-items-center justify-content-between mb-3">
@@ -139,12 +139,12 @@ const RameStatusToggle = ({ studentId, studentName, onStatusChange = null }) => 
                                 {rameStatus.has_brought_rame ? (
                                     <>
                                         <Check size={16} className="me-1" />
-                                        A apporté sa RAME
+                                        A apporté sa Rames de papier
                                     </>
                                 ) : (
                                     <>
                                         <X size={16} className="me-1" />
-                                        N'a pas apporté sa RAME
+                                        N'a pas apporté sa Rames de papier
                                     </>
                                 )}
                             </Badge>

@@ -14,18 +14,18 @@ return new class extends Migration
     {
         Schema::table('payment_tranches', function (Blueprint $table) {
             $table->decimal('default_amount', 10, 2)->nullable()->after('description')
-                ->comment('Montant par défaut pour cette tranche (utilisé pour les tranches globales comme RAME)');
+                ->comment('Montant par défaut pour cette tranche (utilisé pour les tranches globales comme Rames de papier)');
             $table->boolean('use_default_amount')->default(false)->after('default_amount')
                 ->comment('Indique si cette tranche utilise le montant par défaut au lieu des montants par classe');
         });
 
-        // Mettre à jour la tranche RAME existante
-        DB::table('payment_tranches')
-            ->where('name', 'RAME')
+        // Mettre à jour la tranche Rames de papier existante
+        /*DB::table('payment_tranches')
+            ->where('name', 'Rames de papier')
             ->update([
                 'default_amount' => 5000,
                 'use_default_amount' => true
-            ]);
+            ]);*/
     }
 
     /**

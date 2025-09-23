@@ -217,7 +217,7 @@ class WhatsAppService
             'card' => '💳 Carte bancaire',
             'transfer' => '🏦 Virement',
             'check' => '📝 Chèque',
-            'rame_physical' => '🎫 RAME (Physique)',
+            'rame_physical' => '🎫 Rames de papier (Physique)',
             default => $payment->payment_method
         };
         

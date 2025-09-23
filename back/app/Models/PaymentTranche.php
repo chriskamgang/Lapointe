@@ -68,7 +68,7 @@ class PaymentTranche extends Model
     {
         $baseAmount = 0;
         
-        // Si cette tranche utilise un montant par défaut (comme RAME)
+        // Si cette tranche utilise un montant par défaut (comme Rames de papier)
         if ($this->use_default_amount && $this->default_amount) {
             $baseAmount = $this->default_amount;
         } else {

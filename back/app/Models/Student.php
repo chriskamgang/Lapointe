@@ -111,7 +111,7 @@ class Student extends Model
     }
 
     /**
-     * Relation avec le statut RAME
+     * Relation avec le statut Rames de papier
      */
     public function rameStatus()
     {

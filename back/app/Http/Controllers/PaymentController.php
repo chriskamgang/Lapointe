@@ -458,7 +458,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Marquer la RAME comme payée physiquement
+     * Marquer la Rames de papier comme payée physiquement
      */
     public function payRamePhysically(Request $request)
     {
@@ -489,13 +489,13 @@ class PaymentController extends Controller
                 return response()->json(['success' => false, 'message' => 'Étudiant non trouvé'], 404);
             }
 
-            // Récupérer la tranche RAME
-            $rameTranche = PaymentTranche::where('name', 'RAME')->first();
+            // Récupérer la tranche Rames de papier
+            $rameTranche = PaymentTranche::where('name', 'Rames de papier')->first();
             if (!$rameTranche) {
-                return response()->json(['success' => false, 'message' => 'Tranche RAME non trouvée'], 404);
+                return response()->json(['success' => false, 'message' => 'Tranche Rames de papier non trouvée'], 404);
             }
 
-            // Vérifier si la RAME n'a pas déjà été payée
+            // Vérifier si la Rames de papier n'a pas déjà été payée
             $existingRamePayment = Payment::where('student_id', $studentId)
                 ->where('school_year_id', $workingYear->id)
                 ->where('is_rame_physical', true)
@@ -504,11 +504,11 @@ class PaymentController extends Controller
             if ($existingRamePayment) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'La RAME a déjà été payée physiquement pour cet étudiant'
+                    'message' => 'La Rames de papier a déjà été payée physiquement pour cet étudiant'
                 ], 422);
             }
 
-            // Vérifier si la RAME n'a pas été payée électroniquement
+            // Vérifier si la Rames de papier n'a pas été payée électroniquement
             $existingElectronicRame = PaymentDetail::whereHas('payment', function ($query) use ($studentId, $workingYear) {
                 $query->where('student_id', $studentId)
                     ->where('school_year_id', $workingYear->id)
@@ -520,7 +520,7 @@ class PaymentController extends Controller
             if ($existingElectronicRame) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'La RAME a déjà été payée électroniquement pour cet étudiant'
+                    'message' => 'La Rames de papier a déjà été payée électroniquement pour cet étudiant'
                 ], 422);
             }
 
@@ -528,7 +528,7 @@ class PaymentController extends Controller
 
             $receiptNumber = Payment::generateReceiptNumber($workingYear, $paymentDate);
 
-            // Créer le paiement RAME physique
+            // Créer le paiement Rames de papier physique
             $payment = Payment::create([
                 'student_id' => $studentId,
                 'school_year_id' => $workingYear->id,
@@ -538,7 +538,7 @@ class PaymentController extends Controller
                 'validation_date' => now(),
                 'payment_method' => 'rame_physical',
                 'reference_number' => $request->input('reference_number'),
-                'notes' => $request->notes ?? 'Paiement RAME physique',
+                'notes' => $request->notes ?? 'Paiement Rames de papier physique',
                 'created_by_user_id' => Auth::id(),
                 'receipt_number' => $receiptNumber,
                 'is_rame_physical' => true,
@@ -549,7 +549,7 @@ class PaymentController extends Controller
                 'discount_reason' => null
             ]);
 
-            // Créer le détail de paiement pour la tranche RAME
+            // Créer le détail de paiement pour la tranche Rames de papier
             PaymentDetail::create([
                 'payment_id' => $payment->id,
                 'payment_tranche_id' => $rameTranche->id,
@@ -569,7 +569,7 @@ class PaymentController extends Controller
                 $whatsAppService = new \App\Services\WhatsAppService();
                 $whatsAppService->sendPaymentNotification($payment);
             } catch (\Exception $e) {
-                Log::warning('Erreur lors de l\'envoi de la notification WhatsApp pour paiement RAME physique', [
+                Log::warning('Erreur lors de l\'envoi de la notification WhatsApp pour paiement Rames de papier physique', [
                     'payment_id' => $payment->id,
                     'error' => $e->getMessage()
                 ]);
@@ -581,7 +581,7 @@ class PaymentController extends Controller
                     'payment' => $payment,
                     'receipt_number' => $receiptNumber
                 ],
-                'message' => 'RAME payée physiquement avec succès'
+                'message' => 'Rames de papier payée physiquement avec succès'
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -589,14 +589,14 @@ class PaymentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de l\'enregistrement du paiement RAME physique',
+                'message' => 'Erreur lors de l\'enregistrement du paiement Rames de papier physique',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Obtenir le statut RAME d'un étudiant
+     * Obtenir le statut Rames de papier d'un étudiant
      */
     public function getRameStatus($studentId)
     {
@@ -611,25 +611,25 @@ class PaymentController extends Controller
                 return response()->json(['success' => false, 'message' => 'Étudiant non trouvé'], 404);
             }
 
-            // Récupérer la tranche RAME
-            $rameTranche = PaymentTranche::where('name', 'RAME')->first();
+            // Récupérer la tranche Rames de papier
+            $rameTranche = PaymentTranche::where('name', 'Rames de papier')->first();
             if (!$rameTranche) {
                 return response()->json([
                     'success' => true,
                     'data' => [
                         'rame_available' => false,
-                        'message' => 'La tranche RAME n\'est pas configurée'
+                        'message' => 'La tranche Rames de papier n\'est pas configurée'
                     ]
                 ]);
             }
 
-            // Vérifier si la RAME a été payée physiquement
+            // Vérifier si la Rames de papier a été payée physiquement
             $physicalRamePayment = Payment::where('student_id', $studentId)
                 ->where('school_year_id', $workingYear->id)
                 ->where('is_rame_physical', true)
                 ->first();
 
-            // Vérifier si la RAME a été payée électroniquement
+            // Vérifier si la Rames de papier a été payée électroniquement
             $electronicRamePayment = PaymentDetail::whereHas('payment', function ($query) use ($studentId, $workingYear) {
                 $query->where('student_id', $studentId)
                     ->where('school_year_id', $workingYear->id)
@@ -666,7 +666,7 @@ class PaymentController extends Controller
                     'payment_date' => $electronicRamePayment->payment->payment_date ?? null
                 ];
             } else {
-                // RAME non payée - les deux options sont disponibles
+                // Rames de papier non payée - les deux options sont disponibles
                 $status['can_pay_physically'] = true;
                 $status['can_pay_electronically'] = true;
             }
@@ -679,7 +679,7 @@ class PaymentController extends Controller
             Log::error('Error in PaymentController@getRameStatus: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération du statut RAME',
+                'message' => 'Erreur lors de la récupération du statut Rames de papier',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -861,14 +861,14 @@ class PaymentController extends Controller
         $workingYear = $payment->schoolYear;
         $paymentStatus = $this->getPaymentStatusAtTime($student, $payment);
 
-        // Vérifier si l'étudiant a payé sa RAME (physique ou électronique)
+        // Vérifier si l'étudiant a payé sa Rames de papier (physique ou électronique)
         $hasRamePaid = $this->checkIfRamePaid($student, $workingYear, $payment);
 
         // Générer le tableau des détails de paiement
         $paymentDetailsRows = '';
         $operationNumber = 1;
 
-        // Ajouter TOUJOURS la ligne RAME en premier
+        // Ajouter TOUJOURS la ligne Rames de papier en premier
         $rameValidationDate = \Carbon\Carbon::parse($payment->versement_date)->format('d/m/Y');
         if ($hasRamePaid['paid']) {
             $rameBankName = 'local';
@@ -883,7 +883,7 @@ class PaymentController extends Controller
                 <td style='border: 1px solid #000; padding: 4px; text-align: center;'>{$operationNumber}</td>
                 <td style='border: 1px solid #000; padding: 4px; text-align: center;'>{$rameBankName}</td>
                 <td style='border: 1px solid #000; padding: 4px; text-align: center;'>{$rameValidationDate}</td>
-                <td style='border: 1px solid #000; padding: 4px; text-align: center;'>RAME</td>
+                <td style='border: 1px solid #000; padding: 4px; text-align: center;'>Rames de papier</td>
                 <td style='border: 1px solid #000; padding: 4px; text-align: right;'>{$rameAmount}</td>
             </tr>
         ";
@@ -1504,7 +1504,7 @@ class PaymentController extends Controller
     private function getPaymentTypeLabel($payment)
     {
         if ($payment->is_rame_physical) {
-            return 'RAME';
+            return 'Rames de papier';
         }
 
         $method = strtoupper($payment->payment_method);
@@ -1752,7 +1752,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Vérifier si l'étudiant a apporté sa RAME
+     * Vérifier si l'étudiant a apporté sa Rames de papier
      */
     private function checkIfRamePaid($student, $workingYear, $currentPayment)
     {
@@ -1777,7 +1777,7 @@ class PaymentController extends Controller
             'card' => 'Carte bancaire',
             'transfer' => 'Virement',
             'check' => 'Chèque',
-            'rame_physical' => 'RAME Physique'
+            'rame_physical' => 'Rames de papier Physique'
         ];
 
         return $methods[$method] ?? ucfirst($method);
@@ -1820,14 +1820,14 @@ class PaymentController extends Controller
         $workingYear = $payment->schoolYear;
         $paymentStatus = $this->getPaymentStatusAtTime($student, $payment);
 
-        // Vérifier si l'étudiant a payé sa RAME (physique ou électronique)
+        // Vérifier si l'étudiant a payé sa Rames de papier (physique ou électronique)
         $hasRamePaid = $this->checkIfRamePaid($student, $workingYear, $payment);
 
         // Générer le tableau des détails de paiement
         $paymentDetailsRows = '';
         $operationNumber = 1;
 
-        // Ajouter TOUJOURS la ligne RAME en premier
+        // Ajouter TOUJOURS la ligne Rames de papier en premier
         $rameValidationDate = \Carbon\Carbon::parse($payment->versement_date)->format('d/m/Y');
         if ($hasRamePaid['paid']) {
             $rameBankName = 'local';
@@ -1842,7 +1842,7 @@ class PaymentController extends Controller
                 <td style='border: 1px solid #000; padding: 4px; text-align: center;'>{$operationNumber}</td>
                 <td style='border: 1px solid #000; padding: 4px; text-align: center;'>{$rameBankName}</td>
                 <td style='border: 1px solid #000; padding: 4px; text-align: center;'>{$rameValidationDate}</td>
-                <td style='border: 1px solid #000; padding: 4px; text-align: center;'>RAME</td>
+                <td style='border: 1px solid #000; padding: 4px; text-align: center;'>Rames de papier</td>
                 <td style='border: 1px solid #000; padding: 4px; text-align: right;'>{$rameAmount}</td>
             </tr>
         ";
@@ -3164,7 +3164,7 @@ class PaymentController extends Controller
             $totalScholarships = $existingPayments->sum('scholarship_amount');
             $totalReductions = $existingPayments->sum('reduction_amount');
 
-            // Vérifier le statut RAME
+            // Vérifier le statut Rames de papier
             $rameStatus = $this->getRameStatus($studentId);
             $rameData = json_decode($rameStatus->getContent(), true);
 

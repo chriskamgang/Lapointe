@@ -25,7 +25,7 @@ class StudentRameController extends Controller
     }
 
     /**
-     * Obtenir le statut RAME d'un étudiant
+     * Obtenir le statut Rames de papier d'un étudiant
      */
     public function getRameStatus($studentId)
     {
@@ -63,14 +63,14 @@ class StudentRameController extends Controller
             Log::error('Error in StudentRameController@getRameStatus: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération du statut RAME',
+                'message' => 'Erreur lors de la récupération du statut Rames de papier',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Modifier le statut RAME d'un étudiant
+     * Modifier le statut Rames de papier d'un étudiant
      */
     public function updateRameStatus(Request $request, $studentId)
     {
@@ -98,10 +98,10 @@ class StudentRameController extends Controller
 
             if ($request->has_brought_rame) {
                 $rameStatus->markAsBrought(Auth::id(), $request->notes);
-                $message = "Statut RAME mis à jour : l'étudiant a apporté sa RAME";
+                $message = "Statut Rames de papier mis à jour : l'étudiant a apporté sa Rames de papier";
             } else {
                 $rameStatus->markAsNotBrought(Auth::id(), $request->notes);
-                $message = "Statut RAME mis à jour : l'étudiant n'a pas apporté sa RAME";
+                $message = "Statut Rames de papier mis à jour : l'étudiant n'a pas apporté sa Rames de papier";
             }
 
             return response()->json([
@@ -126,14 +126,14 @@ class StudentRameController extends Controller
             Log::error('Error in StudentRameController@updateRameStatus: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la mise à jour du statut RAME',
+                'message' => 'Erreur lors de la mise à jour du statut Rames de papier',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Obtenir la liste des étudiants avec leur statut RAME pour une classe/série
+     * Obtenir la liste des étudiants avec leur statut Rames de papier pour une classe/série
      */
     public function getClassRameStatus($classSeriesId)
     {
@@ -182,14 +182,14 @@ class StudentRameController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $studentsWithRameStatus,
-                'message' => 'Statuts RAME récupérés avec succès'
+                'message' => 'Statuts Rames de papier récupérés avec succès'
             ]);
 
         } catch (\Exception $e) {
             Log::error('Error in StudentRameController@getClassRameStatus: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération des statuts RAME de la classe',
+                'message' => 'Erreur lors de la récupération des statuts Rames de papier de la classe',
                 'error' => $e->getMessage()
             ], 500);
         }

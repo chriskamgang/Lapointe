@@ -2,7 +2,7 @@
 
 ## Nouvelles Fonctionnalités Ajoutées
 
-### 1. 🍽️ Affichage du Statut RAME
+### 1. 🍽️ Affichage du Statut Rames de papier
 
 **Emplacement :** Colonne de droite, au-dessus de l'historique des paiements
 
@@ -19,7 +19,7 @@
     studentId={studentId}
     studentName={`${student.first_name} ${student.last_name}`}
     onStatusChange={(newStatus) => {
-        console.log('Statut RAME mis à jour:', newStatus);
+        console.log('Statut Rames de papier mis à jour:', newStatus);
     }}
 />
 ```
@@ -45,7 +45,7 @@
 ### 3. 🎨 Améliorations UI/UX
 
 **Interface repensée :**
-- Statut RAME visible en permanence
+- Statut Rames de papier visible en permanence
 - Bouton de paiement rapide accessible
 - Confirmation visuelle des actions
 - Messages d'erreur clairs
@@ -57,7 +57,7 @@
 
 **Ajouts :**
 ```jsx
-// Import du composant RAME
+// Import du composant Rames de papier
 import RameStatusToggle from '../../components/RameStatusToggle';
 
 // Fonction de paiement rapide
@@ -72,21 +72,21 @@ const handleQuickPayment = async () => {
 **Modifications :**
 - Ajout du bouton "Paiement Rapide" dans l'en-tête du tableau
 - Intégration du composant RameStatusToggle dans la colonne de droite
-- Suppression de l'ancienne school RAME complexe
+- Suppression de l'ancienne school Rames de papier complexe
 
 ### Backend (Déjà implémenté)
 
 **APIs disponibles :**
-- `GET /api/student-rame/student/{studentId}/status` - Statut RAME
-- `POST /api/student-rame/student/{studentId}/update` - Modifier statut RAME
+- `GET /api/student-rame/student/{studentId}/status` - Statut Rames de papier
+- `POST /api/student-rame/student/{studentId}/update` - Modifier statut Rames de papier
 - `POST /api/payments` - Enregistrer paiement rapide
 
 ## Flux d'Utilisation
 
-### Scénario 1 : Vérifier et modifier le statut RAME
+### Scénario 1 : Vérifier et modifier le statut Rames de papier
 
 1. **Accéder** à la page de paiement d'un étudiant
-2. **Visualiser** le statut RAME actuel dans la colonne de droite
+2. **Visualiser** le statut Rames de papier actuel dans la colonne de droite
 3. **Cliquer** sur le switch pour modifier le statut
 4. **Confirmer** avec notes optionnelles
 5. **Statut mis à jour** automatiquement avec traçabilité
@@ -108,10 +108,10 @@ const handleQuickPayment = async () => {
 1. **Page de paiement** affiche maintenant :
    - Statuts des paiements par tranche
    - Historique des paiements existants
-   - **Statut RAME** en permanence visible
+   - **Statut Rames de papier** en permanence visible
    - **Bouton de paiement rapide** accessible
 2. **Actions possibles** en une page :
-   - Marquer statut RAME
+   - Marquer statut Rames de papier
    - Enregistrer nouveau paiement
    - Consulter l'historique
    - Voir les statuts détaillés
@@ -131,7 +131,7 @@ const handleQuickPayment = async () => {
 
 ### 📊 **Efficacité**
 - Paiements plus rapides à enregistrer
-- Statut RAME facile à gérer
+- Statut Rames de papier facile à gérer
 - Vue d'ensemble complète en une page
 
 ### 🔧 **Maintenance**
@@ -149,7 +149,7 @@ const handleQuickPayment = async () => {
 - Authentification et rôles
 
 **❌ Remplace :**
-- Ancienne logique RAME complexe
-- School RAME dans le modal de paiement
+- Ancienne logique Rames de papier complexe
+- School Rames de papier dans le modal de paiement
 
 Les améliorations sont **entièrement rétrocompatibles** et n'affectent pas les fonctionnalités existantes ! 🎉
