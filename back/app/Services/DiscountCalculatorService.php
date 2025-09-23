@@ -5,15 +5,19 @@ namespace App\Services;
 use App\Models\Student;
 use App\Models\SchoolSetting;
 use App\Models\ClassScholarship;
+use App\Models\UniversityScholarship;
+use App\Services\ScholarshipService;
 use Carbon\Carbon;
 
 class DiscountCalculatorService
 {
     private $schoolSettings;
+    private $scholarshipService;
 
     public function __construct()
     {
         $this->schoolSettings = SchoolSetting::getSettings();
+        $this->scholarshipService = new ScholarshipService();
     }
 
     /**
@@ -37,8 +41,8 @@ class DiscountCalculatorService
             return false;
         }
 
-        // Condition 2: La classe ne doit PAS avoir de bourse (exclusion mutuelle)
-        if ($this->getClassScholarship($student)) {
+        // Condition 2: L'étudiant ne doit PAS avoir de bourse (classe ou université) (exclusion mutuelle)
+        if ($this->getClassScholarship($student) || $this->getUniversityScholarship($student)) {
             return false;
         }
 
@@ -207,8 +211,8 @@ class DiscountCalculatorService
      */
     public function getPaymentType($student, float $paymentAmount, float $totalRemaining, $versementDate, bool $hasExistingPayments): string
     {
-        // Vérifier si a une bourse
-        if ($this->getClassScholarship($student)) {
+        // Vérifier si a une bourse (classe ou université)
+        if ($this->getClassScholarship($student) || $this->getUniversityScholarship($student)) {
             return 'scholarship';
         }
         
@@ -227,5 +231,78 @@ class DiscountCalculatorService
     public function getDiscountPercentage(): float
     {
         return $this->schoolSettings->reduction_percentage ?? 0;
+    }
+
+    /**
+     * Obtenir la bourse universitaire d'un étudiant selon son niveau
+     *
+     * @param Student $student
+     * @return array|null
+     */
+    public function getUniversityScholarship(Student $student): ?array
+    {
+        $scholarshipData = $this->scholarshipService->calculateScholarship($student);
+        
+        if ($scholarshipData['eligible'] && $scholarshipData['amount'] > 0) {
+            return $scholarshipData;
+        }
+        
+        return null;
+    }
+
+    /**
+     * Obtenir toutes les bourses disponibles pour un étudiant (classe + université)
+     *
+     * @param Student $student
+     * @return array
+     */
+    public function getAllScholarships(Student $student): array
+    {
+        $scholarships = [];
+        
+        // Bourse de classe
+        $classScholarship = $this->getClassScholarship($student);
+        if ($classScholarship) {
+            $scholarships['class'] = [
+                'type' => 'class',
+                'amount' => $classScholarship->amount,
+                'payment_tranche_id' => $classScholarship->payment_tranche_id,
+                'name' => 'Bourse de classe',
+                'conditions' => $classScholarship->conditions ?? 'Bourse automatique de classe'
+            ];
+        }
+        
+        // Bourse universitaire
+        $universityScholarship = $this->getUniversityScholarship($student);
+        if ($universityScholarship) {
+            $scholarships['university'] = [
+                'type' => 'university',
+                'amount' => $universityScholarship['amount'],
+                'payment_tranche_id' => null, // Les bourses universitaires s'appliquent au total
+                'name' => 'Bourse universitaire (niveau ' . $student->current_level . ')',
+                'conditions' => $universityScholarship['conditions'] ?? 'Bourse automatique selon le niveau',
+                'laptop_eligible' => $universityScholarship['laptop_eligible'] ?? false
+            ];
+        }
+        
+        return $scholarships;
+    }
+
+    /**
+     * Calculer le montant total des bourses disponibles
+     *
+     * @param Student $student
+     * @return float
+     */
+    public function getTotalScholarshipAmount(Student $student): float
+    {
+        $scholarships = $this->getAllScholarships($student);
+        $total = 0;
+        
+        foreach ($scholarships as $scholarship) {
+            $total += $scholarship['amount'];
+        }
+        
+        return $total;
     }
 }
