@@ -31,7 +31,6 @@ class PaymentStatusService
 
         $totalRequired = $trancheDetails['totalRequired'];
         $totalPaid = $trancheDetails['totalPaid'];
-        $totalEffectiveRequired = $trancheDetails['totalEffectiveRequired']; // Montant requis après bourses/réductions
 
         $discountInfo = $this->calculateDiscountEligibility(
             $student,
@@ -46,13 +45,16 @@ class PaymentStatusService
             $totalRequiredWithDiscount = $discountInfo['finalAmount'];
         }
 
+        // Ajouter la bourse GLOBALE au total payé (pas les allocations par tranche)
+        $totalPaidWithScholarship = $totalPaid + $totalScholarshipAmount;
+        
         return (object) [
             'student_id' => $student->id,
             'school_year_id' => $schoolYear->id,
             // Montants normaux affichés partout
             'total_required' => $totalRequired,
-            'total_paid' => $totalPaid,
-            'total_remaining' => max(0, $totalEffectiveRequired - $totalPaid),
+            'total_paid' => $totalPaidWithScholarship, // Inclut la bourse complète
+            'total_remaining' => max(0, $totalRequired - $totalPaidWithScholarship),
             // Informations sur les bourses (pour calcul de répartition)
             'total_scholarship_amount' => $totalScholarshipAmount,
             'has_scholarships' => $totalScholarshipAmount > 0,
@@ -96,7 +98,6 @@ class PaymentStatusService
         $trancheStatus = [];
         $totalRequired = 0;
         $totalPaid = 0;
-        $totalEffectiveRequired = 0; // Montant requis après réductions/bourses
 
         // Vérifier si la rame a été payée physiquement
         $ramePhysicalStatus = \App\Models\StudentEquipmentStatus::where('student_id', $student->id)
@@ -151,14 +152,29 @@ class PaymentStatusService
             $requiredAmount = $tranche->getAmountForStudent($student, false, false, false); // Montants NORMAUX
             if ($requiredAmount <= 0 && !$isPhysicalOnly) continue; // Pour les tranches physiques, on continue même si le montant est 0
 
-            // Si c'est une rame payée physiquement, ajuster les montants
-            if ($ramePaid) {
-                $paidAmount = 0; // Considéré comme payé
-                $remainingAmount = 0; // Plus rien à payer
-                $isFullyPaid = true; // Marqué comme payé
+            // Calculer le montant payé pour cette tranche
+            $electronicPaidAmount = $paidPerTranche[$tranche->id] ?? 0;
+            
+            // Si c'est une rame : vérifier si payée électroniquement ET physiquement
+            if ($isRameTranche) {
+                if ($ramePaid && $electronicPaidAmount >= $requiredAmount) {
+                    // Rame payée DEUX FOIS (électroniquement + physiquement)
+                    // Considérer comme un CRÉDIT supplémentaire de 22,500 FCFA
+                    $paidAmount = $requiredAmount + $requiredAmount; // Double paiement = crédit
+                } else if ($ramePaid) {
+                    // Rame payée SEULEMENT physiquement
+                    $paidAmount = $requiredAmount;
+                } else {
+                    // Rame payée SEULEMENT électroniquement (ou pas du tout)
+                    $paidAmount = $electronicPaidAmount;
+                }
+                $remainingAmount = 0; // Rame toujours considérée comme complète
+                $isFullyPaid = true;
             } else {
-                $paidAmount = $paidPerTranche[$tranche->id] ?? 0;
+                // Tranche normale
+                $paidAmount = $electronicPaidAmount;
                 $remainingAmount = max(0, $requiredAmount - $paidAmount);
+                $isFullyPaid = $paidAmount >= $requiredAmount;
             }
 
             // Vérifier si cette tranche bénéficie d'une bourse
@@ -179,26 +195,8 @@ class PaymentStatusService
                     $hasScholarship = true;
                     $scholarshipType = 'class';
                     
-                    // Pour le statut, considérer qu'une tranche est "complète" si: montant payé + bourse >= montant normal
+                    // Pour le statut, une tranche est "complète" si paiement + bourse >= montant requis
                     $isFullyPaid = ($paidAmount + $scholarshipAmount) >= $requiredAmount;
-                }
-                // Vérifier bourse universitaire (s'applique au premier paiement)
-                else if ($universityScholarship && $paidAmount == 0) {
-                    // Les bourses universitaires s'appliquent proportionnellement sur toutes les tranches
-                    $totalTrancheAmount = 0;
-                    foreach ($paymentTranches as $t) {
-                        $totalTrancheAmount += $t->getAmountForStudent($student, false, false, false);
-                    }
-                    
-                    if ($totalTrancheAmount > 0) {
-                        $proportionalScholarship = ($requiredAmount / $totalTrancheAmount) * $universityScholarship['amount'];
-                        $scholarshipAmount = min($proportionalScholarship, $requiredAmount);
-                        $hasScholarship = true;
-                        $scholarshipType = 'university';
-                        
-                        // Pour le statut, considérer qu'une tranche est "complète" si: montant payé + bourse >= montant normal
-                        $isFullyPaid = ($paidAmount + $scholarshipAmount) >= $requiredAmount;
-                    }
                 }
                 else {
                     // Cas normal - utiliser les informations de réduction stockées
@@ -216,7 +214,16 @@ class PaymentStatusService
                 }
             }
 
+            // Recalculer le montant restant en tenant compte des bourses
+            if ($hasScholarship && !$isRameTranche) {
+                $totalPaidForTranche = $paidAmount + $scholarshipAmount;
+                $remainingAmount = max(0, $requiredAmount - $totalPaidForTranche);
+            }
+
             $trancheStatus[] = [
+                'tranche_id' => $tranche->id,
+                'tranche_name' => $tranche->name,
+                'tranche_description' => $tranche->description,
                 'tranche' => $tranche,
                 'required_amount' => $requiredAmount,
                 'paid_amount' => $paidAmount,
@@ -229,28 +236,28 @@ class PaymentStatusService
                 'global_discount_amount' => $globalDiscountAmount,
                 'discount_percentage' => $hasGlobalDiscount ? $discountPercentage : 0,
                 'is_physical_only' => $isPhysicalOnly,
+                'is_rame_physical' => $ramePaid,
                 'rame_paid' => $ramePaid,
             ];
 
-            // Pour les tranches physiques (rame), ne pas inclure dans les totaux si payées
-            if (!$isPhysicalOnly || !$ramePaid) {
-                $totalRequired += $requiredAmount;
-                $totalPaid += $ramePaid ? $requiredAmount : $paidAmount; // Si rame payée, considérer comme totalement payée
-                
-                // Calculer le montant effectivement requis (avec bourses/réductions)
-                $effectiveRequired = $requiredAmount;
-                if ($hasScholarship) {
-                    $effectiveRequired = max(0, $requiredAmount - $scholarshipAmount);
-                } elseif ($hasGlobalDiscount) {
-                    $effectiveRequired = $requiredAmount - $globalDiscountAmount;
-                }
-                
-                // Si la rame est payée physiquement, effectiveRequired = 0
-                if ($ramePaid) {
-                    $effectiveRequired = 0;
-                }
-                
-                $totalEffectiveRequired += $effectiveRequired;
+            // Inclure TOUTES les tranches dans les totaux
+            $totalRequired += $requiredAmount;
+            
+            // Total payé = SEULEMENT les paiements effectués
+            // (La rame est déjà incluse dans $paidAmount si elle est payée physiquement)
+            // (La bourse sera ajoutée globalement à la fin)
+            $totalPaid += $paidAmount;
+        }
+
+        // Vérifier si le total global est payé (incluant bourses)
+        $totalScholarshipAmount = $this->calculateTotalScholarshipAmount($student, $paymentTranches);
+        $totalPaidWithScholarship = $totalPaid + $totalScholarshipAmount;
+        
+        // Si le total est entièrement payé, marquer toutes les tranches comme complètes
+        if ($totalPaidWithScholarship >= $totalRequired) {
+            foreach ($trancheStatus as &$status) {
+                $status['is_fully_paid'] = true;
+                $status['remaining_amount'] = 0;
             }
         }
 
@@ -258,7 +265,6 @@ class PaymentStatusService
             'status' => $trancheStatus,
             'totalRequired' => $totalRequired,
             'totalPaid' => $totalPaid,
-            'totalEffectiveRequired' => $totalEffectiveRequired,
         ];
     }
 

@@ -67,9 +67,9 @@ class PaymentController extends Controller
 
             $paymentStatus = $this->paymentStatusService->getStatusForStudent($student, $workingYear);
 
-            // Calculer les montants effectifs avec les bourses appliquées
+            // Le reste à payer inclut déjà la bourse déduite
             $scholarshipAmount = $paymentStatus->total_scholarship_amount;
-            $effectiveRemaining = max(0, $paymentStatus->total_remaining - $scholarshipAmount);
+            $effectiveRemaining = $paymentStatus->total_remaining;
 
             $response_data = [
                 'student' => $student,
