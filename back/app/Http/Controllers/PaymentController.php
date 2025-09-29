@@ -249,7 +249,9 @@ class PaymentController extends Controller
             'versement_date' => 'required|date',
             'apply_global_discount' => 'nullable|boolean',
             'apply_scholarship' => 'nullable|boolean', // Nouveau paramètre
-            'scholarship_amount' => 'nullable|numeric|min:0', // Nouveau paramètre
+            'scholarship_amount' => 'nullable|numeric|min:0',
+            'selected_optional_tranches' => 'nullable|array',
+            'selected_optional_tranches.*' => 'integer',
         ]);
 
         if ($validator->fails()) {
@@ -378,9 +380,9 @@ class PaymentController extends Controller
 
             // Allouer le paiement selon le type
             if ($paymentType === 'global_discount') {
-                $this->allocatePaymentToTranchesWithGlobalDiscount($payment, $student, $workingYear, $paymentStatus->payment_tranches);
+                $this->allocatePaymentToTranchesWithGlobalDiscount($payment, $student, $workingYear, $paymentStatus->tranche_status, $request->selected_optional_tranches ?? []);
             } else {
-                $this->allocatePaymentToTranches($payment, $student, $workingYear, $paymentStatus->payment_tranches);
+                $this->allocatePaymentToTranches($payment, $student, $workingYear, $paymentStatus->tranche_status, $request->selected_optional_tranches ?? []);
             }
 
             DB::commit();
@@ -411,7 +413,7 @@ class PaymentController extends Controller
         }
     }
 
-    private function allocatePaymentToTranches(Payment $payment, Student $student, SchoolYear $workingYear, $paymentTranches)
+    private function allocatePaymentToTranches(Payment $payment, Student $student, SchoolYear $workingYear, $trancheStatuses, $selectedOptional = [])
     {
         $remainingAmountToAllocate = $payment->total_amount;
 
@@ -432,7 +434,8 @@ class PaymentController extends Controller
             $scholarshipTrancheId = $scholarship->payment_tranche_id;
             
             // Process the scholarship tranche first if it exists in the list
-            foreach ($paymentTranches as $tranche) {
+            foreach ($trancheStatuses as $status) {
+                $tranche = $status['tranche'];
                 if ($tranche->id == $scholarshipTrancheId && $remainingAmountToAllocate > 0) {
                     $requiredAmount = $tranche->getAmountForStudent($student, false, $payment->has_reduction, false);
                     // Apply scholarship to required amount
@@ -474,9 +477,14 @@ class PaymentController extends Controller
         }
 
         // Process remaining tranches
-        foreach ($paymentTranches as $tranche) {
+        foreach ($trancheStatuses as $status) {
+            $tranche = $status['tranche'];
             // Skip if this is the scholarship tranche (already processed)
             if ($hasScholarship && $scholarship && $tranche->id == $scholarship->payment_tranche_id) {
+                continue;
+            }
+
+            if ($status['is_optional'] && !in_array($tranche->id, $selectedOptional)) {
                 continue;
             }
             
@@ -774,7 +782,7 @@ class PaymentController extends Controller
     /**
      * Allouer le paiement aux tranches avec réduction globale
      */
-    private function allocatePaymentToTranchesWithGlobalDiscount(Payment $payment, Student $student, SchoolYear $workingYear, $paymentTranches)
+    private function allocatePaymentToTranchesWithGlobalDiscount(Payment $payment, Student $student, SchoolYear $workingYear, $trancheStatuses, $selectedOptional = [])
     {
         $remainingAmountToAllocate = $payment->total_amount;
         $schoolSettings = \App\Models\SchoolSetting::getSettings();
@@ -787,8 +795,13 @@ class PaymentController extends Controller
             ->with(['paymentDetails.paymentTranche'])
             ->get();
 
-        foreach ($paymentTranches as $tranche) {
+        foreach ($trancheStatuses as $status) {
+            $tranche = $status['tranche'];
             if ($remainingAmountToAllocate <= 0) break;
+
+            if ($status['is_optional'] && !in_array($tranche->id, $selectedOptional)) {
+                continue;
+            }
 
             // Calculer les montants normal et réduit
             $normalAmount = $tranche->getAmountForStudent($student, false, false, false, false);
@@ -818,7 +831,7 @@ class PaymentController extends Controller
                     'amount_allocated' => $amountToAllocate,
                     'previous_amount' => $previouslyPaid,
                     'new_total_amount' => $newTotalAmount,
-                    'is_fully_paid' => $newTotalAmount >= $reducedAmount,
+                    'is_fully_paid' => $newTotalAmount >= $reducedAmount, // Stocker le montant réduit
                     'required_amount_at_time' => $reducedAmount, // Stocker le montant réduit
                     'was_reduced' => true,
                     'reduction_context' => "Réduction globale {$discountPercentage}% appliquée - Normal: " . number_format($normalAmount, 0) . " FCFA"

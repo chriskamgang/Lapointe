@@ -903,7 +903,8 @@ class DatabaseSeeder extends Seeder
         $btsElectrotechnique = [
             'Maintenance des Appareils Biomédicaux',
             'Maintenance des Systèmes Électroniques',
-            'Contrôle, Instrumentation et Régulation'
+            'Contrôle, Instrumentation et Régulation',
+            'Electrotechnique'
         ];
 
         // BTS Génie Mécanique et Productique

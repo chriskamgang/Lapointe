@@ -25,6 +25,8 @@ const StudentPayment = () => {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [initialPaymentData, setInitialPaymentData] = useState(null);
+  const [selectedOptional, setSelectedOptional] = useState([]);
 
   // États pour les totaux
   const [totals, setTotals] = useState({
@@ -83,6 +85,35 @@ const StudentPayment = () => {
     }
   }, [studentId]);
 
+  useEffect(() => {
+    if (!initialPaymentData) return;
+
+    let newRequired = 0;
+    initialPaymentData.payment_status.forEach(status => {
+      if (!status.is_optional || selectedOptional.includes(status.tranche_id)) {
+        newRequired += status.required_amount;
+      }
+    });
+
+    const newTotals = {
+      ...totals,
+      required: newRequired,
+      remaining: Math.max(0, newRequired - initialPaymentData.total_paid),
+    };
+    setTotals(newTotals);
+
+  }, [selectedOptional, initialPaymentData]);
+
+  const handleOptionalTrancheToggle = (trancheId) => {
+    setSelectedOptional(prev => {
+      if (prev.includes(trancheId)) {
+        return prev.filter(id => id !== trancheId);
+      } else {
+        return [...prev, trancheId];
+      }
+    });
+  };
+
   const loadStudentData = async () => {
     setLoading(true);
     try {
@@ -96,9 +127,15 @@ const StudentPayment = () => {
       if (studentResponse.success) setStudent(studentResponse.data);
 
       if (paymentResponse.success) {
+        setInitialPaymentData(paymentResponse.data);
         setStudent(paymentResponse.data.student);
         setPaymentStatus(paymentResponse.data.payment_status);
         setSchoolYear(paymentResponse.data.school_year);
+
+        const initiallySelected = paymentResponse.data.payment_status
+            .filter(s => s.is_optional && s.paid_amount > 0)
+            .map(s => s.tranche_id);
+        setSelectedOptional(initiallySelected);
 
         // Calculer les totaux avec réductions globales
         let totalGlobalDiscountAmount = 0;
@@ -273,7 +310,8 @@ const StudentPayment = () => {
         payment_date: paymentForm.payment_date,
         versement_date: paymentForm.versement_date,
         apply_global_discount: paymentForm.apply_discount,
-        equipment_actions: equipmentActions
+        equipment_actions: equipmentActions,
+        selected_optional_tranches: selectedOptional,
       };
 
       const response = await secureApiEndpoints.payments.create(paymentData);
@@ -1101,14 +1139,21 @@ const StudentPayment = () => {
                   {paymentStatus.map((status, index) => (
                     <tr key={index} className={status.is_physical_only ? 'table-info' : status.is_optional ? 'table-secondary' : ''}>
                       <td>
-                        {status.tranche.name}
+                        {status.is_optional ? (
+                            <Form.Check
+                                type="checkbox"
+                                id={`tranche-${status.tranche_id}`}
+                                label={status.tranche.name}
+                                checked={selectedOptional.includes(status.tranche_id)}
+                                onChange={() => handleOptionalTrancheToggle(status.tranche_id)}
+                            />
+                        ) : (
+                            status.tranche.name
+                        )}
                         {status.is_physical_only && (
                           <small className="text-info d-block">
                             <strong>(Paiement physique uniquement)</strong>
                           </small>
-                        )}
-                        {status.is_optional && !status.is_physical_only && (
-                          <small className="text-muted d-block">(Optionnelle)</small>
                         )}
                       </td>
                       <td>

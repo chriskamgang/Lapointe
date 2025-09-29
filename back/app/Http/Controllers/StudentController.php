@@ -294,6 +294,7 @@ class StudentController extends Controller
             $studentData['school_year_id'] = $workingYear->id;
             $studentData['order'] = $maxOrder + 1; // Ajouter à la fin par défaut
             $studentData['is_active'] = true;
+            $studentData['is_new'] = true; // New students are always new
             
             // Gérer le champ has_scholarship_enabled
             if (isset($studentData['has_scholarship_enabled'])) {
@@ -355,6 +356,7 @@ class StudentController extends Controller
             'class_series_id' => 'required|exists:class_series,id',
             'school_year_id' => 'nullable|exists:school_years,id', // Optionnel lors de la modification
             'is_active' => 'boolean',
+            'is_new' => 'nullable|boolean',
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' // 5MB max
         ]);
 
@@ -455,6 +457,7 @@ public function show(Student $student)
             'class_series_id' => 'required|exists:class_series,id',
             'school_year_id' => 'nullable|exists:school_years,id', // Make nullable for update
             'is_active' => 'nullable|boolean',
+            'is_new' => 'nullable|boolean',
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' // 5MB max
         ]);
 

@@ -856,7 +856,6 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
     );
 };
 
-// Composant pour éditer un étudiant
 const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
     const [formData, setFormData] = useState({
         first_name: '',
@@ -871,6 +870,7 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
         current_level: 1,
         bts_mention: '',
         has_scholarship_enabled: true,
+        is_new: true,
         notes: ''
     });
     
@@ -893,6 +893,7 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
                 current_level: student.current_level || 1,
                 bts_mention: student.bts_mention || '',
                 has_scholarship_enabled: student.has_scholarship_enabled !== false,
+                is_new: student.is_new === null ? true : student.is_new,
                 notes: student.notes || ''
             });
         }
@@ -1138,6 +1139,21 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
                             </Form.Group>
                         </Col>
                     </Row>
+
+                    {series?.schoolClass?.level?.order > 1 && (
+                        <Form.Group className="mb-3">
+                            <Form.Check
+                                type="switch"
+                                id="is-new-switch"
+                                label="Nouvel étudiant cette année"
+                                checked={formData.is_new}
+                                onChange={(e) => handleInputChange('is_new', e.target.checked)}
+                            />
+                            <Form.Text className="text-muted">
+                                Un nouvel étudiant paie les frais de dossier, même en année supérieure. Décochez si c'est un ancien étudiant qui se réinscrit.
+                            </Form.Text>
+                        </Form.Group>
+                    )}
                         
                     {needsBTSMention() && (
                         <Row>

@@ -99,6 +99,17 @@ class PaymentStatusService
         $totalRequired = 0;
         $totalPaid = 0;
 
+        $isOldStudent = !$student->is_new;
+        $level = $student->classSeries && $student->classSeries->schoolClass ? $student->classSeries->schoolClass->level : null;
+        
+        // Condition pour être considéré comme "ancien" : non nouveau ET niveau > 1
+        if ($level && $level->order > 1) {
+            $isOldStudent = !$student->is_new;
+        } else {
+            $isOldStudent = false;
+        }
+
+
         // Vérifier si la rame a été payée physiquement
         $ramePhysicalStatus = \App\Models\StudentEquipmentStatus::where('student_id', $student->id)
             ->where('school_year_id', $student->school_year_id)
@@ -144,6 +155,17 @@ class PaymentStatusService
         $allScholarships = $discountCalculator->getAllScholarships($student);
 
         foreach ($paymentTranches as $tranche) {
+            $trancheName = strtolower($tranche->name);
+
+            if ($isOldStudent && $trancheName === 'étude de dossier') {
+                continue; // Skip this tranche for old students
+            }
+
+            $isOptional = false;
+            if ($isOldStudent && in_array($trancheName, ['polo', 'blouse'])) {
+                $isOptional = true;
+            }
+
             // Vérifier si c'est une tranche de rame et si elle a été payée physiquement
             $isRameTranche = strtolower($tranche->name) === 'rame' || stripos($tranche->name, 'rame') !== false;
             $isPhysicalOnly = $tranche->is_physical_only ?? false;
@@ -234,14 +256,21 @@ class PaymentStatusService
                 'scholarship_type' => $scholarshipType,
                 'has_global_discount' => $hasGlobalDiscount,
                 'global_discount_amount' => $globalDiscountAmount,
-                'discount_percentage' => $hasGlobalDiscount ? $discountPercentage : 0,
+                'discount_percentage' => $hasGlobalDiscount ? ($discountPercentage ?? 0) : 0,
                 'is_physical_only' => $isPhysicalOnly,
                 'is_rame_physical' => $ramePaid,
                 'rame_paid' => $ramePaid,
+                'is_optional' => $isOptional,
             ];
 
-            // Inclure TOUTES les tranches dans les totaux
-            $totalRequired += $requiredAmount;
+            // Inclure les tranches dans les totaux
+            if ($isOptional) {
+                if ($paidAmount > 0) {
+                    $totalRequired += $requiredAmount;
+                }
+            } else {
+                $totalRequired += $requiredAmount;
+            }
             
             // Total payé = SEULEMENT les paiements effectués
             // (La rame est déjà incluse dans $paidAmount si elle est payée physiquement)
