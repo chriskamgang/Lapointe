@@ -367,9 +367,10 @@ const StudentPayment = () => {
   };
 
   const handleQuickPayment = async () => {
-    const amountWithScholarship = Math.max(0, parseFloat(totals.remaining) - parseFloat(totals.scholarship_amount));
+    // Le backend a déjà calculé le reste à payer avec la bourse déduite
+    const effectiveRemaining = totals.remaining;
     let quickDiscountInfo = null;
-    let amountWithDiscount = totals.remaining;
+    let amountWithDiscount = effectiveRemaining;
 
     try {
       const discountResponse = await secureApiEndpoints.payments.getStudentInfoWithDiscount(studentId);
@@ -402,12 +403,11 @@ const StudentPayment = () => {
       html: `
                 <div class="text-start">
                     <p><strong>Étudiant:</strong> ${student?.first_name} ${student?.last_name}</p>
-                    <p><strong>Montant restant:</strong> ${formatAmount(totals.remaining)}</p>
+                    <p><strong>Montant restant à payer:</strong> ${formatAmount(totals.remaining)}</p>
                     ${totals.has_scholarships ? `
                         <div class="alert alert-success mb-3">
-                            <strong>🎉 Avec votre bourse:</strong><br>
-                            ${formatAmount(totals.remaining)} - ${formatAmount(totals.scholarship_amount)} = 
-                            <strong>${formatAmount(amountWithScholarship)}</strong>
+                            <strong>🎉 Bourse de ${formatAmount(totals.scholarship_amount)} déjà déduite</strong><br>
+                            Le montant ci-dessus inclut déjà votre bourse.
                         </div>
                     ` : quickDiscountInfo ? `
                         <div class="alert alert-info mb-3">
@@ -419,7 +419,7 @@ const StudentPayment = () => {
                     <div class="mb-3">
                         <label for="quickAmount" class="form-label">Montant à payer *</label>
                         <input type="number" id="quickAmount" class="form-control" 
-                               value="${totals.has_scholarships ? amountWithScholarship : quickDiscountInfo ? amountWithDiscount : totals.remaining}" 
+                               value="${quickDiscountInfo ? amountWithDiscount : totals.remaining}" 
                                min="1" max="${totals.remaining}">
                     </div>
                     ${quickDiscountInfo ? `
@@ -647,9 +647,10 @@ const StudentPayment = () => {
 
   // Improved quick payment with better bourse handling
   const handleQuickPaymentWithBourse = async () => {
+    // Le backend a déjà calculé le reste à payer avec la bourse déduite
     const baseAmount = totals.remaining;
     const scholarshipAmount = totals.scholarship_amount || 0;
-    const finalAmount = calculateAmountWithBourse(baseAmount, scholarshipAmount);
+    const finalAmount = totals.remaining;
 
     // Check for additional discounts (seulement si pas de bourse)
     let quickDiscountInfo = null;
@@ -693,19 +694,23 @@ const StudentPayment = () => {
                         <h6 class="card-title">💰 Calcul détaillé du montant à payer:</h6>
                         <table class="table table-sm">
                             <tr>
-                                <td>Montant pension restant initial:</td>
-                                <td class="text-end"><strong>${formatAmount(baseAmount)}</strong></td>
+                                <td>Montant total des frais:</td>
+                                <td class="text-end"><strong>${formatAmount(totals.required)}</strong></td>
                             </tr>
-                            ${scholarshipAmount > 0 ? `
+                            <tr>
+                                <td>Total déjà payé:</td>
+                                <td class="text-end"><strong>-${formatAmount(totals.paid)}</strong></td>
+                            </tr>
+                            ${totals.scholarship_amount > 0 ? `
                             <tr class="text-success">
-                                <td>🎓 Bourse de classe appliquée:</td>
-                                <td class="text-end"><strong>-${formatAmount(scholarshipAmount)}</strong></td>
-                            </tr>
-                            <tr class="border-top table-success">
-                                <td><strong>💚 Montant après bourse:</strong></td>
-                                <td class="text-end"><strong>${formatAmount(finalAmount)}</strong></td>
+                                <td>🎓 Bourse de classe:</td>
+                                <td class="text-end"><strong>-${formatAmount(totals.scholarship_amount)}</strong></td>
                             </tr>
                             ` : ''}
+                            <tr class="border-top table-primary">
+                                <td><strong>💰 Reste à payer:</strong></td>
+                                <td class="text-end"><strong>${formatAmount(finalAmount)}</strong></td>
+                            </tr>
                             ${quickDiscountInfo ? `
                             <tr class="text-info">
                                 <td>💸 Réduction ${quickDiscountInfo.discount_percentage}%:</td>
@@ -716,7 +721,7 @@ const StudentPayment = () => {
                                 <td class="text-end"><strong>${formatAmount(amountWithDiscount)}</strong></td>
                             </tr>
                             ` : ''}
-                            ${!scholarshipAmount && !quickDiscountInfo ? `
+                            ${!quickDiscountInfo ? `
                             <tr class="border-top">
                                 <td><strong>💰 Montant à payer:</strong></td>
                                 <td class="text-end"><strong>${formatAmount(finalAmount)}</strong></td>
@@ -724,11 +729,11 @@ const StudentPayment = () => {
                             ` : ''}
                         </table>
                         
-                        ${scholarshipAmount > 0 ? `
+                        ${totals.scholarship_amount > 0 ? `
                         <div class="alert alert-success mt-2">
                             <i class="fas fa-graduation-cap me-2"></i>
-                            <strong>Félicitations!</strong> Vous bénéficiez d'une bourse de classe de ${formatAmount(scholarshipAmount)}. 
-                            Cette réduction est automatiquement appliquée.
+                            <strong>Félicitations!</strong> Vous bénéficiez d'une bourse de classe de ${formatAmount(totals.scholarship_amount)}. 
+                            Cette réduction est automatiquement appliquée dans le calcul ci-dessus.
                         </div>
                         ` : ''}
                         
@@ -745,9 +750,9 @@ const StudentPayment = () => {
                     <label for="quickAmount" class="form-label">Montant à payer *</label>
                     <input type="number" id="quickAmount" class="form-control" 
                            value="${quickDiscountInfo ? amountWithDiscount : finalAmount}" 
-                           min="1" max="${baseAmount}">
+                           min="1" max="${totals.remaining}">
                     <div class="form-text">
-                        ${scholarshipAmount > 0 ? `✅ Bourse de ${formatAmount(scholarshipAmount)} déjà déduite` : ''}
+                        ${totals.scholarship_amount > 0 ? `✅ Bourse de ${formatAmount(totals.scholarship_amount)} déjà déduite` : ''}
                         ${quickDiscountInfo ? ` | ✅ Réduction de ${formatAmount(quickDiscountInfo.discount_amount)} disponible` : ''}
                     </div>
                 </div>
@@ -789,8 +794,8 @@ const StudentPayment = () => {
           return false;
         }
 
-        if (amount > baseAmount) {
-          Swal.showValidationMessage(`Le montant ne peut pas dépasser ${formatAmount(baseAmount)}`);
+        if (amount > finalAmount) {
+          Swal.showValidationMessage(`Le montant ne peut pas dépasser ${formatAmount(finalAmount)}`);
           return false;
         }
 
@@ -798,8 +803,8 @@ const StudentPayment = () => {
           amount: amount,
           payment_method: method,
           apply_global_discount: applyDiscount,
-          apply_scholarship: scholarshipAmount > 0,
-          scholarship_amount: scholarshipAmount,
+          apply_scholarship: totals.scholarship_amount > 0,
+          scholarship_amount: totals.scholarship_amount,
           payment_date: new Date().toISOString().split('T')[0],
           versement_date: new Date().toISOString().split('T')[0]
         };
@@ -823,10 +828,10 @@ const StudentPayment = () => {
                                 <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
                             </div>
                             <p>Paiement de <strong>${formatAmount(result.value.amount)}</strong> enregistré avec succès</p>
-                            ${scholarshipAmount > 0 ? `
+                            ${totals.scholarship_amount > 0 ? `
                                 <div class="alert alert-success">
                                     <i class="fas fa-graduation-cap me-2"></i>
-                                    Bourse de ${formatAmount(scholarshipAmount)} appliquée automatiquement
+                                    Bourse de ${formatAmount(totals.scholarship_amount)} appliquée automatiquement
                                 </div>
                             ` : ''}
                             ${result.value.apply_global_discount ? `
@@ -912,9 +917,9 @@ const StudentPayment = () => {
   };
 
   const renderRemainingAmountCard = () => {
-    const effectiveRemaining = totals.has_scholarships ?
-      Math.max(0, totals.remaining - totals.scholarship_amount) :
-      totals.remaining;
+    // Le backend calcule déjà le reste à payer avec la bourse déduite
+    // Donc on affiche directement totals.remaining
+    const effectiveRemaining = totals.remaining;
 
     return (
       <Card className="text-center">
@@ -926,7 +931,10 @@ const StudentPayment = () => {
           {totals.has_scholarships && (
             <div className="mt-2">
               <small className="text-muted d-block">
-                Montant initial: {formatAmount(totals.remaining)}
+                Montant initial: {formatAmount(totals.required)}
+              </small>
+              <small className="text-info d-block">
+                Total payé: {formatAmount(totals.paid)}
               </small>
               <small className="text-success">
                 <i className="fas fa-graduation-cap me-1"></i>

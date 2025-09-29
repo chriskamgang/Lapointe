@@ -86,7 +86,8 @@ class ReceiptCustomizationService
                 $remainingAmount,
                 $hasScholarship,
                 $paymentDeadline,
-                $schoolSettings
+                $schoolSettings,
+                $paymentStatus
             );
         }
 
@@ -247,11 +248,13 @@ class ReceiptCustomizationService
         $remainingAmount,
         $hasScholarship,
         $paymentDeadline,
-        $schoolSettings
+        $schoolSettings,
+        $paymentStatus
     ) {
         $tableRows = '';
         $rowNumber = 1;
         $totalTTC_sum = 0;
+
 
         $details = $payment->paymentDetails->sortBy(function ($detail) {
             if (stripos($detail->paymentTranche->name, 'Rame') !== false) {
@@ -261,6 +264,41 @@ class ReceiptCustomizationService
         });
 
         foreach ($details as $detail) {
+
+        // Vérifier si la rame a été payée physiquement pour cet étudiant
+        $ramePhysicalStatus = \App\Models\StudentEquipmentStatus::where('student_id', $student->id)
+            ->where('school_year_id', $payment->school_year_id)
+            ->where('equipment_type', 'rame')
+            ->where('brought_physical', true)
+            ->first();
+
+        // Si la rame a été payée physiquement, l'ajouter au reçu
+        if ($ramePhysicalStatus) {
+            $rameTranche = \App\Models\PaymentTranche::where(function($query) {
+                $query->where('name', 'LIKE', '%rame%')
+                      ->orWhere('name', 'LIKE', '%Rame%');
+            })->first();
+            
+            if ($rameTranche) {
+                $rameAmount = $rameTranche->getAmountForStudent($student, false, false, false);
+                if ($rameAmount > 0) {
+                    $totalTTC_sum += $rameAmount;
+                    $tableRows .= "
+                    <tr>
+                        <td class='text-left'>Rames de papier (Apport physique)</td>
+                        <td>REF-" . str_pad($rowNumber, 2, '0', STR_PAD_LEFT) . "</td>
+                        <td class='text-right'>{$formatAmount($rameAmount)}</td>
+                        <td class='text-right'>{$formatAmount($rameAmount)}</td>
+                        <td class='text-right'>0%</td>
+                        <td class='text-right'>0</td>
+                        <td class='text-right'>{$formatAmount($rameAmount)}</td>
+                    </tr>";
+                    $rowNumber++;
+                }
+            }
+        }
+
+        foreach ($payment->paymentDetails as $detail) {
             $trancheName = $detail->paymentTranche->name;
             $totalTTC = $detail->amount_allocated;
             $totalTTC_sum += $totalTTC;
@@ -278,19 +316,45 @@ class ReceiptCustomizationService
             $rowNumber++;
         }
 
-        if ($hasScholarship) {
-            $scholarshipAmount = $payment->scholarship_amount;
-            $totalTTC_sum -= $scholarshipAmount;
+        // Afficher la bourse SEULEMENT sur le premier reçu
+        $studentScholarshipAmount = $paymentStatus->total_scholarship_amount;
+        // Le premier reçu = le reçu du paiement avec l'ID le plus petit pour cet étudiant
+        $firstPayment = \App\Models\Payment::where('student_id', $student->id)
+            ->where('school_year_id', $payment->school_year_id)
+            ->orderBy('id', 'asc')
+            ->first();
+        $isFirstReceipt = ($firstPayment && $firstPayment->id == $payment->id);
+        
+        if ($studentScholarshipAmount > 0 && $isFirstReceipt) {
             $tableRows .= "
             <tr class='scholarship-row'>
-                <td class='text-left'>Bourse d'études</td>
-                <td>BOURSE</td>
-                <td class='text-right'>-{$formatAmount($scholarshipAmount)}</td>
-                <td class='text-right'>-{$formatAmount($scholarshipAmount)}</td>
+                <td class='text-left'>🎓 Bourse d'études (Information)</td>
+                <td>INFO</td>
+                <td class='text-right'>-{$formatAmount($studentScholarshipAmount)}</td>
+                <td class='text-right'>-{$formatAmount($studentScholarshipAmount)}</td>
                 <td class='text-right'>0%</td>
                 <td class='text-right'>0</td>
-                <td class='text-right'>-{$formatAmount($scholarshipAmount)}</td>
+                <td class='text-right'>-{$formatAmount($studentScholarshipAmount)}</td>
             </tr>";
+        }
+
+        // Afficher également la bourse du paiement actuel si c'est un premier paiement avec bourse
+        if ($hasScholarship && $payment->scholarship_amount > 0) {
+            $scholarshipAmount = $payment->scholarship_amount;
+            $totalTTC_sum -= $scholarshipAmount;
+            // Si on n'a pas déjà affiché la bourse générale, l'afficher
+            if ($studentScholarshipAmount == 0) {
+                $tableRows .= "
+                <tr class='scholarship-row'>
+                    <td class='text-left'>Bourse d'études</td>
+                    <td>BOURSE</td>
+                    <td class='text-right'>-{$formatAmount($scholarshipAmount)}</td>
+                    <td class='text-right'>-{$formatAmount($scholarshipAmount)}</td>
+                    <td class='text-right'>0%</td>
+                    <td class='text-right'>0</td>
+                    <td class='text-right'>-{$formatAmount($scholarshipAmount)}</td>
+                </tr>";
+            }
         }
 
         return "
@@ -348,6 +412,7 @@ class ReceiptCustomizationService
             <div class='bottom-section'>
                 <div><strong>Montant déjà payé:</strong> {$formatAmount($totalPaid)}</div>
                 <div><strong>Reste à payer:</strong> {$formatAmount($remainingAmount)}</div>
+                " . ($studentScholarshipAmount > 0 && $isFirstReceipt ? "<div style='color: #28a745;'><strong>🎓 Bonne nouvelle!</strong> Vous bénéficiez d'une bourse de " . $formatAmount($studentScholarshipAmount) . ". Cette réduction est automatiquement appliquée dans vos calculs.</div>" : "") . "
                 <div><strong>Date limite de règlement:</strong> {$paymentDeadline}</div>
                 <hr>
                 <div><strong>Banque:</strong> CCA</div>
@@ -365,5 +430,6 @@ class ReceiptCustomizationService
                 Généré le {$currentDateTime} par le système {$institutName}
             </div>
         </div>";
+    }
     }
 }
