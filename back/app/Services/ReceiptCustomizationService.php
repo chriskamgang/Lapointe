@@ -434,3 +434,4 @@ class ReceiptCustomizationService
             </div>
         </div>";
     }
+}
