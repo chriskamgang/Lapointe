@@ -278,10 +278,11 @@ class PaymentController extends Controller
             // Vérifier si l'étudiant a activé les bourses
             $hasScholarship = $student->has_scholarship_enabled && $this->discountCalculatorService->getClassScholarship($student) !== null;
 
-            if ($request->amount > $paymentStatus->total_remaining) {
+            // Valider que le montant n'est pas supérieur au montant restant effectif (aprés bourses/réductions)
+            if ($request->amount > $effectiveRemaining) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Le montant saisi (" . number_format($request->amount, 0, ',', ' ') . " FCFA) est supérieur au montant restant (" . number_format($paymentStatus->total_remaining, 0, ',', ' ') . " FCFA)."
+                    'message' => "Le montant saisi (" . number_format($request->amount, 0, ',', ' ') . " FCFA) est supérieur au montant restant effectif (" . number_format($effectiveRemaining, 0, ',', ' ') . " FCFA) après application des bourses et réductions."
                 ], 422);
             }
 
@@ -421,7 +422,64 @@ class PaymentController extends Controller
             ->with(['paymentDetails.paymentTranche'])
             ->get();
 
+        // Check for scholarship to know which tranche should be prioritized
+        $discountCalculator = new \App\Services\DiscountCalculatorService();
+        $scholarship = $discountCalculator->getClassScholarship($student);
+        $hasScholarship = $student->has_scholarship_enabled && $scholarship !== null;
+        
+        // If scholarship exists, make sure it's applied to the correct tranche
+        if ($hasScholarship && $scholarship && $payment->has_scholarship) {
+            $scholarshipTrancheId = $scholarship->payment_tranche_id;
+            
+            // Process the scholarship tranche first if it exists in the list
+            foreach ($paymentTranches as $tranche) {
+                if ($tranche->id == $scholarshipTrancheId && $remainingAmountToAllocate > 0) {
+                    $requiredAmount = $tranche->getAmountForStudent($student, false, $payment->has_reduction, false);
+                    // Apply scholarship to required amount
+                    $scholarshipAmount = $scholarship->amount;
+                    $adjustedRequiredAmount = max(0, $requiredAmount - $scholarshipAmount);
+                    
+                    if ($adjustedRequiredAmount <= 0) continue; // No payment needed after scholarship
+                    
+                    $previouslyPaid = 0;
+                    foreach ($existingPayments as $existingPayment) {
+                        $detail = $existingPayment->paymentDetails->where('payment_tranche_id', $tranche->id)->first();
+                        if ($detail) {
+                            $previouslyPaid = $detail->new_total_amount;
+                        }
+                    }
+
+                    $remainingForTranche = $adjustedRequiredAmount - $previouslyPaid;
+                    if ($remainingForTranche <= 0) continue;
+
+                    $allocatedAmount = min($remainingAmountToAllocate, $remainingForTranche);
+                    $newTotalAmount = $previouslyPaid + $allocatedAmount;
+
+                    PaymentDetail::create([
+                        'payment_id' => $payment->id,
+                        'payment_tranche_id' => $tranche->id,
+                        'amount_allocated' => $allocatedAmount,
+                        'previous_amount' => $previouslyPaid,
+                        'new_total_amount' => $newTotalAmount,
+                        'is_fully_paid' => $newTotalAmount >= $adjustedRequiredAmount,
+                        'required_amount_at_time' => $adjustedRequiredAmount,
+                        'was_reduced' => $payment->has_reduction,
+                        'reduction_context' => $payment->has_reduction ? "Réduction appliquée sur le paiement global" : null
+                    ]);
+
+                    $remainingAmountToAllocate -= $allocatedAmount;
+                    break; // Process scholarship tranche first
+                }
+            }
+        }
+
+        // Process remaining tranches
         foreach ($paymentTranches as $tranche) {
+            // Skip if this is the scholarship tranche (already processed)
+            if ($hasScholarship && $scholarship && $tranche->id == $scholarship->payment_tranche_id) {
+                continue;
+            }
+            
             if ($remainingAmountToAllocate <= 0) break;
 
             $requiredAmount = $tranche->getAmountForStudent($student, false, $payment->has_reduction, true);
@@ -856,6 +914,9 @@ class PaymentController extends Controller
         $formatAmount = function ($amount) {
             return number_format($amount, 0, ',', ' ');
         };
+        
+        // Créer une instance du service de calcul des réductions pour les vérifications
+        $discountCalculatorService = new \App\Services\DiscountCalculatorService();
 
         // Obtenir le statut récapitulatif des paiements AU MOMENT de ce paiement
         $workingYear = $payment->schoolYear;
@@ -1004,6 +1065,7 @@ class PaymentController extends Controller
                     <div><strong>Inscription :</strong> " . $formatAmount($paymentStatus->tranche_status[0]['required_amount'] ?? 0) . " <span class='float-right'><strong>Banque :</strong> " . ($schoolSettings->bank_name ?? 'N/A') . "</span></div>
                     <div><strong>Date de validation :</strong> " . \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') . " <span class='float-right'><strong>Reçu N° :</strong> {$payment->receipt_number}</span></div>
                     " . ($benefitInfo ? "<div><strong>Motif ou rabais :</strong> {$benefitInfo}</div>" : "") . "
+                    <div><strong>Statut Rame :</strong> " . ($hasRamePaid['paid'] ? 'Payé' : 'Non payé') . " <span class='float-right'><strong>Bourse :</strong> " . ($student->has_scholarship_enabled && $discountCalculatorService->getClassScholarship($student) ? 'Activée' : 'Désactivée') . "</span></div>
                 </div>
 
                 <table class='payment-table'>
@@ -1756,12 +1818,40 @@ class PaymentController extends Controller
      */
     private function checkIfRamePaid($student, $workingYear, $currentPayment)
     {
+        // Vérifier le statut simple via StudentRameStatus (nouveau système)
         $rameStatus = \App\Models\StudentRameStatus::where('student_id', $student->id)
             ->where('school_year_id', $workingYear->id)
             ->first();
 
         if ($rameStatus && $rameStatus->has_brought_rame) {
             return ['paid' => true, 'type' => 'physical'];
+        }
+        
+        // Vérifier si la rame a été payée via le système de paiement (ancien système)
+        $rameTranche = \App\Models\PaymentTranche::where('name', 'Rames de papier')->first();
+        if ($rameTranche) {
+            // Vérifier si la Rames de papier a été payée physiquement via le système de paiement
+            $physicalRamePayment = \App\Models\Payment::where('student_id', $student->id)
+                ->where('school_year_id', $workingYear->id)
+                ->where('is_rame_physical', true)
+                ->first();
+            
+            if ($physicalRamePayment) {
+                return ['paid' => true, 'type' => 'physical'];
+            }
+            
+            // Vérifier si la Rames de papier a été payée électroniquement via le système de paiement
+            $electronicRamePayment = \App\Models\PaymentDetail::whereHas('payment', function ($query) use ($student, $workingYear) {
+                $query->where('student_id', $student->id)
+                    ->where('school_year_id', $workingYear->id)
+                    ->where('is_rame_physical', false);
+            })->where('payment_tranche_id', $rameTranche->id)
+                ->where('amount_allocated', '>', 0)
+                ->first();
+            
+            if ($electronicRamePayment) {
+                return ['paid' => true, 'type' => 'electronic'];
+            }
         }
 
         return ['paid' => false, 'type' => null];
@@ -1815,6 +1905,9 @@ class PaymentController extends Controller
         $formatAmount = function ($amount) {
             return number_format($amount, 0, ',', ' ');
         };
+        
+        // Créer une instance du service de calcul des réductions pour les vérifications
+        $discountCalculatorService = new \App\Services\DiscountCalculatorService();
 
         // Obtenir le statut récapitulatif des paiements AU MOMENT de ce paiement
         $workingYear = $payment->schoolYear;
@@ -1964,6 +2057,7 @@ class PaymentController extends Controller
                     <div><strong>Date validation :</strong> " . \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') . "</div>
                     <div><strong>Banque :</strong> " . ($schoolSettings->bank_name ?? 'N/A') . "</div>
                     " . ($benefitInfo ? "<div><strong>Avantage :</strong> <span class='amount-highlight'>{$benefitInfo}</span></div>" : "") . "
+                    <div><strong>Statut Rame :</strong> " . ($hasRamePaid['paid'] ? 'Payé' : 'Non payé') . " <strong>Bourse :</strong> " . ($student->has_scholarship_enabled && $discountCalculatorService->getClassScholarship($student) ? 'Activée' : 'Désactivée') . "</div>
                 </div>
 
                 <div class='payment-details'>

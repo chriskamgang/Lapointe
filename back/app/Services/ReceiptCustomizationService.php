@@ -253,7 +253,14 @@ class ReceiptCustomizationService
         $rowNumber = 1;
         $totalTTC_sum = 0;
 
-        foreach ($payment->paymentDetails as $detail) {
+        $details = $payment->paymentDetails->sortBy(function ($detail) {
+            if (stripos($detail->paymentTranche->name, 'Rame') !== false) {
+                return 0; // "Rame" comes first
+            }
+            return 1; // Everything else after
+        });
+
+        foreach ($details as $detail) {
             $trancheName = $detail->paymentTranche->name;
             $totalTTC = $detail->amount_allocated;
             $totalTTC_sum += $totalTTC;
@@ -307,6 +314,12 @@ class ReceiptCustomizationService
                     <div class='receipt-title'>Reçu de paiement N° {$receiptNumber}</div>
                     <div class='receipt-date'>Date: {$paymentDate}</div>
                 </div>
+            </div>
+
+            <div style='padding: 2mm 0; font-size: 9px; border-top: 1px solid #EEE; border-bottom: 1px solid #EEE; margin-bottom: 2mm;'>
+                <strong>Étudiant:</strong> {$student->full_name}<br>
+                <strong>Matricule:</strong> {$student->student_number}<br>
+                <strong>Spécialité:</strong> " . ($classSeries ? $classSeries->name : 'N/A') . "
             </div>
 
             <table class='payment-table'>
