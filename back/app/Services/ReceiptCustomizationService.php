@@ -380,7 +380,7 @@ class ReceiptCustomizationService
                 </div>
             </div>
 
-            <div style='padding: 2mm 0; font-size: 9px; border-top: 1px solid #EEE; border-bottom: 1px solid #EEE; margin-bottom: 2mm;'>
+            <div style='padding: 1mm 0; font-size: 9px; border-top: 1px solid #EEE; border-bottom: 1px solid #EEE; margin-bottom: 1mm;'>
                 <strong>Étudiant:</strong> {$student->full_name}<br>
                 <strong>Matricule:</strong> {$student->student_number}<br>
                 <strong>Spécialité:</strong> " . ($schoolClass ? $schoolClass->name : 'N/A') . "
