@@ -81,17 +81,25 @@ class ScholarshipService
      */
     private function calculateINSSASScholarship(UniversityScholarship $scholarship, Student $student)
     {
-        // INSSAS offre 150k FCFA pour toutes les formations de santé
-        // BTS, HND, LICENCE_PRO, PROFESSIONAL_LICENSE, BACHELOR, MASTER, PROFESSIONAL_MASTER
-        $healthLevels = ['BTS', 'HND', 'LICENCE_PRO', 'PROFESSIONAL_LICENSE', 'BACHELOR', 'MASTER', 'PROFESSIONAL_MASTER'];
-        
         $levelType = $student->classSeries->schoolClass->level->level_type;
-        
-        if (in_array($levelType, $healthLevels)) {
-            return 150000; // 150k FCFA
+        $currentLevel = $student->current_level ?: 1;
+
+        if (in_array($levelType, ['BTS', 'HND', 'DOUBLE_DIPLOMATION'])) {
+            if ($currentLevel == 1) {
+                return $scholarship->level_1_amount;
+            } else {
+                return $scholarship->level_2_plus_amount;
+            }
         }
         
-        return 0;
+        if ($levelType === 'MASTER' || $levelType === 'PROFESSIONAL_MASTER') {
+            if ($currentLevel > 2) {
+                return 0;
+            }
+        }
+
+        // For all other cases (Licence Pro, Bachelor, and Master 1/2), return the main amount.
+        return $scholarship->scholarship_amount;
     }
 
     /**

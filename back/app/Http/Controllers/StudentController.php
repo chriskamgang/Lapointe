@@ -264,6 +264,7 @@ class StudentController extends Controller
             'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'class_series_id' => 'required|integer|exists:class_series,id',
+            'is_new' => 'nullable|boolean',
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' // 5MB max
         ]);
 
@@ -294,7 +295,6 @@ class StudentController extends Controller
             $studentData['school_year_id'] = $workingYear->id;
             $studentData['order'] = $maxOrder + 1; // Ajouter à la fin par défaut
             $studentData['is_active'] = true;
-            $studentData['is_new'] = true; // New students are always new
             
             // Gérer le champ has_scholarship_enabled
             if (isset($studentData['has_scholarship_enabled'])) {

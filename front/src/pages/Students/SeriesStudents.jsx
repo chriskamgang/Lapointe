@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge, Form, Modal, Alert } from 'react-bootstrap';
-import { 
-    PersonPlus, PencilSquare, Trash, CreditCard, Award, 
+import {
+    PersonPlus, PencilSquare, Trash, CreditCard, Award,
     Laptop, ShirtT, FileEarmarkText, Eye, ArrowRightCircle
 } from 'react-bootstrap-icons';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -95,17 +95,17 @@ const SeriesStudents = () => {
 
     const getScholarshipBadge = (student) => {
         if (!series?.schoolClass?.level?.school) return null;
-        
+
         const schoolCode = series.schoolClass.level.school.code;
         const levelType = series.schoolClass.level.level_type;
         const currentLevel = student.current_level || 1;
-        
+
         const isEligible = checkScholarshipEligibility(schoolCode, levelType);
-        
+
         if (!isEligible) return <Badge bg="secondary">Pas de bourse</Badge>;
-        
+
         const scholarshipAmount = calculateScholarshipAmount(schoolCode, levelType, currentLevel, student);
-        
+
         if (scholarshipAmount > 0) {
             return (
                 <Badge bg="success">
@@ -114,7 +114,7 @@ const SeriesStudents = () => {
                 </Badge>
             );
         }
-        
+
         return <Badge bg="secondary">Pas de bourse</Badge>;
     };
 
@@ -125,7 +125,7 @@ const SeriesStudents = () => {
             'ESSIT': ['INGENIERIE_SC'],
             'ISTPM': ['CQP', 'DQP']
         };
-        
+
         return eligibilityRules[schoolCode]?.includes(levelType) || false;
     };
 
@@ -145,7 +145,7 @@ const SeriesStudents = () => {
                     return currentLevel <= 2 ? 150000 : 0;
                 }
                 break;
-                
+
             case 'ESGIT':
                 if (levelType === 'LICENCE_PRO') {
                     const mention = student.bts_mention || 'passable';
@@ -161,28 +161,28 @@ const SeriesStudents = () => {
                     return 50000;
                 }
                 break;
-                
+
             case 'ESSIT':
                 if (levelType === 'INGENIERIE_SC') {
                     return 50000;
                 }
                 break;
-                
+
             case 'ISTPM':
                 return 25000;
         }
-        
+
         return 0;
     };
 
     const getEquipmentBadges = (student) => {
         if (!series?.schoolClass?.level?.school) return null;
-        
+
         const schoolCode = series.schoolClass.level.school.code;
         const levelType = series.schoolClass.level.level_type;
-        
+
         const equipments = getRequiredEquipments(schoolCode, levelType);
-        
+
         return (
             <div className="d-flex gap-1 flex-wrap">
                 {equipments.polo && <Badge bg="primary" className="small">Polo</Badge>}
@@ -232,7 +232,7 @@ const SeriesStudents = () => {
                 rame: false
             }
         };
-        
+
         return configs[schoolCode] || { polo: false, blouse: false, laptop: false, rame: true };
     };
 
@@ -471,7 +471,6 @@ const SeriesStudents = () => {
     );
 };
 
-// Composant pour créer un étudiant
 const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
     const [formData, setFormData] = useState({
         first_name: '',
@@ -486,9 +485,10 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
         current_level: 1,
         bts_mention: '',
         has_scholarship_enabled: true,
+        is_new: true,
         notes: ''
     });
-    
+
     const [loading, setLoading] = useState(false);
     const [scholarshipPreview, setScholarshipPreview] = useState(null);
 
@@ -500,17 +500,17 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
 
     const calculateScholarshipPreview = () => {
         if (!series?.schoolClass?.level?.school) return;
-        
+
         const schoolCode = series.schoolClass.level.school.code;
         const levelType = series.schoolClass.level.level_type;
         const currentLevel = parseInt(formData.current_level) || 1;
-        
+
         const isEligible = checkScholarshipEligibility(schoolCode, levelType);
-        
+
         if (isEligible) {
             const amount = calculateScholarshipAmount(schoolCode, levelType, currentLevel, formData);
             const laptopIncluded = checkLaptopInScholarship(schoolCode, levelType, formData.bts_mention);
-            
+
             setScholarshipPreview({
                 eligible: true,
                 amount,
@@ -529,7 +529,7 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
             'ESSIT': ['INGENIERIE_SC'],
             'ISTPM': ['CQP', 'DQP']
         };
-        
+
         return eligibilityRules[schoolCode]?.includes(levelType) || false;
     };
 
@@ -549,7 +549,7 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
                     return currentLevel <= 2 ? 150000 : 0;
                 }
                 break;
-                
+
             case 'ESGIT':
                 if (levelType === 'LICENCE_PRO') {
                     const mention = studentData.bts_mention || 'passable';
@@ -565,17 +565,17 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
                     return 50000;
                 }
                 break;
-                
+
             case 'ESSIT':
                 if (levelType === 'INGENIERIE_SC') {
                     return 50000;
                 }
                 break;
-                
+
             case 'ISTPM':
                 return 25000;
         }
-        
+
         return 0;
     };
 
@@ -599,16 +599,16 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
                 'INGENIERIE': 'Bourse fixe: 50k FCFA par an (3ème année)'
             }
         };
-        
+
         return conditions[schoolCode]?.[levelType] || '';
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         try {
             setLoading(true);
-            
+
             const studentData = {
                 ...formData,
                 class_series_id: seriesId,
@@ -616,7 +616,7 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
             };
 
             const response = await secureApiEndpoints.students.create(studentData);
-            
+
             if (response.success) {
                 Swal.fire('Succès', 'Étudiant créé avec succès', 'success');
                 onSuccess();
@@ -655,13 +655,14 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
             current_level: 1,
             bts_mention: '',
             has_scholarship_enabled: true,
+            is_new: true,
             notes: ''
         });
     };
 
     const needsBTSMention = () => {
-        return series?.schoolClass?.level?.school?.code === 'ESGIT' && 
-               series?.schoolClass?.level?.level_type === 'LICENCE_PRO';
+        return series?.schoolClass?.level?.school?.code === 'ESGIT' &&
+            series?.schoolClass?.level?.level_type === 'LICENCE_PRO';
     };
 
     return (
@@ -751,7 +752,7 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
                                 </Form.Select>
                             </Form.Group>
                         </Col>
-                        
+
                         {needsBTSMention() && (
                             <Col md={4}>
                                 <Form.Group className="mb-3">
@@ -771,6 +772,35 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
                             </Col>
                         )}
                     </Row>
+                    
+                    <Form.Group className="mb-3">
+                        <Form.Check
+                            type="switch"
+                            id="is-new-switch-create"
+                            label="Nouvel étudiant cette année"
+                            checked={formData.is_new}
+                            onChange={(e) => setFormData(prev => ({ ...prev, is_new: e.target.checked }))}
+                            className="form-switch" // Ajoute cette classe
+                        />
+                        <Form.Text className="text-muted">
+                            Un nouvel étudiant paie les frais de dossier, même en année supérieure. Décochez si c'est un ancien étudiant qui se réinscrit.
+                        </Form.Text>
+                    </Form.Group>
+
+                    {series?.schoolClass?.level?.order > 1 && (
+                        <Form.Group className="mb-3">
+                            <Form.Check
+                                type="switch"
+                                id="is-new-switch-create"
+                                label="Nouvel étudiant cette année"
+                                checked={formData.is_new}
+                                onChange={(e) => setFormData(prev => ({ ...prev, is_new: e.target.checked }))}
+                            />
+                            <Form.Text className="text-muted">
+                                Un nouvel étudiant paie les frais de dossier, même en année supérieure. Décochez si c'est un ancien étudiant qui se réinscrit.
+                            </Form.Text>
+                        </Form.Group>
+                    )}
 
                     <Row>
                         <Col md={6}>
@@ -823,7 +853,7 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
                                 <Award className="me-2" />
                                 <strong>Information sur les bourses et équipements</strong>
                             </div>
-                            
+
                             {scholarshipPreview.eligible ? (
                                 <div>
                                     <p className="mb-1">
@@ -873,7 +903,7 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
         is_new: true,
         notes: ''
     });
-    
+
     const [loading, setLoading] = useState(false);
     const [scholarshipPreview, setScholarshipPreview] = useState(null);
 
@@ -907,17 +937,17 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
 
     const calculateScholarshipPreview = () => {
         if (!series?.schoolClass?.level?.school) return;
-        
+
         const schoolCode = series.schoolClass.level.school.code;
         const levelType = series.schoolClass.level.level_type;
         const currentLevel = parseInt(formData.current_level) || 1;
-        
+
         const isEligible = checkScholarshipEligibility(schoolCode, levelType);
-        
+
         if (isEligible) {
             const amount = calculateScholarshipAmount(schoolCode, levelType, currentLevel, formData);
             const laptopIncluded = checkLaptopInScholarship(schoolCode, levelType, formData.bts_mention);
-            
+
             setScholarshipPreview({
                 eligible: true,
                 amount,
@@ -936,7 +966,7 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
             'ESSIT': ['INGENIERIE_SC'],
             'ISTPM': ['CQP', 'DQP']
         };
-        
+
         return eligibilityRules[schoolCode]?.includes(levelType) || false;
     };
 
@@ -956,7 +986,7 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
                     return currentLevel <= 2 ? 150000 : 0;
                 }
                 break;
-                
+
             case 'ESGIT':
                 if (levelType === 'LICENCE_PRO') {
                     const mention = studentData.bts_mention || 'passable';
@@ -972,17 +1002,17 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
                     return 50000;
                 }
                 break;
-                
+
             case 'ESSIT':
                 if (levelType === 'INGENIERIE_SC') {
                     return 50000;
                 }
                 break;
-                
+
             case 'ISTPM':
                 return 25000;
         }
-        
+
         return 0;
     };
 
@@ -1006,13 +1036,13 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
                 'INGENIERIE': 'Bourse fixe: 50k FCFA par an (3ème année)'
             }
         };
-        
+
         return conditions[schoolCode]?.[levelType] || '';
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!formData.first_name.trim() || !formData.last_name.trim()) {
             Swal.fire('Erreur', 'Le prénom et le nom sont requis', 'error');
             return;
@@ -1020,14 +1050,14 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
 
         try {
             setLoading(true);
-            
+
             const updatedData = {
                 ...formData,
                 current_level: parseInt(formData.current_level) || 1
             };
 
             const response = await secureApiEndpoints.students.update(student.id, updatedData);
-            
+
             if (response.success) {
                 Swal.fire('Succès', 'Étudiant modifié avec succès', 'success');
                 onSuccess();
@@ -1043,8 +1073,8 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
     };
 
     const needsBTSMention = () => {
-        return series?.schoolClass?.level?.school?.code === 'ESGIT' && 
-               series?.schoolClass?.level?.level_type === 'LICENCE_PRO';
+        return series?.schoolClass?.level?.school?.code === 'ESGIT' &&
+            series?.schoolClass?.level?.level_type === 'LICENCE_PRO';
     };
 
     const handleInputChange = (field, value) => {
@@ -1140,6 +1170,20 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
                         </Col>
                     </Row>
 
+                    <Form.Group className="mb-3">
+                        <Form.Check
+                            type="switch"
+                            id="is-new-switch-create"
+                            label="Nouvel étudiant cette année"
+                            checked={formData.is_new}
+                            onChange={(e) => setFormData(prev => ({ ...prev, is_new: e.target.checked }))}
+                            className="form-switch" // Ajoute cette classe
+                        />
+                        <Form.Text className="text-muted">
+                            Un nouvel étudiant paie les frais de dossier, même en année supérieure. Décochez si c'est un ancien étudiant qui se réinscrit.
+                        </Form.Text>
+                    </Form.Group>
+
                     {series?.schoolClass?.level?.order > 1 && (
                         <Form.Group className="mb-3">
                             <Form.Check
@@ -1154,7 +1198,7 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
                             </Form.Text>
                         </Form.Group>
                     )}
-                        
+
                     {needsBTSMention() && (
                         <Row>
                             <Col md={12}>
@@ -1228,7 +1272,7 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
                             type="checkbox"
                             label="Bourse activée"
                             checked={formData.has_scholarship_enabled}
-                            onChange={(e) => setFormData({...formData, has_scholarship_enabled: e.target.checked})}
+                            onChange={(e) => setFormData({ ...formData, has_scholarship_enabled: e.target.checked })}
                         />
                         <Form.Text className="text-muted">
                             Décochez pour désactiver temporairement la bourse pour cet étudiant
@@ -1241,7 +1285,7 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
                                 <Award className="me-2" />
                                 <strong>Information sur les bourses et équipements</strong>
                             </div>
-                            
+
                             {scholarshipPreview.eligible ? (
                                 <div>
                                     <p className="mb-1">

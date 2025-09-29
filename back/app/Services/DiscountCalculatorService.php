@@ -297,12 +297,17 @@ class DiscountCalculatorService
     public function getTotalScholarshipAmount(Student $student): float
     {
         $scholarships = $this->getAllScholarships($student);
-        $total = 0;
         
-        foreach ($scholarships as $scholarship) {
-            $total += $scholarship['amount'];
+        // Priorité à la bourse de classe si elle existe
+        if (isset($scholarships['class'])) {
+            return $scholarships['class']['amount'];
         }
         
-        return $total;
+        // Sinon, utiliser la bourse universitaire
+        if (isset($scholarships['university'])) {
+            return $scholarships['university']['amount'];
+        }
+        
+        return 0;
     }
 }
