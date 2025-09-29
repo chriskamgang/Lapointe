@@ -383,7 +383,7 @@ class ReceiptCustomizationService
             <div style='padding: 2mm 0; font-size: 9px; border-top: 1px solid #EEE; border-bottom: 1px solid #EEE; margin-bottom: 2mm;'>
                 <strong>Étudiant:</strong> {$student->full_name}<br>
                 <strong>Matricule:</strong> {$student->student_number}<br>
-                <strong>Spécialité:</strong> " . ($classSeries ? $classSeries->name : 'N/A') . "
+                <strong>Spécialité:</strong> " . ($schoolClass ? $schoolClass->name : 'N/A') . "
             </div>
 
             <table class='payment-table'>
