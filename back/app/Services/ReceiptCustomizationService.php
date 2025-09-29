@@ -255,15 +255,12 @@ class ReceiptCustomizationService
         $rowNumber = 1;
         $totalTTC_sum = 0;
 
-
         $details = $payment->paymentDetails->sortBy(function ($detail) {
             if (stripos($detail->paymentTranche->name, 'Rame') !== false) {
                 return 0; // "Rame" comes first
             }
             return 1; // Everything else after
         });
-
-        foreach ($details as $detail) {
 
         // Vérifier si la rame a été payée physiquement pour cet étudiant
         $ramePhysicalStatus = \App\Models\StudentEquipmentStatus::where('student_id', $student->id)
@@ -272,6 +269,7 @@ class ReceiptCustomizationService
             ->where('brought_physical', true)
             ->first();
 
+        $rameAlreadyHandled = false;
         // Si la rame a été payée physiquement, l'ajouter au reçu
         if ($ramePhysicalStatus) {
             $rameTranche = \App\Models\PaymentTranche::where(function($query) {
@@ -294,11 +292,16 @@ class ReceiptCustomizationService
                         <td class='text-right'>{$formatAmount($rameAmount)}</td>
                     </tr>";
                     $rowNumber++;
+                    $rameAlreadyHandled = true;
                 }
             }
         }
 
-        foreach ($payment->paymentDetails as $detail) {
+        foreach ($details as $detail) {
+            if ($rameAlreadyHandled && $detail->paymentTranche && stripos($detail->paymentTranche->name, 'Rames de papier') !== false) {
+                continue;
+            }
+
             $trancheName = $detail->paymentTranche->name;
             $totalTTC = $detail->amount_allocated;
             $totalTTC_sum += $totalTTC;
@@ -431,5 +434,3 @@ class ReceiptCustomizationService
             </div>
         </div>";
     }
-    }
-}

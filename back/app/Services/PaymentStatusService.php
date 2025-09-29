@@ -99,16 +99,7 @@ class PaymentStatusService
         $totalRequired = 0;
         $totalPaid = 0;
 
-        $isOldStudent = !$student->is_new;
-        $level = $student->classSeries && $student->classSeries->schoolClass ? $student->classSeries->schoolClass->level : null;
-        
-        // Condition pour être considéré comme "ancien" : non nouveau ET niveau > 1
-        if ($level && $level->order > 1) {
-            $isOldStudent = !$student->is_new;
-        } else {
-            $isOldStudent = false;
-        }
-
+        $isOldStudent = !$student->is_new;       
 
         // Vérifier si la rame a été payée physiquement
         $ramePhysicalStatus = \App\Models\StudentEquipmentStatus::where('student_id', $student->id)
@@ -155,14 +146,12 @@ class PaymentStatusService
         $allScholarships = $discountCalculator->getAllScholarships($student);
 
         foreach ($paymentTranches as $tranche) {
-            $trancheName = strtolower($tranche->name);
-
-            if ($isOldStudent && $trancheName === 'étude de dossier') {
+            if ($isOldStudent && stripos($tranche->name, 'Étude de dossier') !== false) {
                 continue; // Skip this tranche for old students
             }
 
             $isOptional = false;
-            if ($isOldStudent && in_array($trancheName, ['polo', 'blouse'])) {
+            if ($isOldStudent && (stripos($tranche->name, 'polo') !== false || stripos($tranche->name, 'blouse') !== false)) {
                 $isOptional = true;
             }
 

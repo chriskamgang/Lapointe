@@ -1956,6 +1956,10 @@ class PaymentController extends Controller
 
         // Ensuite, ajouter les autres détails de paiement
         foreach ($payment->paymentDetails as $detail) {
+            if ($hasRamePaid['paid'] && stripos($detail->paymentTranche->name, 'Rames de papier') !== false) {
+                continue;
+            }
+
             $trancheName = $detail->paymentTranche->name;
             $validationDate = \Carbon\Carbon::parse($payment->versement_date)->format('d/m/Y');
             $paymentType = $trancheName; // Afficher la tranche affectée

@@ -802,6 +802,19 @@ const CreateStudentModal = ({ show, onHide, seriesId, series, onSuccess }) => {
                         </Form.Group>
                     )}
 
+                    <Form.Group className="mb-3">
+                        <Form.Check
+                            type="switch"
+                            id="is-new-switch-create"
+                            label="Nouvel étudiant cette année"
+                            checked={formData.is_new}
+                            onChange={(e) => setFormData(prev => ({ ...prev, is_new: e.target.checked }))}
+                        />
+                        <Form.Text className="text-muted">
+                            Un nouvel étudiant paie les frais de dossier. Décochez si c'est un ancien étudiant qui se réinscrit.
+                        </Form.Text>
+                    </Form.Group>
+
                     <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
@@ -1184,45 +1197,42 @@ const EditStudentModal = ({ show, onHide, student, series, onSuccess }) => {
                         </Form.Text>
                     </Form.Group>
 
-                    {series?.schoolClass?.level?.order > 1 && (
-                        <Form.Group className="mb-3">
-                            <Form.Check
-                                type="switch"
-                                id="is-new-switch"
-                                label="Nouvel étudiant cette année"
-                                checked={formData.is_new}
-                                onChange={(e) => handleInputChange('is_new', e.target.checked)}
-                            />
-                            <Form.Text className="text-muted">
-                                Un nouvel étudiant paie les frais de dossier, même en année supérieure. Décochez si c'est un ancien étudiant qui se réinscrit.
-                            </Form.Text>
-                        </Form.Group>
-                    )}
-
-                    {needsBTSMention() && (
-                        <Row>
-                            <Col md={12}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Mention BTS obtenue *</Form.Label>
-                                    <Form.Select
-                                        value={formData.bts_mention}
-                                        onChange={(e) => handleInputChange('bts_mention', e.target.value)}
-                                        required
-                                    >
-                                        <option value="">Sélectionner une mention</option>
-                                        <option value="passable">Passable</option>
-                                        <option value="assez_bien">Assez Bien</option>
-                                        <option value="bien">Bien</option>
-                                        <option value="tres_bien">Très Bien</option>
-                                    </Form.Select>
-                                    <Form.Text className="text-muted">
-                                        Cette mention détermine le montant de la bourse pour ESGIT Licence Pro
-                                    </Form.Text>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    )}
-
+                                        <Form.Group className="mb-3">
+                                            <Form.Check
+                                                type="switch"
+                                                id="is-new-switch"
+                                                label="Nouvel étudiant cette année"
+                                                checked={formData.is_new}
+                                                onChange={(e) => handleInputChange('is_new', e.target.checked)}
+                                            />
+                                            <Form.Text className="text-muted">
+                                                Un nouvel étudiant paie les frais de dossier, même en année supérieure. Décochez si c'est un ancien étudiant qui se réinscrit.
+                                            </Form.Text>
+                                        </Form.Group>
+                                            
+                                        {needsBTSMention() && (
+                                            <Row>
+                                                <Col md={12}>
+                                                    <Form.Group className="mb-3">
+                                                        <Form.Label>Mention BTS obtenue *</Form.Label>
+                                                        <Form.Select
+                                                            value={formData.bts_mention}
+                                                            onChange={(e) => handleInputChange('bts_mention', e.target.value)}
+                                                            required
+                                                        >
+                                                            <option value="">Sélectionner une mention</option>
+                                                            <option value="passable">Passable</option>
+                                                            <option value="assez_bien">Assez Bien</option>
+                                                            <option value="bien">Bien</option>
+                                                            <option value="tres_bien">Très Bien</option>
+                                                        </Form.Select>
+                                                        <Form.Text className="text-muted">
+                                                            Cette mention détermine le montant de la bourse pour ESGIT Licence Pro
+                                                        </Form.Text>
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                        )}
                     <Row>
                         <Col md={6}>
                             <Form.Group className="mb-3">
