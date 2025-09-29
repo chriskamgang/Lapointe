@@ -242,7 +242,7 @@ class DatabaseSeeder extends Seeder
             // Équipements
             ['name' => 'Blouse', 'description' => 'Blouse médicale', 'order' => 3, 'is_equipment' => true, 'equipment_type' => 'blouse'],
             ['name' => 'Polo', 'description' => 'Polo école', 'order' => 3, 'is_equipment' => true, 'equipment_type' => 'polo'],
-            ['name' => 'Rames de papier', 'description' => 'Rames de papier ou physiques', 'order' => 4, 'is_equipment' => true, 'equipment_type' => 'rame'],
+            ['name' => 'Rames de papier', 'description' => 'Rames de papier ou physiques', 'order' => 3, 'is_equipment' => true, 'equipment_type' => 'rame'],
 
             // Frais spécialisés
             ['name' => 'Frais de tutelle académique', 'description' => 'Frais de tutelle universitaire', 'order' => 7, 'is_equipment' => false],
@@ -888,20 +888,91 @@ class DatabaseSeeder extends Seeder
         $school = School::where('code', 'ESSIT')->first();
         if (!$school) return;
 
-        // BTS - Filières avec troisième tranche 50000
-        $btsFilieresStandard = [
-            'Génie Civil',
-            'Génie Électrique',
-            'Génie Mécanique et Productique',
-            'Agriculture et Élevage',
-            'Génie Géologique et Pétrolier',
-            'Fabrication Mécaniques'
+        // BTS Génie Civil
+        $btsGenieCivil = [
+            'Bâtiment',
+            'Urbanisme',
+            'Travaux Publiques',
+            'Installation Sanitaire',
+            'Géomètre Topographe',
+            'Menuiserie et Ébénisterie',
+            'Géotechnique et Géologie Appliquée'
         ];
 
-        // BTS - Filières avec troisième tranche 40000
-        $btsFilieresSpeciales = [
-            'Génie Biologique',
-            'Informatique et Communication'
+        // BTS Électrotechnique
+        $btsElectrotechnique = [
+            'Maintenance des Appareils Biomédicaux',
+            'Maintenance des Systèmes Électroniques',
+            'Contrôle, Instrumentation et Régulation'
+        ];
+
+        // BTS Génie Mécanique et Productique
+        $btsGenieMecanique = [
+            'Mécanique et Électronique Automobiles (option: Mécatronique)',
+            'Mécanique et Électronique Automobiles (option: Maintenance Après-vente Automobile)',
+            'Construction et Fabrication Mécanique (Option : Fabrication Mécanique)',
+            'Construction et Fabrication Mécanique (Option: Construction Mécanique)',
+            'Construction Métallique',
+            'Chaudronnerie et Soudure',
+            'Maintenance des Systèmes Industriels (option : Maintenance Industrielle et Productive)'
+        ];
+
+        // BTS Génie Thermique
+        $btsGenieThermique = [
+            'Énergies Renouvelables',
+            'Froid et climatisation'
+        ];
+
+        // BTS Agriculture et Élevage
+        $btsAgriculture = [
+            'Aquaculture',
+            'Agroéquipement',
+            'Production Végétale',
+            'Production Animale',
+            'Conseiller Agropastoral',
+            'Entrepreneuriat Agropastoral',
+            'Technique Commerciale Agricole'
+        ];
+
+        // BTS Génie Biologique (tranche 3 = 40000)
+        $btsGenieBiologique = [
+            'Diététique',
+            'Industries Alimentaires',
+            'Biotechnologie Agricole',
+            'Phytothérapie et Aromathérapie',
+            'Analyse Biologique et Biochimique'
+        ];
+
+        // BTS Génie Géologique et Pétrolier
+        $btsGenieGeologique = [
+            'Ingénierie Pétrolière',
+            'Mines et Géologie Appliquée'
+        ];
+
+        // BTS Fabrication Mécanique
+        $btsFabricationMecanique = [
+            'Fabrication Mécanique',
+            'Construction Mécanique'
+        ];
+
+        // BTS Informatique et Communication (tranche 3 = 40000)
+        $btsInformatique = [
+            'Journalisme',
+            'Communication des Organisations',
+            'Hôtelier et restauration'
+        ];
+
+        // BTS Hôtellerie et Restauration
+        $btsHotellerie = [
+            'Gestion et management hôteliers',
+            'Commercialisation et service de restauration'
+        ];
+
+        // BTS Arts et Métiers de la Culture
+        $btsArts = [
+            'Art culinaire',
+            'Industrie d\'habillement',
+            'Industrie du textile'
         ];
 
         // Cycle Préparatoire Intégré
@@ -928,8 +999,17 @@ class DatabaseSeeder extends Seeder
             'Travaux Publics Et Ouvrages'
         ];
 
-        $this->createClassesForESSIT($school, 'BTS', $btsFilieresStandard, 'standard');
-        $this->createClassesForESSIT($school, 'BTS', $btsFilieresSpeciales, 'special');
+        $this->createClassesForESSIT($school, 'BTS', $btsGenieCivil, 'standard');
+        $this->createClassesForESSIT($school, 'BTS', $btsElectrotechnique, 'standard');
+        $this->createClassesForESSIT($school, 'BTS', $btsGenieMecanique, 'standard');
+        $this->createClassesForESSIT($school, 'BTS', $btsGenieThermique, 'standard');
+        $this->createClassesForESSIT($school, 'BTS', $btsAgriculture, 'standard');
+        $this->createClassesForESSIT($school, 'BTS', $btsGenieBiologique, 'special');
+        $this->createClassesForESSIT($school, 'BTS', $btsGenieGeologique, 'standard');
+        $this->createClassesForESSIT($school, 'BTS', $btsFabricationMecanique, 'standard');
+        $this->createClassesForESSIT($school, 'BTS', $btsInformatique, 'special');
+        $this->createClassesForESSIT($school, 'BTS', $btsHotellerie, 'standard');
+        $this->createClassesForESSIT($school, 'BTS', $btsArts, 'standard');
         $this->createClassesForESSIT($school, 'CYCLE_PREPA', $cyclePreparatoire, 'prepa');
         $this->createClassesForESSIT($school, 'INGENIERIE', $ingenierie, 'ingenierie');
     }
