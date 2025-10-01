@@ -35,7 +35,6 @@ use App\Http\Controllers\TeacherAttendanceController;
 use App\Http\Controllers\SchoolEquipmentController;
 use App\Http\Controllers\UniversityScholarshipController;
 use App\Http\Controllers\EquipmentDistributionController;
-use App\Http\Controllers\StudentEquipmentController;
 
 
 // Routes d'authentification
