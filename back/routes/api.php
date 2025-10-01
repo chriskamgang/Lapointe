@@ -12,6 +12,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AccountantController;
 use App\Http\Controllers\SchoolYearController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\StudentEquipmentController;
 use App\Http\Controllers\SchoolSettingsController;
 use App\Http\Controllers\ClassScholarshipController;
 use App\Http\Controllers\ReportsController;
@@ -135,7 +136,11 @@ Route::prefix('payments')->middleware(['role:admin,secretaire,accountant,comptab
     // NOUVELLES ROUTES MANQUANTES
     Route::post('/pay-rame-physically', [PaymentController::class, 'payRamePhysically']);
     Route::post('/process-payment', [PaymentController::class, 'processPayment']);
-    Route::get('/student/{studentId}/status', [PaymentController::class, 'getStudentStatus']);
+    Route::post('/rames/undo-brought', [PaymentController::class, 'undoRameBrought']);
+    Route::get('/student/{studentId}/status', [PaymentController::class, 'getStudentStatus']);});
+
+Route::prefix('equipments')->middleware(['role:admin,secretaire,accountant,comptable_superieur'])->group(function () {
+    Route::post('/undo-payment', [StudentEquipmentController::class, 'undoPayment']);
 });
 
 // Routes pour la distribution des équipements
@@ -366,10 +371,10 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/student/{studentId}/history', [PaymentController::class, 'getStudentPaymentHistory']);
         Route::post('/student/{studentId}/calculate-with-date', [PaymentController::class, 'calculatePaymentWithDate']);
         Route::post('/', [PaymentController::class, 'store']);
+        Route::delete('/{paymentId}', [PaymentController::class, 'cancelPayment']);
         Route::get('/{paymentId}/receipt', [PaymentController::class, 'generateReceipt']);
         Route::get('/{paymentId}/receipt/pdf', [PaymentController::class, 'downloadReceiptPDF']);
         Route::get('/stats', [PaymentController::class, 'getPaymentStats']);
-
         // Nouvelles routes pour les équipements
         Route::post('process-with-equipment', [PaymentController::class, 'processPaymentWithEquipment']);
         Route::get('student/{studentId}/required-equipments', [PaymentController::class, 'getStudentRequiredEquipments']);

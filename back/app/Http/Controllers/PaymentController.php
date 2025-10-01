@@ -23,6 +23,109 @@ use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
+    public function cancelPayment(Request $request, $paymentId)
+    {
+        $payment = Payment::with('paymentDetails')->find($paymentId);
+
+        if (!$payment) {
+            return response()->json(['success' => false, 'message' => 'Paiement non trouvé'], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Revert equipment status linked to this payment
+            $receiptRef = "Réf: {$payment->receipt_number}";
+            $linkedEquipments = StudentEquipmentStatus::where('student_id', $payment->student_id)
+                ->where('school_year_id', $payment->school_year_id)
+                ->where('notes', 'like', '%' . $receiptRef . '%')
+                ->get();
+
+            foreach ($linkedEquipments as $equipment) {
+                $equipment->update([
+                    'has_paid_for' => false,
+                    'paid_date' => null,
+                    'brought_physical' => false, // Also revert this if it was a physical rame deposit
+                    'notes' => "Paiement {$payment->receipt_number} annulé le " . now()->format('d/m/Y')
+                ]);
+            }
+
+            // If it was a physical rame payment, also update StudentRameStatus
+            if ($payment->is_rame_physical) {
+                $rameStatus = \App\Models\StudentRameStatus::where('student_id', $payment->student_id)
+                    ->where('school_year_id', $payment->school_year_id)
+                    ->first();
+                if ($rameStatus) {
+                    $rameStatus->markAsNotBrought(Auth::id(), "Paiement physique annulé");
+                }
+            }
+
+            // Delete payment details and the payment itself
+            $payment->paymentDetails()->delete();
+            $payment->delete();
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Paiement annulé avec succès.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error in PaymentController@cancelPayment: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'annulation du paiement.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function undoRameBrought(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:students,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Données invalides', 'errors' => $validator->errors()], 422);
+        }
+        
+        try {
+            $workingYear = $this->getUserWorkingYear();
+            if (!$workingYear) {
+                return response()->json(['success' => false, 'message' => 'Aucune année scolaire définie'], 400);
+            }
+
+            // Find the physical rame payment
+            $ramePayment = Payment::where('student_id', $request->student_id)
+                ->where('school_year_id', $workingYear->id)
+                ->where('is_rame_physical', true)
+                ->first();
+
+            if ($ramePayment) {
+                // Use the cancelPayment logic to reverse it
+                return $this->cancelPayment($request, $ramePayment->id);
+            }
+
+            // Fallback for older system or if no payment record is found
+            $rameStatus = \App\Models\StudentRameStatus::where('student_id', $request->student_id)
+                ->where('school_year_id', $workingYear->id)
+                ->first();
+
+            if ($rameStatus && $rameStatus->has_brought_rame) {
+                $rameStatus->markAsNotBrought(Auth::id(), "Annulation manuelle du statut apporté.");
+                return response()->json(['success' => true, 'message' => 'Le statut "Rames apportées" a été annulé.']);
+            }
+
+            return response()->json(['success' => false, 'message' => 'Aucun paiement physique de rames ou statut à annuler trouvé.'], 404);
+
+        } catch (\Exception $e) {
+            Log::error('Error in PaymentController@undoRameBrought: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'annulation du statut des rames.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     protected $paymentStatusService;
     protected $discountCalculatorService;
     protected $receiptCustomizationService;
