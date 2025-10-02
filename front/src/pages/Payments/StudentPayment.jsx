@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Button, Table, Badge, Form, Alert, Modal, Sp
 import {
   CreditCard, Check2Circle, ExclamationTriangle, Gift,
   Laptop, Shift, FileEarmarkText, CheckSquare, ArrowLeft,
-  Calendar, CashCoin, Check, Printer, Receipt
+  Calendar, CashCoin, Check, Printer, Receipt, Reply, Trash
 } from 'react-bootstrap-icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { secureApiEndpoints } from '../../utils/apiMigration';
@@ -118,10 +118,11 @@ const StudentPayment = () => {
     setLoading(true);
     try {
       // Charger toutes les données en parallèle
-      const [studentResponse, paymentResponse, equipmentResponse] = await Promise.all([
+      const [studentResponse, paymentResponse, equipmentResponse, historyResponse] = await Promise.all([
         secureApiEndpoints.students.getById(studentId),
         secureApiEndpoints.payments.getStudentInfo(studentId),
-        secureApiEndpoints.equipment.getStudentStatus(studentId)
+        secureApiEndpoints.equipment.getStudentStatus(studentId),
+        secureApiEndpoints.payments.getStudentPaymentHistory(studentId) // Fetch history here
       ]);
 
       if (studentResponse.success) setStudent(studentResponse.data);
@@ -173,11 +174,34 @@ const StudentPayment = () => {
       }
 
       if (equipmentResponse.success) setEquipmentStatus(equipmentResponse.data);
+      if (historyResponse.success) setPaymentHistory(historyResponse.data); // Set history here
 
-      await loadPaymentHistory();
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
       setError('Erreur lors du chargement des données');
+      // Reset states on error
+      setStudent(null);
+      setPaymentStatus([]);
+      setEquipmentStatus([]);
+      setPaymentHistory([]);
+      setSchoolYear(null);
+      setTotals({
+        required: 0,
+        paid: 0,
+        remaining: 0,
+        scholarship_amount: 0,
+        has_scholarships: false,
+        global_discount_amount: 0,
+        has_global_discounts: false
+      });
+      setDiscountInfo({
+        eligible_for_scholarship: false,
+        scholarship_amount: 0,
+        eligible_for_reduction: false,
+        reduction_percentage: 0,
+        deadline: null,
+        reasons: []
+      });
     } finally {
       setLoading(false);
     }
@@ -185,7 +209,7 @@ const StudentPayment = () => {
 
   const loadPaymentHistory = async () => {
     try {
-      const response = await secureApiEndpoints.payments.getStudentHistory(studentId);
+      const response = await secureApiEndpoints.payments.getStudentPaymentHistory(studentId);
       if (response.success) {
         setPaymentHistory(response.data);
       }
@@ -193,6 +217,66 @@ const StudentPayment = () => {
       console.error('Erreur historique:', error);
     }
   };
+
+  const handleCancelPayment = async (paymentId) => {
+    if (window.confirm('Êtes-vous sûr de vouloir annuler ce paiement ? Cette action est irréversible.')) {
+        setPaymentLoading(true);
+        try {
+            const response = await secureApiEndpoints.payments.cancelPayment(paymentId);
+            if (response.success) {
+                Swal.fire('Annulé!', 'Paiement annulé avec succès.', 'success');
+                await loadStudentData();
+            } else {
+                Swal.fire('Erreur', response.message || 'Erreur lors de l\'annulation du paiement.', 'error');
+            }
+        } catch (error) {
+            console.error('Erreur annulation paiement:', error);
+            Swal.fire('Erreur', 'Erreur lors de l\'annulation du paiement.', 'error');
+        } finally {
+            setPaymentLoading(false);
+        }
+    }
+};
+
+const handleUndoEquipment = async (equipmentType) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir annuler le paiement pour "${getEquipmentLabel(equipmentType)}"?`)) {
+        setPaymentLoading(true);
+        try {
+            const response = await secureApiEndpoints.payments.undoEquipmentPayment(studentId, equipmentType);
+            if (response.success) {
+                Swal.fire('Annulé!', 'Statut de l\'équipement annulé.', 'success');
+                await loadStudentData();
+            } else {
+                Swal.fire('Erreur', response.message || 'Erreur lors de l\'annulation du statut de l\'équipement.', 'error');
+            }
+        } catch (error) {
+            console.error('Erreur annulation équipement:', error);
+            Swal.fire('Erreur', 'Erreur lors de l\'annulation du statut de l\'équipement.', 'error');
+        } finally {
+            setPaymentLoading(false);
+        }
+    }
+};
+
+const handleUndoRame = async () => {
+    if (window.confirm('Êtes-vous sûr de vouloir annuler le statut "Rames apportées"?')) {
+        setPaymentLoading(true);
+        try {
+            const response = await secureApiEndpoints.payments.undoRameBrought(studentId);
+            if (response.success) {
+                Swal.fire('Annulé!', 'Statut des rames annulé.', 'success');
+                await loadStudentData();
+            } else {
+                Swal.fire('Erreur', response.message || 'Erreur lors de l\'annulation du statut des rames.', 'error');
+            }
+        } catch (error) {
+            console.error('Erreur annulation rames:', error);
+            Swal.fire('Erreur', 'Erreur lors de l\'annulation du statut des rames.', 'error');
+        } finally {
+            setPaymentLoading(false);
+        }
+    }
+};
 
   // Fonction pour vérifier l'éligibilité aux réductions dans le modal
   const checkDiscountEligibilityInModal = async (versementDate) => {
@@ -602,15 +686,26 @@ const StudentPayment = () => {
                     <div className="d-flex flex-column gap-2">
                       {/* Rames de papier special handling */}
                       {equipment.equipment_type === 'rame' && (
-                        <Button
-                          variant={equipment.brought_physical ? "success" : "outline-info"}
-                          size="sm"
-                          onClick={handleRamesPhysiques}
-                          disabled={equipment.brought_physical}
-                        >
-                          <CheckSquare className="me-1" />
-                          {equipment.brought_physical ? 'Rames reçues' : 'Marquer rames reçues'}
-                        </Button>
+                        <>
+                          <Button
+                            variant={equipment.brought_physical ? "success" : "outline-info"}
+                            size="sm"
+                            onClick={handleRamesPhysiques}
+                            disabled={equipment.brought_physical}
+                          >
+                            <CheckSquare className="me-1" />
+                            {equipment.brought_physical ? 'Rames reçues' : 'Marquer rames reçues'}
+                          </Button>
+                          {equipment.brought_physical && (
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={handleUndoRame}
+                            >
+                              <Reply className="me-1" /> Annuler réception rames
+                            </Button>
+                          )}
+                        </>
                       )}
 
                       {/* Other equipment handling */}
@@ -649,6 +744,15 @@ const StudentPayment = () => {
                             >
                               <ArrowLeft className="me-1" />
                               Réinitialiser
+                            </Button>
+                          )}
+                          {equipment.has_paid_for && (
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleUndoEquipment(equipment.equipment_type)}
+                            >
+                              <Reply className="me-1" /> Annuler paiement
                             </Button>
                           )}
                         </div>
@@ -1249,15 +1353,26 @@ const StudentPayment = () => {
 
                           <div className="d-flex justify-content-between align-items-center">
                             {equipment.equipment_type === 'rame' && (
-                              <Button
-                                variant="outline-info"
-                                size="sm"
-                                onClick={handleRamesPhysiques}
-                                disabled={equipment.brought_physical}
-                              >
-                                <CheckSquare className="me-1" />
-                                {equipment.brought_physical ? 'Rames reçues' : 'Marquer rames reçues'}
-                              </Button>
+                              <>
+                                <Button
+                                  variant="outline-info"
+                                  size="sm"
+                                  onClick={handleRamesPhysiques}
+                                  disabled={equipment.brought_physical}
+                                >
+                                  <CheckSquare className="me-1" />
+                                  {equipment.brought_physical ? 'Rames reçues' : 'Marquer rames reçues'}
+                                </Button>
+                                {equipment.brought_physical && (
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={handleUndoRame}
+                                  >
+                                    <Reply className="me-1" /> Annuler réception rames
+                                  </Button>
+                                )}
+                              </>
                             )}
 
                             {equipment.equipment_type !== 'rame' && canMarkEquipmentAsReceived(equipment) && (
@@ -1268,6 +1383,15 @@ const StudentPayment = () => {
                               >
                                 <Check2Circle className="me-1" />
                                 Marquer comme remis
+                              </Button>
+                            )}
+                            {equipment.has_paid_for && (
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() => handleUndoEquipment(equipment.equipment_type)}
+                              >
+                                <Reply className="me-1" /> Annuler paiement
                               </Button>
                             )}
                           </div>
@@ -1295,67 +1419,37 @@ const StudentPayment = () => {
                 <p className="text-muted text-center">Aucun paiement enregistré</p>
               ) : (
                 <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                  {paymentHistory.map((payment) => (
-                    <div key={payment.id} className="border-bottom pb-3 mb-3">
-                      <div className="d-flex justify-content-between align-items-start">
-                        <div>
-                          <strong>{formatAmount(payment.total_amount)}</strong>
-
-                          {payment.has_scholarship && (
-                            <div className="text-success mt-1">
-                              <small>
-                                Montant payé: {formatAmount(payment.total_amount)} + Bourse appliquée: {formatAmount(payment.scholarship_amount)} = Valeur totale: {formatAmount(payment.total_amount + payment.scholarship_amount)}
-                              </small>
-                            </div>
-                          )}
-
-                          {payment.has_reduction && payment.reduction_amount > 0 && (
-                            <div className="text-info mt-1">
-                              <small>
-                                Montant payé: {formatAmount(payment.total_amount)} + Réduction appliquée: {formatAmount(payment.reduction_amount)} = Valeur totale: {formatAmount(payment.total_amount + payment.reduction_amount)}
-                              </small>
-                            </div>
-                          )}
-
-                          <div className="text-muted d-flex align-items-center gap-3 mt-2">
-                            <small className="d-flex align-items-center">
-                              <Calendar size={14} className="me-1" />
-                              {formatDate(payment.payment_date)}
-                            </small>
-                            <small className="d-flex align-items-center">
-                              <CreditCard size={14} className="me-1" />
-                              {getPaymentMethodLabel(payment.payment_method, payment.is_rame_physical)}
-                            </small>
-                          </div>
-
-                          {(payment.has_scholarship || payment.has_reduction) && (
-                            <div className="mt-2">
-                              {payment.has_scholarship && (
-                                <div className="badge bg-success me-1 mb-1">
-                                  Bourse: {formatAmount(payment.scholarship_amount)}
-                                </div>
-                              )}
-                              {payment.has_reduction && payment.reduction_amount > 0 && (
-                                <div className="badge bg-info me-1 mb-1">
-                                  Réduction: {formatAmount(payment.reduction_amount)}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => handlePrintReceipt(payment.id)}
-                        >
-                          <Receipt size={14} />
-                        </Button>
-                      </div>
-                      {payment.notes && (
-                        <small className="text-muted d-block mt-1">Note: {payment.notes}</small>
-                      )}
-                    </div>
-                  ))}
+                  <Table striped bordered hover responsive>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Reçu N°</th>
+                        <th>Montant</th>
+                        <th>Méthode</th>
+                        <th>Notes</th>
+                        <th className="text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paymentHistory.map(p => (
+                        <tr key={p.id}>
+                          <td>{new Date(p.payment_date).toLocaleDateString()}</td>
+                          <td>{p.receipt_number}</td>
+                          <td>{p.total_amount.toLocaleString()} FCFA</td>
+                          <td>{p.payment_method}</td>
+                          <td>{p.notes}</td>
+                          <td className="text-center">
+                            <Button variant="outline-primary" size="sm" onClick={() => handlePrintReceipt(p.id)} className="me-2">
+                              <Receipt size={14} /> Imprimer
+                            </Button>
+                            <Button variant="danger" size="sm" onClick={() => handleCancelPayment(p.id)} disabled={paymentLoading}>
+                              <Trash className="me-1" /> Annuler
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
                 </div>
               )}
             </Card.Body>
@@ -1377,7 +1471,7 @@ const StudentPayment = () => {
                   <Form.Control
                     type="number"
                     min="1"
-                    max={totals.remaining}
+                    max={totals.remaining || 0}
                     step="1"
                     value={paymentForm.amount}
                     onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}

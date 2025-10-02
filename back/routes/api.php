@@ -128,19 +128,9 @@ Route::prefix('scholarships')->middleware(['role:admin,secretaire,accountant,com
     Route::get('/eligible-students', [UniversityScholarshipController::class, 'getEligibleStudents']);
 });
 
-// === PAIEMENTS - Routes manquantes ===
-Route::prefix('payments')->middleware(['role:admin,secretaire,accountant,comptable_superieur'])->group(function () {
-    // Routes existantes...
 
-    // NOUVELLES ROUTES MANQUANTES
-    Route::post('/pay-rame-physically', [PaymentController::class, 'payRamePhysically']);
-    Route::post('/process-payment', [PaymentController::class, 'processPayment']);
-    Route::post('/rames/undo-brought', [PaymentController::class, 'undoRameBrought']);
-    Route::get('/student/{studentId}/status', [PaymentController::class, 'getStudentStatus']);});
 
-Route::prefix('equipments')->middleware(['role:admin,secretaire,accountant,comptable_superieur'])->group(function () {
-    Route::post('/undo-payment', [StudentEquipmentController::class, 'undoPayment']);
-});
+
 
 // Routes pour la distribution des équipements
 Route::prefix('equipment-distribution')->group(function () {
@@ -714,5 +704,31 @@ Route::middleware('auth:api')->group(function () {
             ->middleware(['role:admin']);
         Route::post('/school/{schoolId}/update-all', [UniversityScholarshipController::class, 'updateSchoolScholarships'])
             ->middleware(['role:admin']);
+    });
+
+    // Routes pour les paiements (comptables et admins)
+    Route::prefix('payments')->middleware(['role:admin,secretaire,accountant,comptable_superieur'])->group(function () {
+        Route::get('/student/{studentId}/info', [PaymentController::class, 'getStudentPaymentInfo']);
+        Route::get('/student/{studentId}/info-with-discount', [PaymentController::class, 'getStudentPaymentInfoWithDiscount']);
+        Route::get('/student/{studentId}/history', [PaymentController::class, 'getStudentPaymentHistory']);
+        Route::post('/student/{studentId}/calculate-with-date', [PaymentController::class, 'calculatePaymentWithDate']);
+        Route::post('/', [PaymentController::class, 'store']);
+        Route::delete('/{paymentId}', [PaymentController::class, 'cancelPayment']);
+        Route::get('/{paymentId}/receipt', [PaymentController::class, 'generateReceipt']);
+        Route::get('/{paymentId}/receipt/pdf', [PaymentController::class, 'downloadReceiptPDF']);
+        Route::get('/stats', [PaymentController::class, 'getPaymentStats']);
+        // Nouvelles routes pour les équipements
+        Route::post('process-with-equipment', [PaymentController::class, 'processPaymentWithEquipment']);
+        Route::get('student/{studentId}/required-equipments', [PaymentController::class, 'getStudentRequiredEquipments']);
+        Route::get('student/{studentId}/complete-status', [PaymentController::class, 'getCompleteStudentStatus']);
+        Route::get('student/{studentId}/summary', [PaymentController::class, 'getStudentPaymentSummary']);
+
+        // Route pour calculer les totaux avec bourses
+        Route::post('calculate-with-scholarships', [PaymentController::class, 'calculateTotalWithScholarships']);
+        Route::post('/rames/undo-brought', [PaymentController::class, 'undoRameBrought']);
+    });
+
+    Route::prefix('equipments')->middleware(['role:admin,secretaire,accountant,comptable_superieur'])->group(function () {
+        Route::post('/undo-payment', [StudentEquipmentController::class, 'undoPayment']);
     });
 });
