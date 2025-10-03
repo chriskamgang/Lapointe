@@ -785,7 +785,7 @@ export const secureApiEndpoints = {
         processPayment: (data) => secureApi.post('/payments/process-payment', data),
         getStudentPaymentHistory: (studentId) => secureApi.get(`/payments/student/${studentId}/history`),
         cancelPayment: (paymentId) => secureApi.delete(`/payments/${paymentId}`),
-        undoRameBrought: (studentId) => secureApi.post('/rames/undo-brought', { student_id: studentId }),
+        undoRameBrought: (studentId) => secureApi.post('/payments/rames/undo-brought', { student_id: studentId }),
         undoEquipmentPayment: (studentId, equipmentType) => secureApi.post('/equipments/undo-payment', { student_id: studentId, equipment_type: equipmentType }),
         getStudentStatus: (studentId) => secureApi.get(`/payments/student/${studentId}/status`),
     },
