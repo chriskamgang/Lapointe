@@ -89,17 +89,38 @@ const StudentPayment = () => {
     if (!initialPaymentData) return;
 
     let newRequired = 0;
-    initialPaymentData.payment_status.forEach(status => {
-      if (!status.is_optional || selectedOptional.includes(status.tranche_id)) {
-        newRequired += status.required_amount;
-      }
-    });
+    let totalGlobalDiscountAmount = 0;
+    let hasGlobalDiscounts = false;
+
+    if (initialPaymentData.payment_status && Array.isArray(initialPaymentData.payment_status)) {
+      initialPaymentData.payment_status.forEach(status => {
+        const amount = parseFloat(status.required_amount) || 0;
+
+        if (!status.is_optional || selectedOptional.includes(status.tranche_id)) {
+          newRequired += amount;
+        }
+        // Calculer les réductions globales
+        if (status.has_global_discount && status.global_discount_amount > 0) {
+          totalGlobalDiscountAmount += parseFloat(status.global_discount_amount);
+          hasGlobalDiscounts = true;
+        }
+      });
+    }
+
+    // Calculer le total payé incluant les bourses
+    const totalPaidWithScholarship = (parseFloat(initialPaymentData.total_paid) || 0) +
+                                     (parseFloat(initialPaymentData.total_scholarship_amount) || 0);
 
     const newTotals = {
-      ...totals,
       required: newRequired,
-      remaining: Math.max(0, newRequired - initialPaymentData.total_paid),
+      paid: parseFloat(initialPaymentData.total_paid) || 0,
+      remaining: Math.max(0, newRequired - totalPaidWithScholarship),
+      scholarship_amount: parseFloat(initialPaymentData.total_scholarship_amount) || 0,
+      has_scholarships: initialPaymentData.has_scholarships || false,
+      global_discount_amount: totalGlobalDiscountAmount,
+      has_global_discounts: hasGlobalDiscounts
     };
+
     setTotals(newTotals);
 
   }, [selectedOptional, initialPaymentData]);
@@ -1194,9 +1215,14 @@ const handleUndoRame = async () => {
             <Card.Body>
               <h3 className="text-success">{formatAmount(totals.paid)}</h3>
               <p className="text-muted mb-0">Total payé</p>
+              {totals.has_scholarships && totals.scholarship_amount > 0 && (
+                <small className="text-success d-block mt-1">
+                  + Bourse: {formatAmount(totals.scholarship_amount)}
+                </small>
+              )}
               {totals.has_global_discounts && totals.global_discount_amount > 0 && (
                 <small className="text-info d-block mt-1">
-                  {formatAmount(totals.paid)} + {formatAmount(totals.global_discount_amount)} = {formatAmount(totals.required)}
+                  + Réduction: {formatAmount(totals.global_discount_amount)}
                 </small>
               )}
             </Card.Body>
@@ -1471,16 +1497,22 @@ const handleUndoRame = async () => {
                   <Form.Control
                     type="number"
                     min="1"
-                    max={totals.remaining || 0}
+                    max={totals.remaining > 0 ? totals.remaining : undefined}
                     step="1"
                     value={paymentForm.amount}
                     onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
                     placeholder="Ex: 25000"
                     required
+                    disabled={totals.remaining <= 0}
                   />
                   <Form.Text className="text-muted">
                     Reste à payer: {formatAmount(totals.remaining)}
                   </Form.Text>
+                  {totals.remaining <= 0 && (
+                    <Form.Text className="text-success d-block">
+                      Les paiements sont complets !
+                    </Form.Text>
+                  )}
                 </Form.Group>
               </Col>
               <Col md={6}>

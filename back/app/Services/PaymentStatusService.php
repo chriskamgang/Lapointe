@@ -45,15 +45,15 @@ class PaymentStatusService
             $totalRequiredWithDiscount = $discountInfo['finalAmount'];
         }
 
-        // Ajouter la bourse GLOBALE au total payé (pas les allocations par tranche)
+        // Calculer le total payé incluant la bourse pour le reste à payer
         $totalPaidWithScholarship = $totalPaid + $totalScholarshipAmount;
-        
+
         return (object) [
             'student_id' => $student->id,
             'school_year_id' => $schoolYear->id,
             // Montants normaux affichés partout
             'total_required' => $totalRequired,
-            'total_paid' => $totalPaidWithScholarship, // Inclut la bourse complète
+            'total_paid' => $totalPaid, // Montant réellement payé (SANS la bourse)
             'total_remaining' => max(0, $totalRequired - $totalPaidWithScholarship),
             // Informations sur les bourses (pour calcul de répartition)
             'total_scholarship_amount' => $totalScholarshipAmount,
@@ -253,14 +253,10 @@ class PaymentStatusService
             ];
 
             // Inclure les tranches dans les totaux
-            if ($isOptional) {
-                if ($paidAmount > 0) {
-                    $totalRequired += $requiredAmount;
-                }
-            } else {
-                $totalRequired += $requiredAmount;
-            }
-            
+            // Les tranches optionnelles sont toujours incluses dans le total requis
+            // (c'est au frontend de gérer l'inclusion/exclusion via selectedOptional)
+            $totalRequired += $requiredAmount;
+
             // Total payé = SEULEMENT les paiements effectués
             // (La rame est déjà incluse dans $paidAmount si elle est payée physiquement)
             // (La bourse sera ajoutée globalement à la fin)

@@ -104,6 +104,21 @@ class PaymentController extends Controller
                 return $this->cancelPayment($request, $ramePayment->id);
             }
 
+            // Check for rame in equipment status
+            $rameEquipmentStatus = \App\Models\StudentEquipmentStatus::where('student_id', $request->student_id)
+                ->where('school_year_id', $workingYear->id)
+                ->where('equipment_type', 'rame')
+                ->where('brought_physical', true)
+                ->first();
+
+            if ($rameEquipmentStatus) {
+                $rameEquipmentStatus->update([
+                    'brought_physical' => false,
+                    'received_date' => null
+                ]);
+                return response()->json(['success' => true, 'message' => 'Le statut "Rames apportées" a été annulé.']);
+            }
+
             // Fallback for older system or if no payment record is found
             $rameStatus = \App\Models\StudentRameStatus::where('student_id', $request->student_id)
                 ->where('school_year_id', $workingYear->id)
