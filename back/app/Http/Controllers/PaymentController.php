@@ -389,11 +389,8 @@ class PaymentController extends Controller
 
             $paymentStatus = $this->paymentStatusService->getStatusForStudent($student, $workingYear);
 
-            // Validation du montant en tenant compte des bourses
+            // Validation du montant - $paymentStatus->total_remaining déjà tient compte des bourses
             $effectiveRemaining = $paymentStatus->total_remaining;
-            if ($paymentStatus->has_scholarships) {
-                $effectiveRemaining = max(0, $paymentStatus->total_remaining - $paymentStatus->total_scholarship_amount);
-            }
 
             // Vérifier si l'étudiant a activé les bourses
             $hasScholarship = $student->has_scholarship_enabled && $this->discountCalculatorService->getClassScholarship($student) !== null;

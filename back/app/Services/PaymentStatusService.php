@@ -30,7 +30,12 @@ class PaymentStatusService
         $totalScholarshipAmount = $this->calculateTotalScholarshipAmount($student, $paymentTranches);
 
         $totalRequired = $trancheDetails['totalRequired'];
-        $totalPaid = $trancheDetails['totalPaid'];
+        
+        // Recalculate totalPaid from scratch to ensure its correctness, bypassing the value from trancheDetails.
+        $totalPaid = 0;
+        foreach ($existingPayments as $payment) {
+            $totalPaid += $payment->total_amount;
+        }
 
         $discountInfo = $this->calculateDiscountEligibility(
             $student,

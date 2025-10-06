@@ -1,0 +1,67 @@
+<html>
+<head>
+</head>
+<body>
+<svg width="600" height="300" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Échelle : 1 pixel = 0.25 m -->
+
+  <!-- S1 (20 m x 12 m) : 80 px x 48 px -->
+  <rect x="80" y="50" width="80" height="48" fill="rgba(200, 200, 200, 0.2)" stroke="black" stroke-width="2"/>
+  <text x="120" y="74" font-size="16" text-anchor="middle">S1 (20m x 12m)</text>
+  <text x="120" y="46" font-size="12">20 m</text> <!-- Côté haut -->
+  <text x="76" y="74" font-size="12" transform="rotate(-90, 76, 74)">12 m</text> <!-- Côté gauche -->
+
+  <!-- AP1 (Canal 1) -->
+  <circle cx="120" cy="74" r="4" fill="blue"/>
+  <circle cx="120" cy="74" r="48" fill="none" stroke="blue" stroke-width="2" stroke-dasharray="10,10"/>
+  <text x="120" y="86" font-size="12" text-anchor="middle">AP1 (Canal 1)</text>
+
+  <!-- Couloir (30 m x 5 m) : 120 px x 20 px -->
+  <rect x="180" y="50" width="120" height="20" fill="rgba(200, 200, 200, 0.2)" stroke="black" stroke-width="2"/>
+  <text x="240" y="60" font-size="16" text-anchor="middle">Couloir (30m x 5m)</text>
+  <text x="240" y="46" font-size="12">30 m</text> <!-- Côté haut -->
+  <text x="176" y="60" font-size="12" transform="rotate(-90, 176, 60)">5 m</text> <!-- Côté gauche -->
+
+  <!-- AP2 (Canal 6) -->
+  <circle cx="240" cy="60" r="4" fill="green"/>
+  <circle cx="240" cy="60" r="48" fill="none" stroke="green" stroke-width="2" stroke-dasharray="10,10"/>
+  <text x="240" y="72" font-size="12" text-anchor="middle">AP2 (Canal 6)</text>
+
+  <!-- S2 (20 m x 12 m) : 80 px x 48 px -->
+  <rect x="320" y="50" width="80" height="48" fill="rgba(200, 200, 200, 0.2)" stroke="black" stroke-width="2"/>
+  <text x="360" y="74" font-size="16" text-anchor="middle">S2 (20m x 12m)</text>
+  <text x="360" y="46" font-size="12">20 m</text> <!-- Côté haut -->
+  <text x="316" y="74" font-size="12" transform="rotate(-90, 316, 74)">12 m</text> <!-- Côté gauche -->
+
+  <!-- AP4 (Canal 1) -->
+  <circle cx="390" cy="74" r="4" fill="blue"/>
+  <circle cx="390" cy="74" r="48" fill="none" stroke="blue" stroke-width="2" stroke-dasharray="10,10"/>
+  <text x="390" y="86" font-size="12" text-anchor="middle">AP4 (Canal 1)</text>
+
+  <!-- S3 (20 m x 12 m) : 80 px x 48 px -->
+  <rect x="420" y="50" width="80" height="48" fill="rgba(200, 200, 200, 0.2)" stroke="black" stroke-width="2"/>
+  <text x="460" y="74" font-size="16" text-anchor="middle">S3 (20m x 12m)</text>
+  <text x="460" y="46" font-size="12">20 m</text> <!-- Côté haut -->
+  <text x="416" y="74" font-size="12" transform="rotate(-90, 416, 74)">12 m</text> <!-- Côté gauche -->
+
+  <!-- AP3 (Canal 11) -->
+  <circle cx="410" cy="74" r="4" fill="red"/>
+  <circle cx="410" cy="74" r="48" fill="none" stroke="red" stroke-width="2" stroke-dasharray="10,10"/>
+  <text x="410" y="86" font-size="12" text-anchor="middle">AP3 (Canal 11)</text>
+
+  <!-- AP5 (Canal 6) -->
+  <circle cx="430" cy="74" r="4" fill="green"/>
+  <circle cx="430" cy="74" r="48" fill="none" stroke="green" stroke-width="2" stroke-dasharray="10,10"/>
+  <text x="430" y="86" font-size="12" text-anchor="middle">AP5 (Canal 6)</text>
+
+  <!-- Titre et légende -->
+  <text x="300" y="20" font-size="24" text-anchor="middle">Puzzle Canaux - 5 AP</text>
+  <text x="300" y="40" font-size="16">Canaux : 1 (bleu), 6 (vert), 11 (rouge)</text>
+
+  <!-- Annotations pour justification -->
+  <text x="300" y="120" font-size="12" text-anchor="middle">AP4-AP3: 7.5 m, AP3-AP5: 7.5 m, éviter même canal</text>
+  <text x="300" y="132" font-size="12" text-anchor="middle">AP1-AP4: 125 m, AP2-AP5: 70.4 m, canal partagé OK</text>
+  <text x="300" y="144" font-size="12" text-anchor="middle">AP4-AP5: 15 m, réduire puissance si interférence</text>
+</svg>
+</body>
+</html>

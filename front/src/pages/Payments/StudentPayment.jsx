@@ -88,40 +88,34 @@ const StudentPayment = () => {
   useEffect(() => {
     if (!initialPaymentData) return;
 
-    let newRequired = 0;
-    let totalGlobalDiscountAmount = 0;
-    let hasGlobalDiscounts = false;
+    setTotals(prevTotals => {
+        let newRequired = 0;
+        let totalGlobalDiscountAmount = 0;
+        let hasGlobalDiscounts = false;
 
-    if (initialPaymentData.payment_status && Array.isArray(initialPaymentData.payment_status)) {
-      initialPaymentData.payment_status.forEach(status => {
-        const amount = parseFloat(status.required_amount) || 0;
-
-        if (!status.is_optional || selectedOptional.includes(status.tranche_id)) {
-          newRequired += amount;
+        if (initialPaymentData.payment_status && Array.isArray(initialPaymentData.payment_status)) {
+            initialPaymentData.payment_status.forEach(status => {
+                const amount = parseFloat(status.required_amount) || 0;
+                if (!status.is_optional || selectedOptional.includes(status.tranche_id)) {
+                    newRequired += amount;
+                }
+                if (status.has_global_discount && status.global_discount_amount > 0) {
+                    totalGlobalDiscountAmount += parseFloat(status.global_discount_amount);
+                    hasGlobalDiscounts = true;
+                }
+            });
         }
-        // Calculer les réductions globales
-        if (status.has_global_discount && status.global_discount_amount > 0) {
-          totalGlobalDiscountAmount += parseFloat(status.global_discount_amount);
-          hasGlobalDiscounts = true;
-        }
-      });
-    }
 
-    // Calculer le total payé incluant les bourses
-    const totalPaidWithScholarship = (parseFloat(initialPaymentData.total_paid) || 0) +
-                                     (parseFloat(initialPaymentData.total_scholarship_amount) || 0);
+        const newRemaining = newRequired - prevTotals.paid - prevTotals.scholarship_amount;
 
-    const newTotals = {
-      required: newRequired,
-      paid: parseFloat(initialPaymentData.total_paid) || 0,
-      remaining: Math.max(0, newRequired - totalPaidWithScholarship),
-      scholarship_amount: parseFloat(initialPaymentData.total_scholarship_amount) || 0,
-      has_scholarships: initialPaymentData.has_scholarships || false,
-      global_discount_amount: totalGlobalDiscountAmount,
-      has_global_discounts: hasGlobalDiscounts
-    };
-
-    setTotals(newTotals);
+        return {
+            ...prevTotals,
+            required: newRequired,
+            remaining: Math.max(0, newRemaining),
+            global_discount_amount: totalGlobalDiscountAmount,
+            has_global_discounts: hasGlobalDiscounts
+        };
+    });
 
   }, [selectedOptional, initialPaymentData]);
 
