@@ -175,8 +175,8 @@ class PaymentStatusService
             if ($isRameTranche) {
                 if ($ramePaid && $electronicPaidAmount >= $requiredAmount) {
                     // Rame payée DEUX FOIS (électroniquement + physiquement)
-                    // Considérer comme un CRÉDIT supplémentaire de 22,500 FCFA
-                    $paidAmount = $requiredAmount + $requiredAmount; // Double paiement = crédit
+                    // On affiche juste le montant requis, l'excédent est géré au niveau global des paiements.
+                    $paidAmount = $requiredAmount;
                 } else if ($ramePaid) {
                     // Rame payée SEULEMENT physiquement
                     $paidAmount = $requiredAmount;
