@@ -162,7 +162,7 @@ Route::prefix('dashboard')->group(function () {
 
 Route::get('/user-management/{id}/professional-card', function () {
     return response('', 204)
-        ->header('Access-Control-Allow-Origin', 'https://admin.cpb-douala.com')
+        ->header('Access-Control-Allow-Origin', '*')
         ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         ->header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With')
         ->header('Access-Control-Allow-Credentials', 'true')
@@ -170,7 +170,7 @@ Route::get('/user-management/{id}/professional-card', function () {
 });
 Route::get('/students', function () {
     return response('', 204)
-        ->header('Access-Control-Allow-Origin', 'https://admin.cpb-douala.com')
+        ->header('Access-Control-Allow-Origin', '*')
         ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         ->header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With')
         ->header('Access-Control-Allow-Credentials', 'true')
@@ -178,7 +178,7 @@ Route::get('/students', function () {
 });
 Route::post('/students', function () {
     return response('', 201)
-        ->header('Access-Control-Allow-Origin', 'https://admin.cpb-douala.com')
+        ->header('Access-Control-Allow-Origin', '*')
         ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         ->header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With')
         ->header('Access-Control-Allow-Credentials', 'true')
