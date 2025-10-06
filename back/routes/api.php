@@ -292,7 +292,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
     // Routes pour les étudiants
-    Route::prefix('students')->middleware(['role:admin,accountant,comptable_superieur'])->group(function () {
+    Route::prefix('students')->middleware(['role:admin,accountant,comptable_superieur,secretaire'])->group(function () {
         Route::get('/school-years', [StudentController::class, 'getSchoolYears']);
         Route::get('/class-series/{seriesId}', [StudentController::class, 'getByClassSeries']);
         Route::get('/{student}', [StudentController::class, 'show']);
@@ -311,7 +311,7 @@ Route::middleware('auth:api')->group(function () {
         Route::patch('/{student}/status', [StudentController::class, 'updateStatus']);
         Route::post('/{student}/update-with-photo', [StudentController::class, 'updateWithPhoto']);
         Route::post('/{student}/transfer-series', [StudentController::class, 'transferToSeries']);
-        Route::delete('/{student}', [StudentController::class, 'destroy']);
+        Route::delete('/{student}', [StudentController::class, 'destroy'])->middleware(['role:admin,comptable_superieur']);
         Route::post('/import/csv', [StudentController::class, 'importCsv']);
         Route::post('/import/excel', [StudentController::class, 'importExcel']);
         Route::post('/series/{seriesId}/import', [StudentController::class, 'importForSeries']);
