@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentController extends Controller
@@ -96,7 +97,7 @@ class DocumentController extends Controller
     {
         try {
             // Debug: log des données reçues
-            \Log::info('Document upload request received', [
+            Log::info('Document upload request received', [
                 'request_data' => $request->all(),
                 'files' => $request->file() ? array_keys($request->file()) : 'no files',
                 'user_id' => auth()->id()
@@ -125,7 +126,7 @@ class DocumentController extends Controller
             ]);
 
             if ($validator->fails()) {
-                \Log::warning('Document upload validation failed', [
+                Log::warning('Document upload validation failed', [
                     'errors' => $validator->errors()->toArray(),
                     'request_data' => $request->all()
                 ]);

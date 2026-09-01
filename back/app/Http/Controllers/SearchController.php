@@ -73,7 +73,7 @@ class SearchController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Global search error: ' . $e->getMessage());
+            Log::error('Global search error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la recherche',
@@ -89,7 +89,7 @@ class SearchController extends Controller
     {
         return Student::with([
                 'classSeries.schoolClass',
-                'classSeries.schoolClass.level.section',
+                'classSeries.schoolClass.level.school',
                 'schoolYear'
             ])
             ->where(function ($q) use ($query) {
@@ -112,7 +112,7 @@ class SearchController extends Controller
                     'series_id' => $student->class_series_id,
                     'class_name' => $student->classSeries->schoolClass->name ?? 'Non assigné',
                     'series_name' => $student->classSeries->name ?? 'Non assigné',
-                    'section_name' => $student->classSeries->schoolClass->level->section->name ?? 'Non défini',
+                    'school_name' => $student->classSeries->schoolClass->level->school->name ?? 'Non défini',
                     'level_name' => $student->classSeries->schoolClass->level->name ?? 'Non défini',
                     'parent_name' => $student->parent_name,
                     'school_year' => $student->schoolYear->name ?? 'Non défini',
@@ -130,7 +130,7 @@ class SearchController extends Controller
     private function searchClasses($query, $limit)
     {
         return SchoolClass::with([
-                'level.section',
+                'level.school',
                 'series' => function ($q) {
                     $q->withCount('students');
                 }
@@ -141,7 +141,7 @@ class SearchController extends Controller
                   ->orWhereHas('level', function ($levelQuery) use ($query) {
                       $levelQuery->where('name', 'LIKE', "%{$query}%");
                   })
-                  ->orWhereHas('level.section', function ($sectionQuery) use ($query) {
+                  ->orWhereHas('level.school', function ($sectionQuery) use ($query) {
                       $sectionQuery->where('name', 'LIKE', "%{$query}%");
                   });
             })
@@ -155,7 +155,7 @@ class SearchController extends Controller
                     'name' => $class->name,
                     'description' => $class->description,
                     'level_name' => $class->level->name ?? 'Non défini',
-                    'section_name' => $class->level->section->name ?? 'Non défini',
+                    'school_name' => $class->level->school->name ?? 'Non défini',
                     'series_count' => $class->series->count(),
                     'total_students' => $class->series->sum('students_count'),
                     'series' => $class->series->map(function ($series) {
@@ -175,7 +175,7 @@ class SearchController extends Controller
     private function searchSeries($query, $limit)
     {
         return ClassSeries::with([
-                'schoolClass.level.section',
+                'schoolClass.level.school',
                 'students'
             ])
             ->where(function ($q) use ($query) {
@@ -187,7 +187,7 @@ class SearchController extends Controller
                   ->orWhereHas('schoolClass.level', function ($levelQuery) use ($query) {
                       $levelQuery->where('name', 'LIKE', "%{$query}%");
                   })
-                  ->orWhereHas('schoolClass.level.section', function ($sectionQuery) use ($query) {
+                  ->orWhereHas('schoolClass.level.school', function ($sectionQuery) use ($query) {
                       $sectionQuery->where('name', 'LIKE', "%{$query}%");
                   });
             })
@@ -205,7 +205,7 @@ class SearchController extends Controller
                     'students_count' => $series->students_count,
                     'class_name' => $series->schoolClass->name ?? 'Non défini',
                     'level_name' => $series->schoolClass->level->name ?? 'Non défini',
-                    'section_name' => $series->schoolClass->level->section->name ?? 'Non défini',
+                    'school_name' => $series->schoolClass->level->school->name ?? 'Non défini',
                     'main_teacher' => $series->mainTeacher->name ?? null
                 ];
             });
@@ -316,7 +316,7 @@ class SearchController extends Controller
             }
 
             // Recherche de classes
-            $classes = SchoolClass::with('level.section')
+            $classes = SchoolClass::with('level.school')
                 ->where('name', 'LIKE', "%{$query}%")
                 ->where('is_active', true)
                 ->limit($limit)
@@ -326,7 +326,7 @@ class SearchController extends Controller
                 $results[] = [
                     'id' => $class->id,
                     'type' => 'class',
-                    'label' => "{$class->name} ({$class->level->section->name} - {$class->level->name})",
+                    'label' => "{$class->name} ({$class->level->school->name} - {$class->level->name})",
                     'category' => 'Classes'
                 ];
             }
@@ -393,7 +393,7 @@ class SearchController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Quick search error: ' . $e->getMessage());
+            Log::error('Quick search error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la recherche rapide'

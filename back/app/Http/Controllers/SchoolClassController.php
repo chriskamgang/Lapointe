@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Log;
 
 class SchoolClassController extends Controller
 {
@@ -24,17 +25,17 @@ class SchoolClassController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = SchoolClass::with(['level.section', 'series', 'paymentAmounts.paymentTranche']);
+            $query = SchoolClass::with(['level.school', 'series', 'paymentAmounts.paymentTranche']);
             
             // Filtrer par niveau si spécifié
             if ($request->has('level_id')) {
                 $query->where('level_id', $request->level_id);
             }
             
-            // Filtrer par section si spécifié
-            if ($request->has('section_id')) {
+            // Filtrer par school si spécifié
+            if ($request->has('school_id')) {
                 $query->whereHas('level', function($q) use ($request) {
-                    $q->where('section_id', $request->section_id);
+                    $q->where('school_id', $request->school_id);
                 });
             }
             
@@ -68,7 +69,7 @@ class SchoolClassController extends Controller
                 'total_series' => ClassSeries::count(),
             ];
 
-            $recentClasses = SchoolClass::with(['level.section'])
+            $recentClasses = SchoolClass::with(['level.school'])
                 ->latest()
                 ->take(5)
                 ->get();
@@ -160,7 +161,7 @@ class SchoolClassController extends Controller
 
             // Recharger avec les relations
             $schoolClass->load([
-                'level.section', 
+                'level.school', 
                 'series', 
                 'paymentAmounts.paymentTranche'
             ]);
@@ -187,7 +188,7 @@ class SchoolClassController extends Controller
     {
         try {
             $schoolClass->load([
-                'level.section',
+                'level.school',
                 'series.students',
                 'paymentAmounts.paymentTranche'
             ]);
@@ -329,7 +330,7 @@ class SchoolClassController extends Controller
             DB::commit();
 
             // Recharger avec les relations
-            $schoolClass->load(['level.section', 'series', 'paymentAmounts.paymentTranche']);
+            $schoolClass->load(['level.school', 'series', 'paymentAmounts.paymentTranche']);
 
             return response()->json([
                 'success' => true,
@@ -461,7 +462,7 @@ class SchoolClassController extends Controller
     {
         try {
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             $filename = 'classes_' . date('Y-m-d_H-i-s') . '.xlsx';
@@ -482,7 +483,7 @@ class SchoolClassController extends Controller
     {
         try {
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             $filename = 'classes_' . date('Y-m-d_H-i-s') . '.csv';
@@ -502,25 +503,25 @@ class SchoolClassController extends Controller
     public function exportPdf(Request $request)
     {
         try {
-            \Log::info('Export PDF démarré', ['user_id' => auth()->id()]);
+            Log::info('Export PDF démarré', ['user_id' => auth()->id()]);
             
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             
-            \Log::info('Filtres appliqués', $filters);
+            Log::info('Filtres appliqués', $filters);
             
             $filename = 'classes_' . date('Y-m-d_H-i-s') . '.pdf';
             
             $export = new SchoolClassesDetailedExport($filters);
             
-            \Log::info('Export créé, génération PDF...');
+            Log::info('Export créé, génération PDF...');
             
             return Excel::download($export, $filename, \Maatwebsite\Excel\Excel::DOMPDF);
             
         } catch (\Exception $e) {
-            \Log::error('Erreur export PDF', [
+            Log::error('Erreur export PDF', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -542,14 +543,14 @@ class SchoolClassController extends Controller
     public function importCsv(Request $request)
     {
         try {
-            \Log::info('Import CSV démarré', ['user_id' => auth()->id()]);
+            Log::info('Import CSV démarré', ['user_id' => auth()->id()]);
             
             $validator = Validator::make($request->all(), [
                 'file' => 'required|mimes:csv,txt|max:2048'
             ]);
 
             if ($validator->fails()) {
-                \Log::error('Validation import failed', $validator->errors()->toArray());
+                Log::error('Validation import failed', $validator->errors()->toArray());
                 return response()->json([
                     'success' => false,
                     'message' => 'Fichier invalide',
@@ -557,14 +558,14 @@ class SchoolClassController extends Controller
                 ], 422);
             }
 
-            \Log::info('Début du traitement du fichier', ['filename' => $request->file('file')->getClientOriginalName()]);
+            Log::info('Début du traitement du fichier', ['filename' => $request->file('file')->getClientOriginalName()]);
 
             $import = new SchoolClassesImport();
             Excel::import($import, $request->file('file'));
             
             $results = $import->getResults();
             
-            \Log::info('Import terminé', $results);
+            Log::info('Import terminé', $results);
 
             return response()->json([
                 'success' => true,
@@ -588,7 +589,7 @@ class SchoolClassController extends Controller
     {
         try {
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             $filename = 'classes_importable_' . date('Y-m-d_H-i-s') . '.csv';

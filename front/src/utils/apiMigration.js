@@ -17,7 +17,7 @@ class SecureApiService {
     // Fonction de requête sécurisée personnalisée - VERSION AMÉLIORÉE
     async makeRequest(endpoint, options = {}) {
         const fullUrl = endpoint.startsWith('http') ? endpoint : `${this.baseURL}${endpoint}`;
-        
+
         const token = authService.getToken();
         const headers = {
             'Accept': 'application/json',
@@ -32,7 +32,7 @@ class SecureApiService {
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-        
+
         try {
             const response = await fetch(fullUrl, {
                 ...options,
@@ -42,7 +42,7 @@ class SecureApiService {
             // Gestion des erreurs HTTP
             if (!response.ok) {
                 let errorMessage = `Erreur HTTP ${response.status}: ${response.statusText}`;
-                
+
                 try {
                     const contentType = response.headers.get('content-type');
                     if (contentType && contentType.includes('application/json')) {
@@ -57,14 +57,14 @@ class SecureApiService {
                 } catch (parseError) {
                     console.warn('Impossible de parser la réponse d\'erreur:', parseError);
                 }
-                
+
                 // Gestion spéciale pour les erreurs 401
                 if (response.status === 401) {
                     authService.removeToken();
                     window.dispatchEvent(new CustomEvent('auth:unauthorized'));
                     throw new Error('Session expirée. Veuillez vous reconnecter.');
                 }
-                
+
                 throw new Error(errorMessage);
             }
 
@@ -72,12 +72,12 @@ class SecureApiService {
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 const responseText = await response.text();
-                
+
                 if (!responseText.trim()) {
                     console.warn('Réponse JSON vide du serveur');
                     return { success: true };
                 }
-                
+
                 try {
                     return JSON.parse(responseText);
                 } catch (jsonError) {
@@ -160,7 +160,7 @@ export const secureApiEndpoints = {
         changePassword: (data) => secureApi.put('/auth/change-password', data),
         uploadAvatar: async (formData) => {
             const token = authService.getToken();
-            
+
             try {
                 const response = await fetch(`${secureApi.baseURL}/upload-photo`, {
                     method: 'POST',
@@ -174,7 +174,7 @@ export const secureApiEndpoints = {
 
                 if (!response.ok) {
                     let errorMessage = `HTTP Error ${response.status}: ${response.statusText}`;
-                    
+
                     try {
                         const contentType = response.headers.get('content-type');
                         if (contentType && contentType.includes('application/json')) {
@@ -184,7 +184,7 @@ export const secureApiEndpoints = {
                     } catch (e) {
                         // Ignore JSON parsing errors
                     }
-                    
+
                     throw new Error(errorMessage);
                 }
 
@@ -262,11 +262,11 @@ export const secureApiEndpoints = {
         getByClassSeries: (seriesId) => secureApi.get(`/students/class-series/${seriesId}`),
         getById: (id) => secureApi.get(`/students/${id}`),
         create: (data) => secureApi.post('/students', data),
-        
+
         // VERSION AMÉLIORÉE avec meilleure gestion des erreurs JSON
         createWithPhoto: async (formData) => {
             const token = authService.getToken();
-            
+
             try {
                 const response = await fetch(`${secureApi.baseURL}/students`, {
                     method: 'POST',
@@ -282,7 +282,7 @@ export const secureApiEndpoints = {
                 if (!response.ok) {
                     // Essayer de récupérer le message d'erreur
                     let errorMessage = `HTTP Error ${response.status}: ${response.statusText}`;
-                    
+
                     try {
                         const contentType = response.headers.get('content-type');
                         if (contentType && contentType.includes('application/json')) {
@@ -298,7 +298,7 @@ export const secureApiEndpoints = {
                     } catch (parseError) {
                         console.warn('Impossible de parser la réponse d\'erreur:', parseError);
                     }
-                    
+
                     throw new Error(errorMessage);
                 }
 
@@ -309,12 +309,12 @@ export const secureApiEndpoints = {
                     // Essayer quand même de lire comme texte pour voir ce qu'on reçoit
                     const responseText = await response.text();
                     console.log('Contenu de la réponse non-JSON:', responseText);
-                    
+
                     // Si c'est vide mais status 200/201, considérer comme succès
                     if (!responseText.trim() && (response.status === 200 || response.status === 201)) {
                         return { success: true, message: 'Étudiant créé avec succès' };
                     }
-                    
+
                     throw new Error('La réponse du serveur n\'est pas au format JSON');
                 }
 
@@ -345,14 +345,14 @@ export const secureApiEndpoints = {
         // Fonction de debug pour diagnostiquer les problèmes
         debugCreateStudent: async (formData) => {
             const token = authService.getToken();
-            
+
             console.log('=== DEBUG CREATE STUDENT ===');
             console.log('Token présent:', !!token);
             console.log('FormData entries:');
             for (let [key, value] of formData.entries()) {
                 console.log(`${key}:`, value instanceof File ? `File(${value.name})` : value);
             }
-            
+
             try {
                 const response = await fetch(`${secureApi.baseURL}/students`, {
                     method: 'POST',
@@ -419,12 +419,12 @@ export const secureApiEndpoints = {
                     'Accept': 'text/csv'
                 }
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || 'Erreur lors de l\'export CSV');
             }
-            
+
             return await response.blob();
         },
         exportPdf: async (seriesId) => {
@@ -436,22 +436,22 @@ export const secureApiEndpoints = {
                     'Accept': 'text/html'
                 }
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || 'Erreur lors de l\'export PDF');
             }
-            
+
             return response; // Retourner la réponse pour permettre .text()
         },
         importCsv: (formData, seriesId) => {
             const token = authService.getToken();
-            
+
             // Utiliser la nouvelle route avec l'ID de série
-            const endpoint = seriesId 
+            const endpoint = seriesId
                 ? `/students/series/${seriesId}/import`
                 : `/students/import/csv`; // Fallback vers l'ancienne route
-            
+
             return fetch(`${secureApi.baseURL}${endpoint}`, {
                 method: 'POST',
                 headers: {
@@ -468,16 +468,16 @@ export const secureApiEndpoints = {
                 return response.json();
             });
         },
-        
+
         // Nouvelle méthode pour import Excel spécifique à une série
         importExcel: (formData, seriesId) => {
             const token = authService.getToken();
-            
+
             // Utiliser la nouvelle route avec l'ID de série
-            const endpoint = seriesId 
+            const endpoint = seriesId
                 ? `/students/series/${seriesId}/import`
                 : `/students/import/excel`; // Fallback vers l'ancienne route
-            
+
             return fetch(`${secureApi.baseURL}${endpoint}`, {
                 method: 'POST',
                 headers: {
@@ -506,21 +506,21 @@ export const secureApiEndpoints = {
     classes: {
         getAll: () => secureApi.get('/classes'),
         getById: (id) => secureApi.get(`/classes/${id}`),
-        getBySection: (sectionId) => secureApi.get(`/classes/section/${sectionId}`),
+        getBySection: (schoolId) => secureApi.get(`/classes/school/${schoolId}`),
         create: (data) => secureApi.post('/classes', data),
         update: (id, data) => secureApi.put(`/classes/${id}`, data),
         delete: (id) => secureApi.delete(`/classes/${id}`)
     },
 
     // === SECTIONS ===
-    sections: {
-        getAll: () => secureApi.get('/sections'),
-        getById: (id) => secureApi.get(`/sections/${id}`),
-        create: (data) => secureApi.post('/sections', data),
-        update: (id, data) => secureApi.put(`/sections/${id}`, data),
-        delete: (id) => secureApi.delete(`/sections/${id}`),
-        getDashboard: () => secureApi.get('/sections/dashboard'),
-        toggleStatus: (id) => secureApi.post(`/sections/${id}/toggle-status`)
+    schools: {
+        getAll: () => secureApi.get('/schools'),
+        getById: (id) => secureApi.get(`/schools/${id}`),
+        create: (data) => secureApi.post('/schools', data),
+        update: (id, data) => secureApi.put(`/schools/${id}`, data),
+        delete: (id) => secureApi.delete(`/schools/${id}`),
+        getDashboard: () => secureApi.get('/schools/dashboard'),
+        toggleStatus: (id) => secureApi.post(`/schools/${id}/toggle-status`)
     },
 
     // === LEVELS ===
@@ -532,7 +532,7 @@ export const secureApiEndpoints = {
         delete: (id) => secureApi.delete(`/levels/${id}`),
         getDashboard: () => secureApi.get('/levels/dashboard'),
         toggleStatus: (id) => secureApi.post(`/levels/${id}/toggle-status`),
-        getBySection: (sectionId) => secureApi.get(`/levels?section_id=${sectionId}`)
+        getBySection: (schoolId) => secureApi.get(`/levels?school_id=${schoolId}`)
     },
 
     // === SCHOOL CLASSES ===
@@ -546,7 +546,7 @@ export const secureApiEndpoints = {
         toggleStatus: (id) => secureApi.post(`/school-classes/${id}/toggle-status`),
         configurePayments: (id, data) => secureApi.post(`/school-classes/${id}/configure-payments`, data),
         getByLevel: (levelId) => secureApi.get(`/school-classes?level_id=${levelId}`),
-        getBySection: (sectionId) => secureApi.get(`/school-classes?section_id=${sectionId}`)
+        getBySection: (schoolId) => secureApi.get(`/school-classes?school_id=${schoolId}`)
     },
 
     // === GRADES ===
@@ -638,12 +638,12 @@ export const secureApiEndpoints = {
                     'Accept': 'text/html'
                 }
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || 'Erreur lors de l\'export PDF');
             }
-            
+
             const htmlContent = await response.text();
             return { success: true, data: htmlContent };
         }
@@ -681,6 +681,83 @@ export const secureApiEndpoints = {
         setUserWorkingYear: (yearId) => secureApi.post('/school-years/set-user-working-year', { school_year_id: yearId })
     },
 
+    // === EQUIPMENT DISTRIBUTION ===
+    equipmentDistribution: {
+        getHistory: (params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/equipment-distribution/history${queryString ? '?' + queryString : ''}`);
+        },
+        getStatistics: (params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/equipment-distribution/statistics${queryString ? '?' + queryString : ''}`);
+        },
+        getPending: (params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/equipment-distribution/pending${queryString ? '?' + queryString : ''}`);
+        },
+        markAsDistributed: (data) => secureApi.post('/equipment-distribution/mark-as-distributed', data),
+        markRamesAsPhysical: (data) => secureApi.post('/equipment-distribution/mark-rames-physical', data),
+        exportDistributions: (params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            const token = authService.getToken();
+            return `${secureApi.baseURL}/equipment-distribution/export${queryString ? '?' + queryString : ''}${queryString ? '&' : '?'}token=${token}`;
+        }
+    },
+
+    // === STUDENT EQUIPMENT ===
+    studentEquipment: {
+        getStatus: (studentId, yearId) => secureApi.get(`/students/${studentId}/equipment-status/${yearId}`),
+        getScholarshipInfo: (studentId, yearId) => secureApi.get(`/students/${studentId}/scholarship-info/${yearId}`),
+        processPayment: (studentId, data) => secureApi.post(`/students/${studentId}/equipment-payment`, data)
+    },
+
+    // === SCHOOL EQUIPMENT ===
+    schoolEquipment: {
+        getBySchool: (schoolId, params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/schools/${schoolId}/required-equipment${queryString ? '?' + queryString : ''}`);
+        },
+        getSummary: (schoolId) => secureApi.get(`/schools/${schoolId}/equipment-summary`),
+
+        // Routes CRUD pour la gestion des équipements
+        getAll: (params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/school-equipment${queryString ? '?' + queryString : ''}`);
+        },
+        getStats: () => secureApi.get('/school-equipment/stats'),
+        getById: (id) => secureApi.get(`/school-equipment/${id}`),
+        create: (data) => secureApi.post('/school-equipment', data),
+        update: (id, data) => secureApi.put(`/school-equipment/${id}`, data),
+        delete: (id) => secureApi.delete(`/school-equipment/${id}`),
+        toggleStatus: (id) => secureApi.patch(`/school-equipment/${id}/toggle-status`),
+        reorder: (data) => secureApi.post('/school-equipment/reorder', data),
+
+        // Par école
+        getEquipmentBySchool: (schoolId, params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/school-equipment/school/${schoolId}/equipment${queryString ? '?' + queryString : ''}`);
+        },
+        getEquipmentBySchoolCode: (schoolCode) => secureApi.get(`/school-equipment/school-code/${schoolCode}/equipment`),
+        getRequiredClothing: (schoolCode) => secureApi.get(`/school-equipment/school-code/${schoolCode}/required-clothing`)
+    },
+
+    // === UNIVERSITY SCHOLARSHIPS ===
+    universityScholarships: {
+        getAll: (params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/scholarships${queryString ? '?' + queryString : ''}`);
+        },
+        getBySchool: (schoolId) => secureApi.get(`/scholarships/school/${schoolId}`),
+        getBySchoolCode: (schoolCode) => secureApi.get(`/scholarships/school-code/${schoolCode}`),
+        calculateForStudent: (studentId) => secureApi.get(`/scholarships/student/${studentId}/calculate`),
+        create: (data) => secureApi.post('/scholarships', data),
+        getById: (id) => secureApi.get(`/scholarships/${id}`),
+        update: (id, data) => secureApi.put(`/scholarships/${id}`, data),
+        delete: (id) => secureApi.delete(`/scholarships/${id}`),
+        applyToStudent: (studentId, data) => secureApi.post(`/scholarships/student/${studentId}/apply`, data),
+        updateSchoolScholarships: (schoolId, data) => secureApi.post(`/scholarships/school/${schoolId}/update-all`, data)
+    },
+
     // === PAYMENTS ===
     payments: {
         getStudentInfo: (studentId) => secureApi.get(`/payments/student/${studentId}/info`),
@@ -692,10 +769,83 @@ export const secureApiEndpoints = {
         getStats: (params = {}) => {
             const queryString = new URLSearchParams(params).toString();
             return secureApi.get(`/payments/stats${queryString ? '?' + queryString : ''}`);
+        },
+
+        // Nouvelles routes pour les équipements
+        processWithEquipment: (data) => secureApi.post('/payments/process-with-equipment', data),
+        getStudentRequiredEquipments: (studentId) => secureApi.get(`/payments/student/${studentId}/required-equipments`),
+        getCompleteStudentStatus: (studentId) => secureApi.get(`/payments/student/${studentId}/complete-status`),
+        getStudentSummary: (studentId) => secureApi.get(`/payments/student/${studentId}/summary`),
+        calculateWithScholarships: (data) => secureApi.post('/payments/calculate-with-scholarships', data),
+        // Dans l'objet payments existant, ajoutez :
+        payRamePhysically: (studentId, data = {}) => secureApi.post('/payments/pay-rame-physically', {
+            student_id: studentId,
+            ...data
+        }),
+        processPayment: (data) => secureApi.post('/payments/process-payment', data),
+        getStudentPaymentHistory: (studentId) => secureApi.get(`/payments/student/${studentId}/history`),
+        cancelPayment: (paymentId) => secureApi.delete(`/payments/${paymentId}`),
+        undoRameBrought: (studentId) => secureApi.post('/payments/rames/undo-brought', { student_id: studentId }),
+        undoEquipmentPayment: (studentId, equipmentType) => secureApi.post('/equipments/undo-payment', { student_id: studentId, equipment_type: equipmentType }),
+        getStudentStatus: (studentId) => secureApi.get(`/payments/student/${studentId}/status`),
+    },
+
+    // === EQUIPMENT ===
+    equipment: {
+        // Statut des équipements pour un étudiant
+        getStudentStatus: (studentId) => secureApi.get(`/equipment/student/${studentId}/status`),
+
+        // Actions sur les équipements
+        processAction: (data) => secureApi.post('/equipment/process-action', data),
+        markPhysicalRames: (data) => secureApi.post('/equipment/mark-physical-rames', data),
+
+        // Gestion des distributions
+        distributeEquipment: (data) => secureApi.post('/equipment/distribute', data),
+        getPendingDistributions: (params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/equipment/pending-distributions${queryString ? '?' + queryString : ''}`);
         }
     },
 
-    // === STUDENT RAME (Simplified) ===
+    // === CLASS SERIES ===
+    classSeries: {
+        getAll: (params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/class-series${queryString ? '?' + queryString : ''}`);
+        },
+        getById: (id) => secureApi.get(`/class-series/${id}`),
+        getByClass: (classId) => secureApi.get(`/class-series/class/${classId}`),
+        create: (data) => secureApi.post('/class-series', data),
+        update: (id, data) => secureApi.put(`/class-series/${id}`, data),
+        delete: (id) => secureApi.delete(`/class-series/${id}`),
+        toggleStatus: (id) => secureApi.post(`/class-series/${id}/toggle-status`),
+        getStudents: (id) => secureApi.get(`/class-series/${id}/students`),
+        addStudent: (id, studentData) => secureApi.post(`/class-series/${id}/students`, studentData),
+        removeStudent: (seriesId, studentId) => secureApi.delete(`/class-series/${seriesId}/students/${studentId}`)
+    },
+
+    // === SCHOLARSHIPS (différent de universityScholarships) ===
+    scholarships: {
+        // Informations bourse pour un étudiant (route /scholarships/student/{id}/info)
+        getStudentInfo: (studentId) => secureApi.get(`/scholarships/student/${studentId}/info`),
+
+        // Gestion des bourses
+        applyScholarship: (data) => secureApi.post('/scholarships/apply', data),
+        getEligibleStudents: (params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/scholarships/eligible-students${queryString ? '?' + queryString : ''}`);
+        }
+    },
+
+    // === DASHBOARD STATS ===
+    dashboard: {
+        getPaymentEquipmentStats: (params = {}) => {
+            const queryString = new URLSearchParams(params).toString();
+            return secureApi.get(`/dashboard/payment-equipment-stats${queryString ? '?' + queryString : ''}`);
+        }
+    },
+
+    // === STUDENT Rames de papier (Simplified) ===
     studentRame: {
         getStatus: (studentId) => secureApi.get(`/student-rame/student/${studentId}/status`),
         updateStatus: (studentId, data) => secureApi.post(`/student-rame/student/${studentId}/update`, data),
@@ -710,7 +860,7 @@ export const secureApiEndpoints = {
             if (data instanceof FormData) {
                 // Ajouter _method=PUT pour simuler PUT avec POST
                 data.append('_method', 'PUT');
-                
+
                 const token = authService.getToken();
                 return fetch(`${secureApi.baseURL}/school-settings`, {
                     method: 'POST',
@@ -817,7 +967,7 @@ export const secureApiEndpoints = {
         reject: (id, data) => secureApi.post(`/needs/${id}/reject`, data),
         getStatistics: () => secureApi.get('/needs/statistics/summary'),
         testWhatsApp: () => secureApi.post('/needs/test-whatsapp'),
-        
+
         // Exports
         exportPdf: (params = {}) => {
             const queryString = new URLSearchParams(params).toString();
@@ -893,7 +1043,7 @@ export const secureApiEndpoints = {
                 return response.json();
             });
         },
-        
+
         // Nouvelle fonctionnalité: cartes d'identité professionnelles
         generateProfessionalCard: (id) => {
             const token = authService.getToken();
@@ -911,7 +1061,7 @@ export const secureApiEndpoints = {
                 return response.blob();
             });
         },
-        
+
         getUserQR: (id) => secureApi.get(`/user-management/${id}/qr-code`)
     },
 
@@ -923,7 +1073,7 @@ export const secureApiEndpoints = {
         deleteAssignment: (assignmentId) => secureApi.delete(`/supervisors/assignments/${assignmentId}`),
         getSupervisorAssignments: (supervisorId) => secureApi.get(`/supervisors/${supervisorId}/assignments`),
         getAvailableClasses: (supervisorId) => secureApi.get(`/supervisors/${supervisorId}/available-classes`),
-        
+
         // Scanner QR et présences
         scanQR: (data) => secureApi.post('/supervisors/scan-qr', data),
         getDailyAttendance: (params = {}) => {
@@ -941,7 +1091,7 @@ export const secureApiEndpoints = {
         getStudentCurrentStatus: (data) => secureApi.post('/supervisors/student-status', data),
         markAbsentStudents: (data) => secureApi.post('/supervisors/mark-absent-students', data),
         markAllAbsentStudents: (data) => secureApi.post('/supervisors/mark-all-absent-students', data),
-        
+
         // Génération QR codes
         generateStudentQR: (studentId) => secureApi.get(`/supervisors/generate-qr/${studentId}`),
         generateAllQRs: () => secureApi.get('/supervisors/generate-all-qrs')
@@ -959,11 +1109,11 @@ export const secureApiEndpoints = {
             const queryString = new URLSearchParams(params).toString();
             return secureApi.get(`/teacher-attendance/entry-exit-stats${queryString ? '?' + queryString : ''}`);
         },
-        
+
         // Gestion des QR codes enseignants
         generateQRCode: (data) => secureApi.post('/teacher-attendance/generate-qr', data),
         getTeachersWithQR: () => secureApi.get('/teacher-attendance/teachers-with-qr'),
-        
+
         // Rapports et statistiques
         getTeacherReport: (teacherId, params = {}) => {
             const queryString = new URLSearchParams(params).toString();
@@ -1062,7 +1212,7 @@ export const migrationUtils = {
         try {
             const oldUser = sessionStorage.getItem('user');
             const oldStatus = sessionStorage.getItem('stat');
-            
+
             if (oldUser && oldStatus) {
                 console.log('Anciennes données utilisateur détectées, migration recommandée');
                 // Ici vous pourriez implémenter une logique de migration
@@ -1078,13 +1228,147 @@ export const migrationUtils = {
     needsMigration: () => {
         const hasOldData = !!(sessionStorage.getItem('user') || localStorage.getItem('user'));
         const hasNewData = !!authService.getToken();
-        
+
         return hasOldData && !hasNewData;
     },
 
     // === CONVENIENCE METHODS ===
     getTeachers: (params = {}) => secureApiEndpoints.teachers.getAll(params),
     getSubjects: (params = {}) => secureApiEndpoints.subjects.getAll(params)
+};
+
+// Utilitaires pour la gestion des équipements
+export const equipmentUtils = {
+    /**
+     * Formater le type d'équipement pour l'affichage
+     */
+    formatEquipmentType(type) {
+        const types = {
+            'polo': 'Polo École',
+            'blouse': 'Blouse Médicale',
+            'laptop': 'Ordinateur Portable',
+            'rame': 'Rames de Papier'
+        };
+        return types[type] || type;
+    },
+
+    /**
+     * Obtenir l'icône pour un type d'équipement
+     */
+    getEquipmentIcon(type) {
+        const icons = {
+            'polo': '👕',
+            'blouse': '🥼',
+            'laptop': '💻',
+            'rame': '📄'
+        };
+        return icons[type] || '📦';
+    },
+
+    /**
+     * Obtenir la couleur du badge selon le statut
+     */
+    getStatusBadgeColor(equipment) {
+        if (!equipment.has_paid_for) return 'danger';
+        if (equipment.equipment_type === 'rame' && equipment.brought_physical) return 'info';
+        if (equipment.has_received) return 'success';
+        if (equipment.has_paid_for && !equipment.has_received) return 'warning';
+        return 'secondary';
+    },
+
+    /**
+     * Obtenir le libellé du statut
+     */
+    getStatusLabel(equipment) {
+        if (!equipment.has_paid_for) return 'Non payé';
+        if (equipment.equipment_type === 'rame' && equipment.brought_physical) return 'Rames physiques';
+        if (equipment.has_received) return 'Distribué';
+        if (equipment.has_paid_for && !equipment.has_received) return 'En attente';
+        return 'Statut inconnu';
+    },
+
+    /**
+     * Calculer le taux de completion pour les statistiques
+     */
+    calculateCompletionRate(stats) {
+        if (!stats.required || stats.required === 0) return 0;
+        return Math.round((stats.received / stats.required) * 100);
+    }
+};
+
+// Utilitaires pour les bourses
+export const scholarshipUtils = {
+    /**
+     * Calculer le montant de bourse selon l'école et le niveau
+     */
+    calculateScholarshipAmount(schoolCode, levelType, currentLevel = 1, btsMention = null) {
+        switch (schoolCode) {
+            case 'INSSAS':
+                if (['BTS', 'HND'].includes(levelType)) {
+                    return currentLevel === 1 ? 50000 : 100000;
+                }
+                if (levelType === 'DOUBLE_DIPLOMATION') {
+                    return currentLevel === 1 ? 50000 : 100000;
+                }
+                if (levelType === 'LICENCE_PRO') {
+                    return 100000;
+                }
+                if (levelType === 'MASTER_PRO' && currentLevel <= 2) {
+                    return 150000;
+                }
+                break;
+
+            case 'ESGIT':
+                if (levelType === 'LICENCE_PRO' && btsMention) {
+                    const scholarships = {
+                        'passable': 50000,
+                        'assez_bien': 100000,
+                        'bien': 120000,
+                        'tres_bien': 150000
+                    };
+                    return scholarships[btsMention] || 50000;
+                }
+                if (levelType === 'INGENIERIE') {
+                    return 50000;
+                }
+                break;
+
+            case 'ESSIT':
+                if (levelType === 'INGENIERIE_SC') {
+                    return 50000;
+                }
+                break;
+
+            case 'ISTPM':
+                return 25000;
+
+            default:
+                return 0;
+        }
+        return 0;
+    },
+
+    /**
+     * Vérifier l'éligibilité aux bourses
+     */
+    isEligibleForScholarship(schoolCode, levelType) {
+        const eligibleCombinations = {
+            'INSSAS': ['BTS', 'HND', 'DOUBLE_DIPLOMATION', 'LICENCE_PRO', 'MASTER_PRO'],
+            'ESGIT': ['LICENCE_PRO', 'INGENIERIE'],
+            'ESSIT': ['INGENIERIE_SC'],
+            'ISTPM': ['CQP', 'DQP']
+        };
+
+        return eligibleCombinations[schoolCode]?.includes(levelType) || false;
+    },
+
+    /**
+     * Formater le montant de bourse
+     */
+    formatAmount(amount) {
+        if (amount === 0) return 'Aucune bourse';
+        return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
+    }
 };
 
 export { secureApi };

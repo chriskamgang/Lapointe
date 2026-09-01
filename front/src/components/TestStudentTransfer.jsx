@@ -3,7 +3,7 @@ import { Button, Container, Row, Col, Card } from 'react-bootstrap';
 import { ArrowRightCircle } from 'react-bootstrap-icons';
 import StudentTransfer from './StudentTransfer';
 
-// Composant de test pour le transfert d'élève
+// Composant de test pour le transfert d'étudiant
 const TestStudentTransfer = () => {
     const [showTransferModal, setShowTransferModal] = useState(false);
 
@@ -31,18 +31,18 @@ const TestStudentTransfer = () => {
             newClass: newClassInfo
         });
         
-        alert(`Élève ${transferredStudent.first_name} ${transferredStudent.last_name} transféré vers ${newClassInfo.className} - ${newClassInfo.seriesName}`);
+        alert(`Étudiant ${transferredStudent.first_name} ${transferredStudent.last_name} transféré vers ${newClassInfo.className} - ${newClassInfo.seriesName}`);
     };
 
     return (
         <Container className="py-4">
             <Row>
                 <Col md={12}>
-                    <h2 className="mb-4">Test du Transfert d'Élève</h2>
+                    <h2 className="mb-4">Test du Transfert d'Étudiant</h2>
                     
                     <Card className="mb-4">
                         <Card.Header>
-                            <h5 className="mb-0">Élève d'exemple</h5>
+                            <h5 className="mb-0">Étudiant d'exemple</h5>
                         </Card.Header>
                         <Card.Body>
                             <Row>

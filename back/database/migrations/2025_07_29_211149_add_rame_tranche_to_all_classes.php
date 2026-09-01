@@ -12,15 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Ajouter la tranche RAME si elle n'existe pas déjà
-        $rameTrancheExists = DB::table('payment_tranches')
-            ->where('name', 'RAME')
-            ->exists();
+        // Ajouter la tranche Rames de papier si elle n'existe pas déjà
+        /*$rameTrancheExists = DB::table('payment_tranches')
+            ->where('name', 'Rames de papier')
+            ->exists();*/
 
-        if (!$rameTrancheExists) {
-            // Créer la tranche RAME
+        /*if (!$rameTrancheExists) {
+            // Créer la tranche Rames de papier
             $rameTrancheId = DB::table('payment_tranches')->insertGetId([
-                'name' => 'RAME',
+                'name' => 'Rames de papier',
                 'description' => 'Frais de rame scolaire - peut être payé en espèces ou fourni physiquement',
                 'order' => 999, // Placer en dernier
                 'is_active' => true,
@@ -33,8 +33,8 @@ return new class extends Migration
                 ->where('is_active', true)
                 ->get();
 
-            // Ajouter la tranche RAME à toutes les classes avec un montant par défaut
-            foreach ($classes as $class) {
+            // Ajouter la tranche Rames de papier à toutes les classes avec un montant par défaut
+            /*foreach ($classes as $class) {
                 DB::table('class_payment_amounts')->insert([
                     'class_id' => $class->id,
                     'payment_tranche_id' => $rameTrancheId,
@@ -45,7 +45,7 @@ return new class extends Migration
                     'updated_at' => now()
                 ]);
             }
-        }
+        }*/
     }
 
     /**
@@ -53,9 +53,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Supprimer tous les montants de classe pour la tranche RAME
+        // Supprimer tous les montants de classe pour la tranche Rames de papier
         $rameTrancheId = DB::table('payment_tranches')
-            ->where('name', 'RAME')
+            ->where('name', 'Rames de papier')
             ->value('id');
 
         if ($rameTrancheId) {
@@ -63,7 +63,7 @@ return new class extends Migration
                 ->where('payment_tranche_id', $rameTrancheId)
                 ->delete();
 
-            // Supprimer la tranche RAME
+            // Supprimer la tranche Rames de papier
             DB::table('payment_tranches')
                 ->where('id', $rameTrancheId)
                 ->delete();

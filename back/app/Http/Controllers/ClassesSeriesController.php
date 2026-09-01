@@ -18,7 +18,7 @@ class ClassesSeriesController extends Controller
     {
         try {
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             
@@ -40,7 +40,7 @@ class ClassesSeriesController extends Controller
     {
         try {
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             
@@ -62,7 +62,7 @@ class ClassesSeriesController extends Controller
     {
         try {
             $filters = [
-                'section_id' => $request->get('section_id'),
+                'school_id' => $request->get('school_id'),
                 'level_id' => $request->get('level_id')
             ];
             

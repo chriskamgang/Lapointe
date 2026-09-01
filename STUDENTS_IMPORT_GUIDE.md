@@ -30,15 +30,15 @@ id,nom,prenom,date_naissance,lieu_naissance,sexe,nom_parent,telephone_parent,ema
 
 ## 🎯 Logique d'Import
 
-### Création d'élèves (ID vide)
-- **ID vide** = Nouvel élève
+### Création d'étudiants (ID vide)
+- **ID vide** = Nouvel étudiant
 - Matricule généré automatiquement
 - Série assignée automatiquement (depuis l'URL)
 - Ordre calculé automatiquement
 
-### Modification d'élèves (ID fourni)
-- **ID fourni** = Modification d'élève existant
-- L'élève doit exister dans la même année scolaire
+### Modification d'étudiants (ID fourni)
+- **ID fourni** = Modification d'étudiant existant
+- L'étudiant doit exister dans la même année scolaire
 - Matricule conservé
 - Série peut être changée
 
@@ -53,12 +53,12 @@ id,nom,prenom,date_naissance,lieu_naissance,sexe,nom_parent,telephone_parent,ema
 - `nom_parent` : Nom du parent/tuteur
 - `telephone_parent` : Numéro de téléphone
 - `email_parent` : Email du parent
-- `adresse` : Adresse de l'élève
+- `adresse` : Adresse de l'étudiant
 - `statut_etudiant` : `nouveau`, `ancien`
 
 ### Statut (requis)
-- `1` = Élève actif
-- `0` = Élève inactif
+- `1` = Étudiant actif
+- `0` = Étudiant inactif
 
 ## 💻 Exemples d'Utilisation
 

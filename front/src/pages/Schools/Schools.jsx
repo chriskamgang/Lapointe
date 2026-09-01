@@ -21,9 +21,9 @@ import { secureApiEndpoints } from '../../utils/apiMigration';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from 'react-bootstrap';
 
-const Sections = () => {
+const Schools = () => {
     const { user } = useAuth();
-    const [sections, setSections] = useState([]);
+    const [schools, setSchools] = useState([]);
     const [dashboardStats, setDashboardStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -38,7 +38,7 @@ const Sections = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [selectedSection, setSelectedSection] = useState(null);
+    const [selectedSchool, setSelectedSchool] = useState(null);
     
     // Form data
     const [formData, setFormData] = useState({
@@ -50,22 +50,22 @@ const Sections = () => {
 
     // Load data on component mount
     useEffect(() => {
-        loadSections();
+        loadSchools();
         loadDashboard();
     }, []);
 
-    const loadSections = async () => {
+    const loadSchools = async () => {
         try {
             setLoading(true);
-            const response = await secureApiEndpoints.sections.getAll();
+            const response = await secureApiEndpoints.schools.getAll();
             if (response.success) {
-                setSections(response.data);
+                setSchools(response.data);
             } else {
-                setError(response.message || 'Erreur lors du chargement des sections');
+                setError(response.message || 'Erreur lors du chargement des écoles');
             }
         } catch (error) {
-            setError('Erreur lors du chargement des sections');
-            console.error('Error loading sections:', error);
+            setError('Erreur lors du chargement des écoles');
+            console.error('Error loading school:', error);
         } finally {
             setLoading(false);
         }
@@ -73,7 +73,7 @@ const Sections = () => {
 
     const loadDashboard = async () => {
         try {
-            const response = await secureApiEndpoints.sections.getDashboard();
+            const response = await secureApiEndpoints.schools.getDashboard();
             if (response.success) {
                 setDashboardStats(response.data);
             }
@@ -88,54 +88,54 @@ const Sections = () => {
             setError('');
             setSuccess('');
 
-            const response = selectedSection 
-                ? await secureApiEndpoints.sections.update(selectedSection.id, formData)
-                : await secureApiEndpoints.sections.create(formData);
+            const response = selectedSchool 
+                ? await secureApiEndpoints.schools.update(selectedSchool.id, formData)
+                : await secureApiEndpoints.schools.create(formData);
 
             if (response.success) {
                 setSuccess(response.message);
                 resetForm();
                 setShowAddModal(false);
                 setShowEditModal(false);
-                loadSections();
+                loadSchools();
                 loadDashboard();
             } else {
                 setError(response.message || 'Erreur lors de la sauvegarde');
             }
         } catch (error) {
             setError('Erreur lors de la sauvegarde');
-            console.error('Error saving section:', error);
+            console.error('Error saving school:', error);
         }
     };
 
     const handleDelete = async () => {
-        if (!selectedSection) return;
+        if (!selectedSchool) return;
 
         try {
             setError('');
-            const response = await secureApiEndpoints.sections.delete(selectedSection.id);
+            const response = await secureApiEndpoints.schools.delete(selectedSchool.id);
             
             if (response.success) {
                 setSuccess(response.message);
                 setShowDeleteModal(false);
-                setSelectedSection(null);
-                loadSections();
+                setSelectedSchool(null);
+                loadSchools();
                 loadDashboard();
             } else {
                 setError(response.message || 'Erreur lors de la suppression');
             }
         } catch (error) {
             setError('Erreur lors de la suppression');
-            console.error('Error deleting section:', error);
+            console.error('Error deleting school:', error);
         }
     };
 
-    const handleToggleStatus = async (section) => {
+    const handleToggleStatus = async (school) => {
         try {
-            const response = await secureApiEndpoints.sections.toggleStatus(section.id);
+            const response = await secureApiEndpoints.schools.toggleStatus(school.id);
             if (response.success) {
                 setSuccess(response.message);
-                loadSections();
+                loadSchools();
                 loadDashboard();
             } else {
                 setError(response.message || 'Erreur lors de la mise à jour');
@@ -153,33 +153,33 @@ const Sections = () => {
             is_active: true,
             order: 0
         });
-        setSelectedSection(null);
+        setSelectedSchool(null);
     };
 
-    const openEditModal = (section) => {
-        setSelectedSection(section);
+    const openEditModal = (school) => {
+        setSelectedSchool(school);
         setFormData({
-            name: section.name,
-            description: section.description || '',
-            is_active: section.is_active,
-            order: section.order
+            name: school.name,
+            description: school.description || '',
+            is_active: school.is_active,
+            order: school.order
         });
         setShowEditModal(true);
     };
 
-    const openDeleteModal = (section) => {
-        setSelectedSection(section);
+    const openDeleteModal = (school) => {
+        setSelectedSchool(school);
         setShowDeleteModal(true);
     };
 
-    // Filter sections
-    const filteredSections = sections.filter(section => {
-        const matchesSearch = section.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (section.description && section.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    // Filter schools
+    const filteredSchools = schools.filter(school => {
+        const matchesSearch = school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (school.description && school.description.toLowerCase().includes(searchTerm.toLowerCase()));
         
         const matchesFilter = filterActive === 'all' || 
-                            (filterActive === 'active' && section.is_active) ||
-                            (filterActive === 'inactive' && !section.is_active);
+                            (filterActive === 'active' && school.is_active) ||
+                            (filterActive === 'inactive' && !school.is_active);
         
         return matchesSearch && matchesFilter;
     });
@@ -187,29 +187,29 @@ const Sections = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-96">
-                <LoadingSpinner text="Chargement des sections..." size="lg" />
+                <LoadingSpinner text="Chargement des écoles..." size="lg" />
             </div>
         );
     }
 
     return (
-        <div className="sections-page">
+        <div className="schools-page">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                        Gestion des Sections
+                        Gestion des Ecoles
                     </h1>
                     <p className="text-gray-600">
-                        Bienvenue {user?.name} - Gérez les sections de l'établissement
+                        Bienvenue {user?.name} - Gérez les écoles de l'institut
                     </p>
                 </div>
                 <div className="flex gap-2">
                     <ImportExportButton
-                        title="Sections"
-                        apiBasePath="/api/sections"
-                        onImportSuccess={loadSections}
-                        templateFileName="template_sections.csv"
+                        title="Ecoles"
+                        apiBasePath="/api/schools"
+                        onImportSuccess={loadSchools}
+                        templateFileName="template_schools.csv"
                     />
                     
                     <Button
@@ -220,7 +220,7 @@ const Sections = () => {
                         className="flex items-center gap-2"
                     >
                         <Plus size={16} />
-                        Nouvelle Section
+                        Nouvelle Ecole
                     </Button>
                 </div>
             </div>
@@ -243,9 +243,9 @@ const Sections = () => {
                     <Card className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Total Sections</p>
+                                <p className="text-sm text-gray-600">Total Ecoles</p>
                                 <p className="text-2xl font-bold text-blue-600">
-                                    {dashboardStats.stats.total_sections}
+                                    {dashboardStats.stats.total_schools}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -257,9 +257,9 @@ const Sections = () => {
                     <Card className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Sections Actives</p>
+                                <p className="text-sm text-gray-600">Ecoles Actives</p>
                                 <p className="text-2xl font-bold text-green-600">
-                                    {dashboardStats.stats.active_sections}
+                                    {dashboardStats.stats.active_schools}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -271,9 +271,9 @@ const Sections = () => {
                     <Card className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Sections Inactives</p>
+                                <p className="text-sm text-gray-600">Ecoles Inactives</p>
                                 <p className="text-2xl font-bold text-red-600">
-                                    {dashboardStats.stats.inactive_sections}
+                                    {dashboardStats.stats.inactive_schools}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
@@ -285,9 +285,9 @@ const Sections = () => {
                     <Card className="p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Avec Classes</p>
+                                <p className="text-sm text-gray-600">Avec Spécialités</p>
                                 <p className="text-2xl font-bold text-purple-600">
-                                    {dashboardStats.stats.sections_with_classes}
+                                    {dashboardStats.stats.schools_with_classes}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -311,7 +311,7 @@ const Sections = () => {
                                         <input
                                             type="text"
                                             className="form-control ps-5"
-                                            placeholder="Rechercher une section..."
+                                            placeholder="Rechercher une école..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
@@ -324,9 +324,9 @@ const Sections = () => {
                                         value={filterActive}
                                         onChange={(e) => setFilterActive(e.target.value)}
                                     >
-                                        <option value="all">Toutes les sections</option>
-                                        <option value="active">Sections actives</option>
-                                        <option value="inactive">Sections inactives</option>
+                                        <option value="all">Toutes les écoles</option>
+                                        <option value="active">Ecoles actives</option>
+                                        <option value="inactive">Ecoles inactives</option>
                                     </select>
                                 </div>
                                 <div className="col-md-4 d-flex align-items-end">
@@ -364,10 +364,10 @@ const Sections = () => {
                 </div>
             </div>
 
-            {/* Sections List/Grid */}
-            {filteredSections.length === 0 ? (
+            {/* Schools List/Grid */}
+            {filteredSchools.length === 0 ? (
                 <Card className="p-8 text-center">
-                    <p className="text-gray-500 mb-4">Aucune section trouvée</p>
+                    <p className="text-gray-500 mb-4">Aucune écoles trouvée</p>
                     <Button
                         onClick={() => {
                             resetForm();
@@ -376,54 +376,54 @@ const Sections = () => {
                         className="flex items-center gap-2 mx-auto"
                     >
                         <Plus size={16} />
-                        Créer la première section
+                        Créer la première school
                     </Button>
                 </Card>
             ) : viewMode === 'grid' ? (
                 // Vue en grille
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredSections.map((section) => (
-                        <Card key={section.id} className="p-4 hover:shadow-md transition-shadow duration-200">
+                    {filteredSchools.map((school) => (
+                        <Card key={school.id} className="p-4 hover:shadow-md transition-shadow duration-200">
                             <div className="flex justify-between items-start mb-3">
                                 <h3 className="text-lg font-semibold text-gray-900">
-                                    {section.name}
+                                    {school.name}
                                 </h3>
                                 <div className="flex items-center gap-1">
                                     <span className={`px-2 py-1 text-xs rounded-full ${
-                                        section.is_active 
+                                        school.is_active 
                                             ? 'bg-green-100 text-green-800' 
                                             : 'bg-red-100 text-red-800'
                                     }`}>
-                                        {section.is_active ? 'Active' : 'Inactive'}
+                                        {school.is_active ? 'Active' : 'Inactive'}
                                     </span>
                                 </div>
                             </div>
                             
-                            {section.description && (
+                            {school.description && (
                                 <p className="text-gray-600 text-sm mb-4">
-                                    {section.description}
+                                    {school.description}
                                 </p>
                             )}
                             
                             <div className="flex justify-between items-center">
                                 <span className="text-xs text-gray-500">
-                                    Ordre: {section.order}
+                                    Ordre: {school.order}
                                 </span>
                                 
                                 <div className="flex gap-1">
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => handleToggleStatus(section)}
-                                        title={section.is_active ? 'Désactiver' : 'Activer'}
+                                        onClick={() => handleToggleStatus(school)}
+                                        title={school.is_active ? 'Désactiver' : 'Activer'}
                                     >
-                                        {section.is_active ? <ToggleOn size={16} /> : <ToggleOff size={16} />}
+                                        {school.is_active ? <ToggleOn size={16} /> : <ToggleOff size={16} />}
                                     </Button>
                                     
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => openEditModal(section)}
+                                        onClick={() => openEditModal(school)}
                                         title="Modifier"
                                     >
                                         <Pencil size={16} />
@@ -432,7 +432,7 @@ const Sections = () => {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => openDeleteModal(section)}
+                                        onClick={() => openDeleteModal(school)}
                                         className="text-red-600 hover:text-red-700"
                                         title="Supprimer"
                                     >
@@ -446,29 +446,29 @@ const Sections = () => {
             ) : (
                 // Vue en liste
                 <div className="space-y-3">
-                    {filteredSections.map((section) => (
-                        <Card key={section.id} className="p-4 hover:shadow-md transition-shadow duration-200">
+                    {filteredSchools.map((school) => (
+                        <Card key={school.id} className="p-4 hover:shadow-md transition-shadow duration-200">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-4 flex-1">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-1">
                                             <h3 className="text-lg font-semibold text-gray-900">
-                                                {section.name}
+                                                {school.name}
                                             </h3>
                                             <span className={`px-2 py-1 text-xs rounded-full ${
-                                                section.is_active 
+                                                school.is_active 
                                                     ? 'bg-green-100 text-green-800' 
                                                     : 'bg-red-100 text-red-800'
                                             }`}>
-                                                {section.is_active ? 'Active' : 'Inactive'}
+                                                {school.is_active ? 'Active' : 'Inactive'}
                                             </span>
                                             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                                Ordre: {section.order}
+                                                Ordre: {school.order}
                                             </span>
                                         </div>
-                                        {section.description && (
+                                        {school.description && (
                                             <p className="text-gray-600 text-sm">
-                                                {section.description}
+                                                {school.description}
                                             </p>
                                         )}
                                     </div>
@@ -478,16 +478,16 @@ const Sections = () => {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => handleToggleStatus(section)}
-                                        title={section.is_active ? 'Désactiver' : 'Activer'}
+                                        onClick={() => handleToggleStatus(school)}
+                                        title={school.is_active ? 'Désactiver' : 'Activer'}
                                     >
-                                        {section.is_active ? <ToggleOn size={16} /> : <ToggleOff size={16} />}
+                                        {school.is_active ? <ToggleOn size={16} /> : <ToggleOff size={16} />}
                                     </Button>
                                     
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => openEditModal(section)}
+                                        onClick={() => openEditModal(school)}
                                         title="Modifier"
                                     >
                                         <Pencil size={16} />
@@ -496,7 +496,7 @@ const Sections = () => {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => openDeleteModal(section)}
+                                        onClick={() => openDeleteModal(school)}
                                         className="text-red-600 hover:text-red-700"
                                         title="Supprimer"
                                     >
@@ -517,11 +517,11 @@ const Sections = () => {
                     setShowEditModal(false);
                     resetForm();
                 }}
-                title={selectedSection ? 'Modifier la Section' : 'Nouvelle Section'}
+                title={selectedSchool ? 'Modifier la School' : 'Nouvelle School'}
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <Input
-                        label="Nom de la section"
+                        label="Nom de la school"
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -536,7 +536,7 @@ const Sections = () => {
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            placeholder="Description de la section..."
+                            placeholder="Description de la school..."
                             rows={3}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -560,7 +560,7 @@ const Sections = () => {
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <label htmlFor="is_active" className="ml-2 text-sm text-gray-700">
-                            Section active
+                            School active
                         </label>
                     </div>
 
@@ -577,7 +577,7 @@ const Sections = () => {
                             Annuler
                         </Button>
                         <Button type="submit">
-                            {selectedSection ? 'Modifier' : 'Créer'}
+                            {selectedSchool ? 'Modifier' : 'Créer'}
                         </Button>
                     </div>
                 </form>
@@ -588,16 +588,16 @@ const Sections = () => {
                 isOpen={showDeleteModal}
                 onClose={() => {
                     setShowDeleteModal(false);
-                    setSelectedSection(null);
+                    setSelectedSchool(null);
                 }}
                 title="Confirmer la suppression"
             >
                 <div className="space-y-4">
                     <p className="text-gray-700">
-                        Êtes-vous sûr de vouloir supprimer la section <strong>{selectedSection?.name}</strong> ?
+                        Êtes-vous sûr de vouloir supprimer la school <strong>{selectedSchool?.name}</strong> ?
                     </p>
                     <p className="text-sm text-red-600">
-                        Cette action est irréversible et ne sera possible que si la section ne contient aucune classe.
+                        Cette action est irréversible et ne sera possible que si la school ne contient aucune classe.
                     </p>
                     
                     <div className="flex justify-end gap-2 pt-4">
@@ -605,7 +605,7 @@ const Sections = () => {
                             variant="outline"
                             onClick={() => {
                                 setShowDeleteModal(false);
-                                setSelectedSection(null);
+                                setSelectedSchool(null);
                             }}
                         >
                             Annuler
@@ -623,4 +623,4 @@ const Sections = () => {
     );
 };
 
-export default Sections;
+export default Schools;

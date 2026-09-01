@@ -28,7 +28,7 @@ TRUNCATE TABLE subjects;
 
 -- Vider les autres tables de données
 TRUNCATE TABLE needs;
-TRUNCATE TABLE sections;
+TRUNCATE TABLE schools;
 TRUNCATE TABLE levels;
 TRUNCATE TABLE payment_tranches;
 

@@ -51,7 +51,7 @@ const AccountantClasses = () => {
                 // Si pas de données groupées, créer un groupement simple
                 if (Object.keys(groupedClasses).length === 0 && classes.length > 0) {
                     const simpleGrouped = classes.reduce((acc, classe) => {
-                        const groupKey = `${classe.level?.section?.name || 'Section inconnue'} - ${classe.level?.name || 'Niveau inconnu'}`;
+                        const groupKey = `${classe.level?.school?.name || 'School inconnue'} - ${classe.level?.name || 'Niveau inconnu'}`;
                         if (!acc[groupKey]) {
                             acc[groupKey] = [];
                         }
@@ -94,7 +94,7 @@ const AccountantClasses = () => {
     const filteredClasses = classes.filter(classe =>
         classe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         classe.level?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        classe.level?.section?.name.toLowerCase().includes(searchTerm.toLowerCase())
+        classe.level?.school?.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Filtrer les classes groupées selon la recherche
@@ -110,7 +110,7 @@ const AccountantClasses = () => {
                 const filteredLevelClasses = levelClasses.filter(classe =>
                     classe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     classe.level?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    classe.level?.section?.name.toLowerCase().includes(searchTerm.toLowerCase())
+                    classe.level?.school?.name.toLowerCase().includes(searchTerm.toLowerCase())
                 );
                 
                 if (filteredLevelClasses.length > 0) {
@@ -127,7 +127,7 @@ const AccountantClasses = () => {
             const filteredGroupClasses = sectionData.filter(classe =>
                 classe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 classe.level?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                classe.level?.section?.name.toLowerCase().includes(searchTerm.toLowerCase())
+                classe.level?.school?.name.toLowerCase().includes(searchTerm.toLowerCase())
             );
             if (filteredGroupClasses.length > 0) {
                 acc[sectionKey] = filteredGroupClasses;
@@ -142,7 +142,7 @@ const AccountantClasses = () => {
             <div className="container-fluid py-4">
                 <div className="text-center py-5">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Chargement des classes...</span>
+                        <span className="visually-hidden">Chargement des spécialités...</span>
                     </div>
                 </div>
             </div>
@@ -156,9 +156,9 @@ const AccountantClasses = () => {
                 <div className="col-12">
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <h2 className="h4 mb-1">Gestion des Classes</h2>
+                            <h2 className="h4 mb-1">Gestion des Spécialités</h2>
                             <p className="text-muted mb-0">
-                                Visualisation des classes et gestion des élèves (Mode Comptable)
+                                Visualisation des spécialités et gestion des étudiants (Mode Comptable)
                             </p>
                         </div>
                         <div className="d-flex align-items-center gap-2">
@@ -196,7 +196,7 @@ const AccountantClasses = () => {
                             <div className="d-flex justify-content-between">
                                 <div>
                                     <div className="fs-2 fw-bold">{stats.total_students}</div>
-                                    <div>Élèves Total</div>
+                                    <div>Étudiants Total</div>
                                 </div>
                                 <PeopleFill size={40} className="opacity-75" />
                             </div>
@@ -209,7 +209,7 @@ const AccountantClasses = () => {
                             <div className="d-flex justify-content-between">
                                 <div>
                                     <div className="fs-2 fw-bold">{stats.total_classes}</div>
-                                    <div>Classes</div>
+                                    <div>Spécialités</div>
                                 </div>
                                 <HouseHeartFill size={40} className="opacity-75" />
                             </div>
@@ -222,7 +222,7 @@ const AccountantClasses = () => {
                             <div className="d-flex justify-content-between">
                                 <div>
                                     <div className="fs-2 fw-bold">{stats.total_series}</div>
-                                    <div>Séries</div>
+                                    <div>Salle</div>
                                 </div>
                                 <Grid size={40} className="opacity-75" />
                             </div>
@@ -257,7 +257,7 @@ const AccountantClasses = () => {
                                         <input
                                             type="text"
                                             className="form-control ps-5"
-                                            placeholder="Rechercher par nom de classe, niveau ou section..."
+                                            placeholder="Rechercher par nom de classe, niveau ou school..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
@@ -299,14 +299,14 @@ const AccountantClasses = () => {
 
             {/* Classes Display */}
             {viewMode === 'grouped' ? (
-                // Vue groupée par sections et classes
+                // Vue groupée par schools et classes
                 <div className="row">
                     <div className="col-12">
                         {Object.keys(filteredGroupedClasses).length === 0 ? (
                             <div className="card">
                                 <div className="card-body text-center py-5">
                                     <HouseHeartFill size={48} className="text-muted mb-3" />
-                                    <h5 className="text-muted">Aucune classe trouvée</h5>
+                                    <h5 className="text-muted">Aucune spécialité trouvée</h5>
                                     <p className="text-muted">
                                         {searchTerm 
                                             ? 'Aucune classe ne correspond à vos critères de recherche.'
@@ -316,7 +316,7 @@ const AccountantClasses = () => {
                                     {!searchTerm && Object.keys(groupedClasses).length === 0 && classes.length === 0 && (
                                         <div className="mt-3">
                                             <small className="text-muted">
-                                                Vérifiez que des classes ont été créées dans l'administration.
+                                                Vérifiez que des spécialités ont été créées dans l'administration.
                                             </small>
                                         </div>
                                     )}
@@ -344,7 +344,7 @@ const AccountantClasses = () => {
                                                     {typeof sectionData === 'object' && !Array.isArray(sectionData) 
                                                         ? Object.values(sectionData).reduce((total, levelClasses) => total + (Array.isArray(levelClasses) ? levelClasses.length : 0), 0)
                                                         : Array.isArray(sectionData) ? sectionData.length : 0
-                                                    } classe{(typeof sectionData === 'object' && !Array.isArray(sectionData) 
+                                                    } spécialité{(typeof sectionData === 'object' && !Array.isArray(sectionData) 
                                                         ? Object.values(sectionData).reduce((total, levelClasses) => total + (Array.isArray(levelClasses) ? levelClasses.length : 0), 0)
                                                         : Array.isArray(sectionData) ? sectionData.length : 0
                                                     ) > 1 ? 's' : ''}
@@ -353,7 +353,7 @@ const AccountantClasses = () => {
                                         </div>
                                         <div className="card-body p-0">
                                             {typeof sectionData === 'object' && !Array.isArray(sectionData) ? (
-                                                // Structure hiérarchique : Section > Niveau > Classes
+                                                // Structure hiérarchique : School > Niveau > Classes
                                                 Object.entries(sectionData).map(([levelKey, levelClasses]) => {
                                                     const levelClassesArray = Array.isArray(levelClasses) ? levelClasses : [];
                                                     return (
@@ -363,7 +363,7 @@ const AccountantClasses = () => {
                                                                     <Grid size={16} className="me-2" />
                                                                     {levelKey}
                                                                     <span className="badge bg-secondary ms-2">
-                                                                        {levelClassesArray.length} classe{levelClassesArray.length > 1 ? 's' : ''}
+                                                                        {levelClassesArray.length} spécialité{levelClassesArray.length > 1 ? 's' : ''}
                                                                     </span>
                                                                 </h6>
                                                             </div>
@@ -383,7 +383,7 @@ const AccountantClasses = () => {
                                                             <div>
                                                                 <h6 className="mb-1">{classItem.name}</h6>
                                                                 <small className="text-muted">
-                                                                    {classItem.series_count || 0} série{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} élève{(classItem.total_students || 0) > 1 ? 's' : ''}
+                                                                    {classItem.series_count || 0} salle{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} étudiant{(classItem.total_students || 0) > 1 ? 's' : ''}
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -392,7 +392,7 @@ const AccountantClasses = () => {
                                                                 to={`/class-comp/${classItem.id}`}
                                                                 className="btn btn-sm btn-outline-primary"
                                                                 onClick={(e) => e.stopPropagation()}
-                                                                title="Voir les séries"
+                                                                title="Voir les salles"
                                                             >
                                                                 <Eye size={14} />
                                                             </Link>
@@ -406,7 +406,7 @@ const AccountantClasses = () => {
                                                                 <div className="col-12">
                                                                     <h6 className="text-primary mb-3">
                                                                         <PeopleFill size={16} className="me-2" />
-                                                                        Séries
+                                                                        Salles
                                                                     </h6>
                                                                     {classItem.series && classItem.series.length > 0 ? (
                                                                         <div className="list-group list-group-flush">
@@ -416,21 +416,21 @@ const AccountantClasses = () => {
                                                                                         <div>
                                                                                             <span className="fw-medium">{serie.name}</span>
                                                                                             <small className="text-muted ms-2">
-                                                                                                {serie.students_count || 0} élève{(serie.students_count || 0) > 1 ? 's' : ''}
+                                                                                                {serie.students_count || 0} étudiant{(serie.students_count || 0) > 1 ? 's' : ''}
                                                                                             </small>
                                                                                         </div>
                                                                                         <Link
                                                                                             to={`/students/series/${serie.id}`}
                                                                                             className="btn btn-sm btn-outline-success"
                                                                                         >
-                                                                                            Voir élèves
+                                                                                            Voir étudiants
                                                                                         </Link>
                                                                                     </div>
                                                                                 </div>
                                                                             ))}
                                                                         </div>
                                                                     ) : (
-                                                                        <p className="text-muted">Aucune série configurée</p>
+                                                                        <p className="text-muted">Aucune salle configurée</p>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -442,7 +442,7 @@ const AccountantClasses = () => {
                                                     );
                                                 })
                                             ) : (
-                                                // Structure simple : Section > Classes directement
+                                                // Structure simple : School > Classes directement
                                                 Array.isArray(sectionData) ? sectionData.map((classItem) => (
                                                     <div key={classItem.id} className="border-bottom">
                                                         {/* En-tête de la classe */}
@@ -459,7 +459,7 @@ const AccountantClasses = () => {
                                                                 <div>
                                                                     <h6 className="mb-1">{classItem.name}</h6>
                                                                     <small className="text-muted">
-                                                                        {classItem.series_count || 0} série{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} élève{(classItem.total_students || 0) > 1 ? 's' : ''}
+                                                                        {classItem.series_count || 0} salle{(classItem.series_count || 0) > 1 ? 's' : ''} • {classItem.total_students || 0} étudiant{(classItem.total_students || 0) > 1 ? 's' : ''}
                                                                     </small>
                                                                 </div>
                                                             </div>
@@ -468,7 +468,7 @@ const AccountantClasses = () => {
                                                                     to={`/class-comp/${classItem.id}`}
                                                                     className="btn btn-sm btn-outline-primary"
                                                                     onClick={(e) => e.stopPropagation()}
-                                                                    title="Voir les séries"
+                                                                    title="Voir les salles"
                                                                 >
                                                                     <Eye size={14} />
                                                                 </Link>
@@ -482,7 +482,7 @@ const AccountantClasses = () => {
                                                                     <div className="col-12">
                                                                         <h6 className="text-primary mb-3">
                                                                             <PeopleFill size={16} className="me-2" />
-                                                                            Séries
+                                                                            Salles
                                                                         </h6>
                                                                         {classItem.series && classItem.series.length > 0 ? (
                                                                             <div className="list-group list-group-flush">
@@ -492,14 +492,14 @@ const AccountantClasses = () => {
                                                                                             <div>
                                                                                                 <span className="fw-medium">{serie.name}</span>
                                                                                                 <small className="text-muted ms-2">
-                                                                                                    {serie.students_count || 0} élève{(serie.students_count || 0) > 1 ? 's' : ''}
+                                                                                                    {serie.students_count || 0} étudiant{(serie.students_count || 0) > 1 ? 's' : ''}
                                                                                                 </small>
                                                                                             </div>
                                                                                             <Link
                                                                                                 to={`/students/series/${serie.id}`}
                                                                                                 className="btn btn-sm btn-outline-success"
                                                                                             >
-                                                                                                Voir élèves
+                                                                                                Voir étudiants
                                                                                             </Link>
                                                                                         </div>
                                                                                     </div>
@@ -529,7 +529,7 @@ const AccountantClasses = () => {
                             <div className="card">
                                 <div className="card-body text-center py-5">
                                     <HouseHeartFill size={48} className="text-muted mb-3" />
-                                    <h5 className="text-muted">Aucune classe trouvée</h5>
+                                    <h5 className="text-muted">Aucune spécialité trouvée</h5>
                                     <p className="text-muted">
                                         {searchTerm 
                                             ? 'Aucune classe ne correspond à vos critères de recherche.'
@@ -548,23 +548,23 @@ const AccountantClasses = () => {
                                             <div>
                                                 <h6 className="card-title mb-1">{classe.name}</h6>
                                                 <small className="text-muted">
-                                                    {classe.level?.section?.name} - {classe.level?.name}
+                                                    {classe.level?.school?.name} - {classe.level?.name}
                                                 </small>
                                             </div>
                                             <span className="badge bg-primary">
-                                                {classe.series_count || 0} série{(classe.series_count || 0) > 1 ? 's' : ''}
+                                                {classe.series_count || 0} salle{(classe.series_count || 0) > 1 ? 's' : ''}
                                             </span>
                                         </div>
                                         
                                         <div className="d-flex justify-content-between align-items-center mt-auto">
                                             <small className="text-muted">
-                                                {classe.total_students || 0} élève{(classe.total_students || 0) > 1 ? 's' : ''}
+                                                {classe.total_students || 0} étudiant{(classe.total_students || 0) > 1 ? 's' : ''}
                                             </small>
                                             <Link
                                                 to={`/class-comp/${classe.id}`}
                                                 className="btn btn-primary btn-sm"
                                             >
-                                                Voir les séries
+                                                Voir les salle
                                             </Link>
                                         </div>
                                     </div>
@@ -584,10 +584,10 @@ const AccountantClasses = () => {
                                         <thead className="table-light">
                                             <tr>
                                                 <th>Classe</th>
-                                                <th>Section</th>
+                                                <th>Ecole</th>
                                                 <th>Niveau</th>
-                                                <th>Séries</th>
-                                                <th>Élèves</th>
+                                                <th>Spécialité</th>
+                                                <th>Étudiants</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -595,20 +595,20 @@ const AccountantClasses = () => {
                                             {filteredClasses.map((classe) => (
                                                 <tr key={classe.id}>
                                                     <td className="fw-medium">{classe.name}</td>
-                                                    <td>{classe.level?.section?.name}</td>
+                                                    <td>{classe.level?.school?.name}</td>
                                                     <td>{classe.level?.name}</td>
                                                     <td>
                                                         <span className="badge bg-light text-dark">
-                                                            {classe.series_count || 0} série{(classe.series_count || 0) > 1 ? 's' : ''}
+                                                            {classe.series_count || 0} salle{(classe.series_count || 0) > 1 ? 's' : ''}
                                                         </span>
                                                     </td>
-                                                    <td>{classe.total_students || 0} élève{(classe.total_students || 0) > 1 ? 's' : ''}</td>
+                                                    <td>{classe.total_students || 0} étudiant{(classe.total_students || 0) > 1 ? 's' : ''}</td>
                                                     <td>
                                                         <Link
                                                             to={`/class-comp/${classe.id}`}
                                                             className="btn btn-sm btn-primary"
                                                         >
-                                                            Voir les séries
+                                                            Voir les salles
                                                         </Link>
                                                     </td>
                                                 </tr>

@@ -1,8 +1,8 @@
-# Système RAME Simplifié - Documentation
+# Système Rames de papier Simplifié - Documentation
 
 ## Vue d'ensemble
 
-Le système RAME a été simplifié pour devenir une simple case à cocher qui indique si l'étudiant a apporté sa nourriture/matériel ou non. **Il n'y a plus de montant associé ni d'interférence avec les calculs de paiement.**
+Le système Rames de papier a été simplifié pour devenir une simple case à cocher qui indique si l'étudiant a apporté sa nourriture/matériel ou non. **Il n'y a plus de montant associé ni d'interférence avec les calculs de paiement.**
 
 ## Architecture
 
@@ -78,7 +78,7 @@ GET  /api/student-rame/class-series/{classSeriesId}   // Statuts d'une classe
     studentId={studentId}
     studentName={`${student.first_name} ${student.last_name}`}
     onStatusChange={(newStatus) => {
-        console.log('Statut RAME mis à jour:', newStatus);
+        console.log('Statut Rames de papier mis à jour:', newStatus);
     }}
 />
 ```
@@ -105,10 +105,10 @@ GET  /api/student-rame/class-series/{classSeriesId}   // Statuts d'une classe
 ## Différences avec l'Ancien Système
 
 ### ❌ Ancien Système (Complexe)
-- Tranche de paiement RAME avec montant
+- Tranche de paiement Rames de papier avec montant
 - Interférence avec les calculs de paiement
 - Deux modes : paiement électronique vs physique
-- Génération de reçus pour RAME physique
+- Génération de reçus pour Rames de papier physique
 - Logique complexe dans PaymentStatusService
 
 ### ✅ Nouveau Système (Simple)
@@ -120,7 +120,7 @@ GET  /api/student-rame/class-series/{classSeriesId}   // Statuts d'une classe
 
 ## Utilisation
 
-### 1. Marquer qu'un étudiant a apporté sa RAME
+### 1. Marquer qu'un étudiant a apporté sa Rames de papier
 ```javascript
 await secureApiEndpoints.studentRame.updateStatus(studentId, {
     has_brought_rame: true,
@@ -128,7 +128,7 @@ await secureApiEndpoints.studentRame.updateStatus(studentId, {
 });
 ```
 
-### 2. Marquer qu'un étudiant n'a pas apporté sa RAME
+### 2. Marquer qu'un étudiant n'a pas apporté sa Rames de papier
 ```javascript
 await secureApiEndpoints.studentRame.updateStatus(studentId, {
     has_brought_rame: false,
@@ -139,7 +139,7 @@ await secureApiEndpoints.studentRame.updateStatus(studentId, {
 ### 3. Obtenir le statut d'un étudiant
 ```javascript
 const response = await secureApiEndpoints.studentRame.getStatus(studentId);
-console.log('A apporté sa RAME:', response.data.has_brought_rame);
+console.log('A apporté sa Rames de papier:', response.data.has_brought_rame);
 ```
 
 ### 4. Obtenir les statuts d'une classe complète
@@ -153,11 +153,11 @@ response.data.forEach(student => {
 ## Nettoyage Effectué
 
 ### Suppressions :
-- Tranche de paiement "RAME" de la base de données
+- Tranche de paiement "Rames de papier" de la base de données
 - Méthodes `payRamePhysically()` et `getRameStatus()` du PaymentController
 - Routes complexes `/pay-rame-physically` et `/rame-status`
-- Exclusion de RAME dans PaymentStatusService (plus nécessaire)
-- Section RAME complexe dans StudentPayment.jsx
+- Exclusion de Rames de papier dans PaymentStatusService (plus nécessaire)
+- School Rames de papier complexe dans StudentPayment.jsx
 
 ### Ajouts :
 - Table `student_rame_status`
@@ -179,7 +179,7 @@ response.data.forEach(student => {
 ## Migration
 
 ### Données Existantes
-Si des données RAME existaient dans l'ancien système, elles peuvent être migrées :
+Si des données Rames de papier existaient dans l'ancien système, elles peuvent être migrées :
 ```sql
 -- Exemple de migration (à adapter selon les besoins)
 INSERT INTO student_rame_status (student_id, school_year_id, has_brought_rame, marked_date)
@@ -189,7 +189,7 @@ WHERE is_rame_physical = true;
 ```
 
 ### Code Frontend
-- Remplacer les sections RAME complexes par `<RameStatusToggle />`
+- Remplacer les schools Rames de papier complexes par `<RameStatusToggle />`
 - Supprimer les états `rame_choice` et `is_rame_physical`
 - Nettoyer les méthodes `handlePayRame` obsolètes
 

@@ -4,7 +4,7 @@ import { Plus, Trash2, CreditCard } from 'react-bootstrap-icons';
 import { secureApiEndpoints } from '../../utils/apiMigration';
 import Swal from 'sweetalert2';
 
-const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels }) => {
+const EditSchoolClass = ({ show, onHide, onSuccess, classData, schools, levels }) => {
     const [formData, setFormData] = useState({
         name: '',
         level_id: '',
@@ -15,7 +15,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
     });
     
     const [paymentTranches, setPaymentTranches] = useState([]);
-    const [selectedSectionId, setSelectedSectionId] = useState('');
+    const [selectedSchoolId, setSelectedSchoolId] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -46,9 +46,9 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
             })) || []
         });
 
-        // Set section ID for level filtering
+        // Set school ID for level filtering
         const level = levels.find(l => l.id === classData.level_id);
-        setSelectedSectionId(level?.section_id || '');
+        setSelectedSchoolId(level?.school_id || '');
     };
 
     const loadPaymentTranches = async () => {
@@ -105,7 +105,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
 
     const handleLevelChange = (levelId) => {
         const level = levels.find(l => l.id === parseInt(levelId));
-        setSelectedSectionId(level?.section_id || '');
+        setSelectedSchoolId(level?.school_id || '');
         setFormData(prev => ({ ...prev, level_id: levelId }));
     };
 
@@ -132,7 +132,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
             // Show confirmation for existing series
             Swal.fire({
                 title: 'Confirmer la suppression',
-                text: 'Êtes-vous sûr de vouloir supprimer cette série ? Cette action est irréversible.',
+                text: 'Êtes-vous sûr de vouloir supprimer cette salle ? Cette action est irréversible.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
@@ -173,7 +173,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
         try {
             // Validation
             if (!formData.name.trim()) {
-                Swal.fire('Erreur', 'Le nom de la classe est requis', 'error');
+                Swal.fire('Erreur', 'Le nom de la spécialité est requis', 'error');
                 return;
             }
             
@@ -186,7 +186,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
             for (let i = 0; i < formData.series.length; i++) {
                 const serie = formData.series[i];
                 if (!serie.name.trim()) {
-                    Swal.fire('Erreur', `Le nom de la série ${i + 1} est requis`, 'error');
+                    Swal.fire('Erreur', `Le nom de la salle ${i + 1} est requis`, 'error');
                     return;
                 }
             }
@@ -210,14 +210,14 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
             const response = await secureApiEndpoints.schoolClasses.update(classData.id, submissionData);
             
             if (response.success) {
-                Swal.fire('Succès', response.message || 'Classe modifiée avec succès', 'success');
+                Swal.fire('Succès', response.message || 'Spécialité modifiée avec succès', 'success');
                 onSuccess();
             } else {
-                Swal.fire('Erreur', response.message || 'Erreur lors de la modification de la classe', 'error');
+                Swal.fire('Erreur', response.message || 'Erreur lors de la modification de la Spécialité', 'error');
             }
         } catch (error) {
             console.error('Error updating class:', error);
-            Swal.fire('Erreur', 'Erreur lors de la modification de la classe', 'error');
+            Swal.fire('Erreur', 'Erreur lors de la modification de la Spécialité', 'error');
         } finally {
             setLoading(false);
         }
@@ -230,7 +230,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
     return (
         <Modal show={show} onHide={onHide} size="lg" scrollable>
             <Modal.Header closeButton>
-                <Modal.Title>Modifier la Classe</Modal.Title>
+                <Modal.Title>Modifier la spécialité</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <form onSubmit={handleSubmit}>
@@ -241,13 +241,13 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="mb-3">
-                                    <label className="form-label">Nom de la classe *</label>
+                                    <label className="form-label">Nom de la spécialité *</label>
                                     <input
                                         type="text"
                                         className="form-control"
                                         value={formData.name}
                                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                        placeholder="Ex: 6ème A, CP1 B..."
+                                        placeholder="Ex: SI, SR, TL..."
                                         required
                                     />
                                 </div>
@@ -264,7 +264,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                                         <option value="">Sélectionner un niveau</option>
                                         {getFilteredLevels().map(level => (
                                             <option key={level.id} value={level.id}>
-                                                {level.section?.name} - {level.name}
+                                                {level.school?.name} - {level.name}
                                             </option>
                                         ))}
                                     </select>
@@ -279,7 +279,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                                 rows="3"
                                 value={formData.description}
                                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                                placeholder="Description de la classe..."
+                                placeholder="Description de la spécialité..."
                             />
                         </div>
 
@@ -293,7 +293,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                                 id="classActive"
                             />
                             <label className="form-check-label" htmlFor="classActive">
-                                Classe active
+                                Spécialité active
                             </label>
                         </div>
                     </div>
@@ -303,7 +303,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                         <div className="d-flex justify-content-between align-items-center mb-3">
                             <h6 className="text-primary mb-0">
                                 {/* <Users size={16} className="me-2" /> */}
-                                Séries de la Classe
+                                Salles de la Spécialité
                             </h6>
                             <button
                                 type="button"
@@ -311,7 +311,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                                 onClick={addSeries}
                             >
                                 <Plus size={16} className="me-1" />
-                                Ajouter Série
+                                Ajouter Salle
                             </button>
                         </div>
 
@@ -320,7 +320,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                                 <div className="card-body">
                                     <div className="d-flex justify-content-between align-items-start mb-3">
                                         <h6 className="card-title mb-0">
-                                            Série {index + 1}
+                                            Salle {index + 1}
                                             {serie.id && <small className="text-muted ms-2">(Existante)</small>}
                                         </h6>
                                         <button
@@ -366,7 +366,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                                                     className="form-control"
                                                     value={serie.capacity}
                                                     onChange={(e) => handleSeriesChange(index, 'capacity', e.target.value)}
-                                                    placeholder="Nombre max d'élèves"
+                                                    placeholder="Nombre max d'étudiants"
                                                     min="1"
                                                 />
                                             </div>
@@ -382,7 +382,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                                             id={`serieActive${index}`}
                                         />
                                         <label className="form-check-label" htmlFor={`serieActive${index}`}>
-                                            Série active
+                                            Salle active
                                         </label>
                                     </div>
                                 </div>
@@ -391,14 +391,14 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
 
                         {formData.series.length === 0 && (
                             <div className="text-center py-4">
-                                <p className="text-muted mb-3">Aucune série configurée</p>
+                                <p className="text-muted mb-3">Aucune salle configurée</p>
                                 <button
                                     type="button"
                                     className="btn btn-outline-primary"
                                     onClick={addSeries}
                                 >
                                     <Plus size={16} className="me-1" />
-                                    Ajouter la première série
+                                    Ajouter la première salle
                                 </button>
                             </div>
                         )}
@@ -420,7 +420,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                                     <strong>Aucune tranche de paiement configurée.</strong>
                                 </p>
                                 <small className="text-muted">
-                                    Les tranches de paiement doivent être créées avant de pouvoir configurer les montants des classes.
+                                    Les tranches de paiement doivent être créées avant de pouvoir configurer les montants des spécialités.
                                     Allez dans la section "Tranches de Paiement" pour en créer.
                                 </small>
                             </div>
@@ -490,7 +490,7 @@ const EditSchoolClass = ({ show, onHide, onSuccess, classData, sections, levels 
                     onClick={handleSubmit}
                     disabled={loading}
                 >
-                    {loading ? 'Modification...' : 'Modifier la Classe'}
+                    {loading ? 'Modification...' : 'Modifier la Spécialité'}
                 </Button>
             </Modal.Footer>
         </Modal>

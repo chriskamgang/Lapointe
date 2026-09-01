@@ -119,7 +119,7 @@ const AttendanceScannerSimple = () => {
 
   const handleManualScan = () => {
     if (!manualStudentId.trim()) {
-      setMessage("❌ Veuillez entrer un ID d'élève");
+      setMessage("❌ Veuillez entrer un ID d'étudiant");
       setMessageType("danger");
       return;
     }
@@ -132,7 +132,7 @@ const AttendanceScannerSimple = () => {
     try {
       setIsLoading(true);
 
-      // Simulation des noms d'élèves basée sur l'ID
+      // Simulation des noms d'étudiants basée sur l'ID
       const studentNames = {
         1: "Jean Dupont",
         2: "Marie Martin",
@@ -144,7 +144,7 @@ const AttendanceScannerSimple = () => {
       };
 
       const studentId = qrCode.replace("STUDENT_ID_", "");
-      const studentName = studentNames[studentId] || `Élève ${studentId}`;
+      const studentName = studentNames[studentId] || `Étudiant ${studentId}`;
 
       // Vérifier si déjà présent
       const alreadyPresent = todayAttendances.some(
@@ -243,7 +243,7 @@ const AttendanceScannerSimple = () => {
         </head>
         <body>
           <div class="header">
-            <h1>COLLEGE POLYVALENT BILINGUE DE DOUALA</h1>
+            <h1>INSTITUT UNIVERSITAIRE DE LA POINTE</h1>
             <h2>Liste de Présences du Jour</h2>
             <p><strong>Date:</strong> ${today}</p>
             <p><strong>Surveillant:</strong> ${user?.name || "N/A"}</p>
@@ -254,7 +254,7 @@ const AttendanceScannerSimple = () => {
             <thead>
               <tr>
                 <th>N°</th>
-                <th>Élève</th>
+                <th>Étudiant</th>
                 <th>Classe</th>
                 <th>Heure d'arrivée</th>
                 <th>Statut</th>
@@ -308,7 +308,7 @@ const AttendanceScannerSimple = () => {
         </Col>
       </Row>
 
-      {/* Scanner Section */}
+      {/* Scanner School */}
       <Row className="mb-4">
         <Col lg={6}>
           <Card>
@@ -372,7 +372,7 @@ const AttendanceScannerSimple = () => {
                     }}
                   >
                     <Form.Group className="mb-3">
-                      <Form.Label>ID Élève ou Code QR</Form.Label>
+                      <Form.Label>ID Étudiant ou Code QR</Form.Label>
                       <Form.Control
                         type="text"
                         placeholder="Ex: 1, 2, 3, 123, 456 ou STUDENT_ID_123"
@@ -454,7 +454,7 @@ const AttendanceScannerSimple = () => {
                   <Table striped hover size="sm">
                     <thead>
                       <tr>
-                        <th>Élève</th>
+                        <th>Étudiant</th>
                         <th>Classe</th>
                         <th>Heure</th>
                         <th>Statut</th>

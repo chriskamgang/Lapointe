@@ -152,7 +152,7 @@ class NeedController extends Controller
                 $need->update(['whatsapp_sent' => $result]);
             } catch (\Exception $e) {
                 // Ne pas faire échouer la création si l'envoi WhatsApp échoue
-                \Log::error('Erreur envoi WhatsApp pour besoin #' . $need->id . ': ' . $e->getMessage());
+                Log::error('Erreur envoi WhatsApp pour besoin #' . $need->id . ': ' . $e->getMessage());
             }
 
             $need->load(['user', 'approvedBy']);
@@ -230,7 +230,7 @@ class NeedController extends Controller
                 // Notification au demandeur
                 $this->whatsappService->sendStatusUpdateNotificationToRequester($need, $previousStatus);
             } catch (\Exception $e) {
-                \Log::error('Erreur envoi WhatsApp pour approbation besoin #' . $need->id . ': ' . $e->getMessage());
+                Log::error('Erreur envoi WhatsApp pour approbation besoin #' . $need->id . ': ' . $e->getMessage());
             }
 
             $need->load(['user', 'approvedBy']);
@@ -293,7 +293,7 @@ class NeedController extends Controller
                 // Notification au demandeur
                 $this->whatsappService->sendStatusUpdateNotificationToRequester($need, $previousStatus);
             } catch (\Exception $e) {
-                \Log::error('Erreur envoi WhatsApp pour rejet besoin #' . $need->id . ': ' . $e->getMessage());
+                Log::error('Erreur envoi WhatsApp pour rejet besoin #' . $need->id . ': ' . $e->getMessage());
             }
 
             $need->load(['user', 'approvedBy']);
@@ -529,7 +529,7 @@ class NeedController extends Controller
             if (file_exists($logoPath)) {
                 $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
                 $drawing->setName('Logo');
-                $drawing->setDescription('Logo du Collège');
+                $drawing->setDescription('Logo de l\'institut');
                 $drawing->setPath($logoPath);
                 $drawing->setHeight(60);
                 $drawing->setCoordinates('A1');
@@ -543,7 +543,7 @@ class NeedController extends Controller
             
             // Titre principal
             if (file_exists($logoPath)) {
-                $sheet->setCellValue('C1', 'COLLÈGE POLYVALENT BILINGUE DE DOUALA');
+                $sheet->setCellValue('C1', 'INSTITUT UNIVERSITAIRE DE LA POINTE');
                 $sheet->getStyle('C1')->getFont()->setBold(true)->setSize(16);
                 $sheet->setCellValue('C2', 'Liste des Besoins');
                 $sheet->getStyle('C2')->getFont()->setBold(true)->setSize(14);
@@ -614,19 +614,19 @@ class NeedController extends Controller
             $needs = $this->getFilteredNeeds($request);
             
             $phpWord = new PhpWord();
-            $section = $phpWord->addSection();
+            $school = $phpWord->addSection();
             
             // Ajouter le logo et l'en-tête
             $logoPath = public_path('assets/logo.png');
             if (file_exists($logoPath)) {
                 // Créer un tableau pour le header avec logo
-                $headerTable = $section->addTable();
+                $headerTable = $school->addTable();
                 $headerTable->addRow();
                 $cellLogo = $headerTable->addCell(2000);
                 $cellLogo->addImage($logoPath, ['width' => 80, 'height' => 80]);
                 
                 $cellTitle = $headerTable->addCell(8000);
-                $cellTitle->addText('COLLÈGE POLYVALENT BILINGUE DE DOUALA', ['bold' => true, 'size' => 16], ['alignment' => 'center']);
+                $cellTitle->addText('INSTITUT UNIVERSITAIRE DE LA POINTE', ['bold' => true, 'size' => 16], ['alignment' => 'center']);
                 $cellTitle->addTextBreak();
                 
                 // Titre du rapport
@@ -638,7 +638,7 @@ class NeedController extends Controller
                 };
                 
                 $cellTitle->addText('Liste des Besoins - ' . $statusLabel, ['bold' => true, 'size' => 14], ['alignment' => 'center']);
-                $section->addTextBreak();
+                $school->addTextBreak();
             } else {
                 // Titre sans logo
                 $statusLabel = match($request->get('status', 'all')) {
@@ -648,15 +648,15 @@ class NeedController extends Controller
                     default => 'Tous'
                 };
                 
-                $section->addTitle('COLLÈGE POLYVALENT BILINGUE DE DOUALA', 1);
-                $section->addTitle('Liste des Besoins - ' . $statusLabel, 2);
+                $school->addTitle('INSTITUT UNIVERSITAIRE DE LA POINTE', 1);
+                $school->addTitle('Liste des Besoins - ' . $statusLabel, 2);
             }
             
-            $section->addText('Généré le ' . now()->format('d/m/Y à H:i'));
-            $section->addTextBreak(2);
+            $school->addText('Généré le ' . now()->format('d/m/Y à H:i'));
+            $school->addTextBreak(2);
             
             // Table
-            $table = $section->addTable([
+            $table = $school->addTable([
                 'borderSize' => 6,
                 'borderColor' => '000000',
                 'cellMargin' => 80

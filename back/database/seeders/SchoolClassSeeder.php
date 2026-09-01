@@ -48,9 +48,9 @@ class SchoolClassSeeder extends Seeder
     private function getSeriesForLevel($levelName)
     {
         switch ($levelName) {
-            case 'Petite Section':
-            case 'Moyenne Section':
-            case 'Grande Section':
+            case 'Petite School':
+            case 'Moyenne School':
+            case 'Grande School':
             case 'CP':
             case 'CE1':
             case 'CE2':
@@ -92,9 +92,9 @@ class SchoolClassSeeder extends Seeder
     {
         // Montants de base selon le niveau
         $baseAmounts = [
-            'Petite Section' => ['inscription' => 15000, 'tranche' => 35000],
-            'Moyenne Section' => ['inscription' => 15000, 'tranche' => 35000],
-            'Grande Section' => ['inscription' => 18000, 'tranche' => 40000],
+            'Petite School' => ['inscription' => 15000, 'tranche' => 35000],
+            'Moyenne School' => ['inscription' => 15000, 'tranche' => 35000],
+            'Grande School' => ['inscription' => 18000, 'tranche' => 40000],
             'CP' => ['inscription' => 20000, 'tranche' => 45000],
             'CE1' => ['inscription' => 20000, 'tranche' => 45000],
             'CE2' => ['inscription' => 20000, 'tranche' => 45000],

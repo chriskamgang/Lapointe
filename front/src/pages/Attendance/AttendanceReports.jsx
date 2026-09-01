@@ -306,7 +306,7 @@ const AttendanceReports = () => {
     }
 
     const confirmAction = window.confirm(
-      `Êtes-vous sûr de vouloir marquer tous les élèves non présents comme absents pour le ${new Date(
+      `Êtes-vous sûr de vouloir marquer tous les étudiants non présents comme absents pour le ${new Date(
         filters.startDate
       ).toLocaleDateString("fr-FR")} ?`
     );
@@ -418,7 +418,7 @@ const AttendanceReports = () => {
     const now = new Date();
     return `
       <div class="header">
-        <h1>COLLEGE POLYVALENT BILINGUE DE DOUALA</h1>
+        <h1>INSTITUT UNIVERSITAIRE DE LA POINTE</h1>
         <h2>Rapport de Présences</h2>
         <p><strong>Période:</strong> ${formatDate(
           filters.startDate
@@ -458,7 +458,7 @@ const AttendanceReports = () => {
         <thead>
           <tr>
             <th>Date</th>
-            <th>Élève</th>
+            <th>Étudiant</th>
             <th>Classe</th>
             <th>Heure</th>
             <th>Statut</th>
@@ -546,7 +546,7 @@ const AttendanceReports = () => {
         </Row>
       )}
 
-      {/* Filters Section */}
+      {/* Filters School */}
       <Row className="mb-4">
         <Col>
           <Card>
@@ -637,14 +637,14 @@ const AttendanceReports = () => {
                 </Col>
                 <Col md={5}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Rechercher un élève</Form.Label>
+                    <Form.Label>Rechercher un étudiant</Form.Label>
                     <InputGroup>
                       <InputGroup.Text>
                         <Search />
                       </InputGroup.Text>
                       <Form.Control
                         type="text"
-                        placeholder="Nom de l'élève..."
+                        placeholder="Nom de l'étudiant..."
                         value={filters.searchTerm}
                         onChange={(e) =>
                           handleFilterChange("searchTerm", e.target.value)
@@ -668,7 +668,7 @@ const AttendanceReports = () => {
         </Col>
       </Row>
 
-      {/* Summary Section */}
+      {/* Summary School */}
       <Row className="mb-4">
         <Col md={2}>
           <Card className="text-center border-primary">
@@ -797,7 +797,7 @@ const AttendanceReports = () => {
                     <thead>
                       <tr>
                         <th>Date</th>
-                        <th>Élève</th>
+                        <th>Étudiant</th>
                         <th>Classe</th>
                         <th>Type</th>
                         <th>Heure</th>

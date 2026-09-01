@@ -275,20 +275,20 @@ export const apiEndpoints = {
     updateClass: (id, data) => api.put(`/class/${id}`, data),
     deleteClass: (id) => api.delete(`/class/${id}`),
     
-    // Sections
-    getAllSections: () => api.get('/sections'),
-    getOneSection: (id) => api.get(`/sections/${id}`),
-    addSection: (data) => api.post('/sections/store', data),
-    updateSection: (id, data) => api.put(`/sections/${id}`, data),
-    deleteSection: (id) => api.delete(`/sections/${id}`),
-    exportSections: (format, filters = {}) => {
+    // Schools
+    getAllSchools: () => api.get('/schools'),
+    getOneSection: (id) => api.get(`/schools/${id}`),
+    addSection: (data) => api.post('/schools/store', data),
+    updateSection: (id, data) => api.put(`/schools/${id}`, data),
+    deleteSection: (id) => api.delete(`/schools/${id}`),
+    exportSchools: (format, filters = {}) => {
         const params = new URLSearchParams(filters);
-        return api.get(`/sections/export/${format}?${params}`);
+        return api.get(`/schools/export/${format}?${params}`);
     },
-    importSections: (file) => {
+    importSchools: (file) => {
         const formData = new FormData();
         formData.append('file', file);
-        return api.post('/sections/import/csv', formData, {
+        return api.post('/schools/import/csv', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
     },
@@ -327,8 +327,8 @@ export const apiEndpoints = {
     reorderPaymentTranches: (data) => api.post('/payment-tranches/reorder', data),
     
     // Levels
-    getAllLevels: (sectionId = null) => {
-        const url = sectionId ? `/levels?section_id=${sectionId}` : '/levels';
+    getAllLevels: (schoolId = null) => {
+        const url = schoolId ? `/levels?school_id=${schoolId}` : '/levels';
         return api.get(url);
     },
     getLevel: (id) => api.get(`/levels/${id}`),
@@ -339,7 +339,7 @@ export const apiEndpoints = {
     // School Classes
     getAllSchoolClasses: (filters = {}) => {
         const params = new URLSearchParams();
-        if (filters.section_id) params.append('section_id', filters.section_id);
+        if (filters.school_id) params.append('school_id', filters.school_id);
         if (filters.level_id) params.append('level_id', filters.level_id);
         const url = params.toString() ? `/school-classes?${params}` : '/school-classes';
         return api.get(url);

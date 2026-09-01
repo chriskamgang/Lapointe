@@ -29,7 +29,7 @@ return new class extends Migration
             DB::statement('ALTER TABLE attendances DROP INDEX unique_student_daily_attendance');
         } catch (\Exception $e) {
             // Si la contrainte n'existe pas ou ne peut pas être supprimée, continuer
-            \Log::info('Contrainte unique_student_daily_attendance déjà supprimée ou inexistante: ' . $e->getMessage());
+            Log::info('Contrainte unique_student_daily_attendance déjà supprimée ou inexistante: ' . $e->getMessage());
         }
         
         // Étape 4: Ajouter un index pour optimiser les requêtes

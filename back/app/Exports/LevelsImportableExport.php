@@ -12,11 +12,11 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class LevelsImportableExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
-    protected $sectionId;
+    protected $schoolId;
 
-    public function __construct($sectionId = null)
+    public function __construct($schoolId = null)
     {
-        $this->sectionId = $sectionId;
+        $this->schoolId = $schoolId;
     }
 
     /**
@@ -24,14 +24,14 @@ class LevelsImportableExport implements FromCollection, WithHeadings, WithMappin
      */
     public function collection()
     {
-        $query = Level::with(['section']);
+        $query = Level::with(['school']);
         
-        if ($this->sectionId) {
-            $query->where('section_id', $this->sectionId);
-            // Si la section n'a pas de niveaux, retourner tous les niveaux
+        if ($this->schoolId) {
+            $query->where('school', $this->schoolId);
+            // Si la school n'a pas de niveaux, retourner tous les niveaux
             $filteredLevels = $query->get();
             if ($filteredLevels->isEmpty()) {
-                return Level::with(['section'])->orderBy('name')->get();
+                return Level::with(['school'])->orderBy('name')->get();
             }
             return $filteredLevels;
         }
@@ -47,7 +47,7 @@ class LevelsImportableExport implements FromCollection, WithHeadings, WithMappin
         return [
             'id',
             'nom',
-            'section_id',
+            'school_id',
             'description',
             'statut'
         ];
@@ -61,7 +61,7 @@ class LevelsImportableExport implements FromCollection, WithHeadings, WithMappin
         return [
             $level->id,
             $level->name,
-            $level->section_id,
+            $level->school_id,
             $level->description ?? '',
             $level->is_active ? 1 : 0
         ];

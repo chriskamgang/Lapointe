@@ -100,7 +100,7 @@
         <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
             <img src="{{ public_path('assets/logo.png') }}" alt="Logo" style="width: 80px; height: 80px; margin-right: 20px;">
             <div style="text-align: center;">
-                <div class="title">COLLÈGE POLYVALENT BILINGUE DE DOUALA</div>
+                <div class="title">INSTITUT UNIVERSITAIRE DE LA POINTE</div>
                 <div class="subtitle">
                     Liste des Besoins - 
                     @switch($status_filter)

@@ -3,7 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Level;
-use App\Models\Section;
+use App\Models\School;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -24,7 +24,7 @@ class LevelsImport implements ToCollection, WithHeadingRow
                 $validator = Validator::make($row->toArray(), [
                     'id' => 'nullable|integer|exists:levels,id',
                     'nom' => 'required|string|max:255',
-                    'section_id' => 'required|integer|exists:sections,id',
+                    'school_id' => 'required|integer|exists:schools,id',
                     'description' => 'nullable|string',
                     'statut' => 'nullable|in:0,1,actif,inactif,Actif,Inactif,ACTIF,INACTIF'
                 ]);
@@ -39,7 +39,7 @@ class LevelsImport implements ToCollection, WithHeadingRow
 
                 $data = [
                     'name' => $row['nom'],
-                    'section_id' => $row['section_id'],
+                    'school_id' => $row['school_id'],
                     'description' => $row['description'] ?? null,
                     'is_active' => $this->parseStatus($row['statut'] ?? 1)
                 ];
@@ -61,9 +61,9 @@ class LevelsImport implements ToCollection, WithHeadingRow
                         continue;
                     }
                 } else {
-                    // Pas d'ID fourni, comportement classique : chercher par nom et section
+                    // Pas d'ID fourni, comportement classique : chercher par nom et school
                     $existingLevel = Level::where('name', $data['name'])
-                                        ->where('section_id', $data['section_id'])
+                                        ->where('school_id', $data['school_id'])
                                         ->first();
                     
                     if ($existingLevel) {

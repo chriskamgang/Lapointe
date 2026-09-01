@@ -12,6 +12,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AccountantController;
 use App\Http\Controllers\SchoolYearController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\StudentEquipmentController;
 use App\Http\Controllers\SchoolSettingsController;
 use App\Http\Controllers\ClassScholarshipController;
 use App\Http\Controllers\ReportsController;
@@ -31,6 +32,9 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentFolderController;
 use App\Http\Controllers\ClassesSeriesController;
 use App\Http\Controllers\TeacherAttendanceController;
+use App\Http\Controllers\SchoolEquipmentController;
+use App\Http\Controllers\UniversityScholarshipController;
+use App\Http\Controllers\EquipmentDistributionController;
 
 
 // Routes d'authentification
@@ -88,9 +92,77 @@ Route::get('test-inventory', function () {
     }
 });
 
+
+// Dans routes/api.php
+
+// Routes pour la distribution des équipements (corrigées)
+Route::prefix('equipment')->middleware(['role:admin,secretaire,accountant,comptable_superieur'])->group(function () {
+    // Obtenir le statut d'un étudiant spécifique
+    Route::get('student/{studentId}/status', [EquipmentDistributionController::class, 'getStudentStatus']);
+
+    // Historique et statistiques
+    Route::get('distribution/history', [EquipmentDistributionController::class, 'getDistributionHistory']);
+    Route::get('distribution/statistics', [EquipmentDistributionController::class, 'getDistributionStatistics']);
+    Route::get('distribution/pending', [EquipmentDistributionController::class, 'getPendingDistributions']);
+
+    // Actions sur les équipements
+    Route::post('mark-as-distributed', [EquipmentDistributionController::class, 'markEquipmentAsDistributed']);
+    Route::post('mark-rames-physical', [EquipmentDistributionController::class, 'markRamesAsPhysical']);
+    Route::post('process-action', [EquipmentDistributionController::class, 'processAction']);
+});
+
+// Routes pour les équipements par étudiant (alternative avec yearId)
+Route::prefix('students/{studentId}')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('equipment-status/{yearId}', [StudentEquipmentController::class, 'getEquipmentStatus']);
+    Route::get('scholarship-info/{yearId}', [StudentEquipmentController::class, 'getScholarshipInfo']);
+    Route::post('equipment-payment', [StudentEquipmentController::class, 'processEquipmentPayment']);
+});
+
+// === BOURSES ===
+Route::prefix('scholarships')->middleware(['role:admin,secretaire,accountant,comptable_superieur'])->group(function () {
+    // Informations bourse pour un étudiant
+    Route::get('/student/{studentId}/info', [UniversityScholarshipController::class, 'getStudentInfo']);
+
+    // Gestion des bourses
+    Route::post('/apply', [UniversityScholarshipController::class, 'applyScholarship']);
+    Route::get('/eligible-students', [UniversityScholarshipController::class, 'getEligibleStudents']);
+});
+
+
+
+
+
+// Routes pour la distribution des équipements
+Route::prefix('equipment-distribution')->group(function () {
+    Route::get('history', [EquipmentDistributionController::class, 'getDistributionHistory']);
+    Route::get('statistics', [EquipmentDistributionController::class, 'getDistributionStatistics']);
+    Route::get('pending', [EquipmentDistributionController::class, 'getPendingDistributions']);
+    Route::post('mark-as-distributed', [EquipmentDistributionController::class, 'markEquipmentAsDistributed']);
+    Route::post('mark-rames-physical', [EquipmentDistributionController::class, 'markRamesAsPhysical']);
+    Route::get('export', [EquipmentDistributionController::class, 'exportDistributions']);
+});
+
+// Routes pour le statut des équipements par étudiant
+Route::prefix('students/{studentId}')->group(function () {
+    Route::get('equipment-status/{yearId}', [StudentEquipmentController::class, 'getEquipmentStatus']);
+    Route::get('scholarship-info/{yearId}', [StudentEquipmentController::class, 'getScholarshipInfo']);
+    Route::post('equipment-payment', [StudentEquipmentController::class, 'processEquipmentPayment']);
+});
+
+// Routes pour les paramètres d'équipements par école
+Route::prefix('schools/{schoolId}')->group(function () {
+    Route::get('required-equipment', [EquipmentDistributionController::class, 'getRequiredEquipment']);
+    Route::get('equipment-summary', [EquipmentDistributionController::class, 'getSchoolEquipmentSummary']);
+});
+
+// Routes pour les statistiques globales
+Route::prefix('dashboard')->group(function () {
+    Route::get('payment-equipment-stats', [PaymentController::class, 'getPaymentEquipmentStats']);
+});
+
 Route::get('/user-management/{id}/professional-card', function () {
     return response('', 204)
-        ->header('Access-Control-Allow-Origin', 'https://admin.cpb-douala.com')
+        ->header('Access-Control-Allow-Origin', '*')
         ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         ->header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With')
         ->header('Access-Control-Allow-Credentials', 'true')
@@ -98,7 +170,7 @@ Route::get('/user-management/{id}/professional-card', function () {
 });
 Route::get('/students', function () {
     return response('', 204)
-        ->header('Access-Control-Allow-Origin', 'https://admin.cpb-douala.com')
+        ->header('Access-Control-Allow-Origin', '*')
         ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         ->header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With')
         ->header('Access-Control-Allow-Credentials', 'true')
@@ -106,7 +178,7 @@ Route::get('/students', function () {
 });
 Route::post('/students', function () {
     return response('', 201)
-        ->header('Access-Control-Allow-Origin', 'https://admin.cpb-douala.com')
+        ->header('Access-Control-Allow-Origin', '*')
         ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         ->header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With')
         ->header('Access-Control-Allow-Credentials', 'true')
@@ -115,30 +187,30 @@ Route::post('/students', function () {
 // Routes protégées
 Route::middleware('auth:api')->group(function () {
 
-    // Routes pour les sections
-    Route::prefix('sections')->group(function () {
+    // Routes pour les schools
+    Route::prefix('schools')->group(function () {
 
         Route::get('/dashboard', [SectionController::class, 'dashboard'])->middleware(['role:admin,accountant']);
         Route::get('/', [SectionController::class, 'index'])->middleware(['role:admin,accountant']);
-        Route::get('/{section}', [SectionController::class, 'show'])->middleware(['role:admin,accountant']);
-        
+        Route::get('/{school}', [SectionController::class, 'show'])->middleware(['role:admin,accountant']);
+
         // Export routes
         Route::get('/export/excel', [SectionController::class, 'exportExcel'])->middleware(['role:admin,accountant']);
         Route::get('/export/csv', [SectionController::class, 'exportCsv'])->middleware(['role:admin,accountant']);
         Route::get('/export/pdf', [SectionController::class, 'exportPdf'])->middleware(['role:admin,accountant']);
         Route::get('/export/importable', [SectionController::class, 'exportImportable'])->middleware(['role:admin,accountant']);
         Route::get('/template/download', [SectionController::class, 'downloadTemplate'])->middleware(['role:admin']);
-        
+
 
         Route::get('/dashboard', [SectionController::class, 'dashboard'])->middleware(['role:admin,accountant,comptable_superieur']);
         Route::get('/', [SectionController::class, 'index'])->middleware(['role:admin,accountant,comptable_superieur']);
-        Route::get('/{section}', [SectionController::class, 'show'])->middleware(['role:admin,accountant,comptable_superieur']);
+        Route::get('/{school}', [SectionController::class, 'show'])->middleware(['role:admin,accountant,comptable_superieur']);
 
 
         Route::post('/', [SectionController::class, 'store'])->middleware(['role:admin']);
-        Route::put('/{section}', [SectionController::class, 'update'])->middleware(['role:admin']);
-        Route::delete('/{section}', [SectionController::class, 'destroy'])->middleware(['role:admin']);
-        Route::post('/{section}/toggle-status', [SectionController::class, 'toggleStatus'])->middleware(['role:admin']);
+        Route::put('/{school}', [SectionController::class, 'update'])->middleware(['role:admin']);
+        Route::delete('/{school}', [SectionController::class, 'destroy'])->middleware(['role:admin']);
+        Route::post('/{school}/toggle-status', [SectionController::class, 'toggleStatus'])->middleware(['role:admin']);
         Route::post('/import/csv', [SectionController::class, 'importCsv'])->middleware(['role:admin']);
     });
 
@@ -198,14 +270,14 @@ Route::middleware('auth:api')->group(function () {
     // Routes pour les séries
     Route::prefix('series')->group(function () {
         Route::get('/', [SeriesController::class, 'index'])->middleware(['role:admin,accountant']);
-        
+
         // Export routes
         Route::get('/export/excel', [SeriesController::class, 'exportExcel'])->middleware(['role:admin,accountant']);
         Route::get('/export/csv', [SeriesController::class, 'exportCsv'])->middleware(['role:admin,accountant']);
         Route::get('/export/pdf', [SeriesController::class, 'exportPdf'])->middleware(['role:admin,accountant']);
         Route::get('/export/importable', [SeriesController::class, 'exportImportable'])->middleware(['role:admin,accountant']);
         Route::get('/template/download', [SeriesController::class, 'downloadTemplate'])->middleware(['role:admin']);
-        
+
         Route::post('/import/csv', [SeriesController::class, 'importCsv'])->middleware(['role:admin']);
     });
 
@@ -219,10 +291,11 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/import/csv', [ClassesSeriesController::class, 'importCsv'])->middleware(['role:admin']);
     });
 
-    // Routes pour les élèves
-    Route::prefix('students')->middleware(['role:admin,accountant,comptable_superieur'])->group(function () {
+    // Routes pour les étudiants
+    Route::prefix('students')->middleware(['role:admin,accountant,comptable_superieur,secretaire'])->group(function () {
+        Route::get('/school-years', [StudentController::class, 'getSchoolYears']);
         Route::get('/class-series/{seriesId}', [StudentController::class, 'getByClassSeries']);
-        
+        Route::get('/{student}', [StudentController::class, 'show']);
         // Export routes - amélioration des routes existantes
         Route::get('/export/excel', [StudentController::class, 'exportStudentsExcel']);
         Route::get('/export/csv', [StudentController::class, 'exportStudentsCsv']);
@@ -232,18 +305,17 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/export/pdf/{seriesId}', [StudentController::class, 'exportPdf']);
         Route::get('/export/importable', [StudentController::class, 'exportImportable']);
         Route::get('/template/download', [StudentController::class, 'downloadTemplate']);
-        
+
         Route::post('/', [StudentController::class, 'store']);
         Route::put('/{student}', [StudentController::class, 'update']);
         Route::patch('/{student}/status', [StudentController::class, 'updateStatus']);
         Route::post('/{student}/update-with-photo', [StudentController::class, 'updateWithPhoto']);
         Route::post('/{student}/transfer-series', [StudentController::class, 'transferToSeries']);
-        Route::delete('/{student}', [StudentController::class, 'destroy']);
+        Route::delete('/{student}', [StudentController::class, 'destroy'])->middleware(['role:admin,comptable_superieur']);
         Route::post('/import/csv', [StudentController::class, 'importCsv']);
         Route::post('/import/excel', [StudentController::class, 'importExcel']);
         Route::post('/series/{seriesId}/import', [StudentController::class, 'importForSeries']);
         Route::post('/series/{seriesId}/import/csv', [StudentController::class, 'importCsvForSeries']);
-        Route::get('/school-years', [StudentController::class, 'getSchoolYears']);
         Route::post('/reorder', [StudentController::class, 'reorder']);
         Route::post('/class-series/{seriesId}/sort-alphabetically', [StudentController::class, 'sortAlphabetically']);
         Route::post('/bulk-upload-photos', [StudentController::class, 'bulkUploadPhotos']);
@@ -288,9 +360,18 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/student/{studentId}/history', [PaymentController::class, 'getStudentPaymentHistory']);
         Route::post('/student/{studentId}/calculate-with-date', [PaymentController::class, 'calculatePaymentWithDate']);
         Route::post('/', [PaymentController::class, 'store']);
+        Route::delete('/{paymentId}', [PaymentController::class, 'cancelPayment']);
         Route::get('/{paymentId}/receipt', [PaymentController::class, 'generateReceipt']);
         Route::get('/{paymentId}/receipt/pdf', [PaymentController::class, 'downloadReceiptPDF']);
         Route::get('/stats', [PaymentController::class, 'getPaymentStats']);
+        // Nouvelles routes pour les équipements
+        Route::post('process-with-equipment', [PaymentController::class, 'processPaymentWithEquipment']);
+        Route::get('student/{studentId}/required-equipments', [PaymentController::class, 'getStudentRequiredEquipments']);
+        Route::get('student/{studentId}/complete-status', [PaymentController::class, 'getCompleteStudentStatus']);
+        Route::get('student/{studentId}/summary', [PaymentController::class, 'getStudentPaymentSummary']);
+
+        // Route pour calculer les totaux avec bourses
+        Route::post('calculate-with-scholarships', [PaymentController::class, 'calculateTotalWithScholarships']);
     });
 
     // Routes pour les paramètres de l'école
@@ -325,16 +406,16 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/scholarships-discounts', [ReportsController::class, 'getScholarshipsDiscountsReport']);
         Route::get('/collection-details', [ReportsController::class, 'getCollectionDetailsReport']);
         Route::get('/series-collection-summary', [ReportsController::class, 'getSeriesCollectionSummary']);
-        
+
         // Nouveau rapport de détail des paiements des frais de scolarité
         Route::get('/school-fee-payment-details', [ReportsController::class, 'getSchoolFeePaymentDetails']);
         Route::get('/school-fee-payment-details/export-pdf', [ReportsController::class, 'exportSchoolFeePaymentDetailsPdf']);
-        
+
         // Nouveaux rapports financiers
         Route::get('/detailed-collection', [ReportsController::class, 'getDetailedCollectionReport']);
         Route::get('/class-school-fees', [ReportsController::class, 'getClassSchoolFeesReport']);
         Route::get('/class-school-fees/export-pdf', [ReportsController::class, 'exportClassSchoolFeesPdf']);
-        
+
         Route::get('/export-pdf', [ReportsController::class, 'exportPdf']);
     });
 
@@ -349,7 +430,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/{id}/reset-password', [UserManagementController::class, 'resetPassword']);
         Route::post('/{id}/toggle-status', [UserManagementController::class, 'toggleStatus']);
         Route::delete('/{id}', [UserManagementController::class, 'destroy']);
-        
+
         // Routes pour cartes d'identité professionnelles
         Route::get('/{id}/qr-code', [UserManagementController::class, 'getUserQR']);
     });
@@ -390,7 +471,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/', [TeacherController::class, 'index'])->middleware(['role:admin,accountant']);
         Route::get('/{teacher}', [TeacherController::class, 'show'])->middleware(['role:admin,accountant']);
         Route::get('/{teacher}/stats', [TeacherController::class, 'getStats'])->middleware(['role:admin,accountant']);
-        
+
         // Export routes
         Route::get('/export/excel', [TeacherController::class, 'exportExcel'])->middleware(['role:admin,accountant']);
         Route::get('/export/csv', [TeacherController::class, 'exportCsv'])->middleware(['role:admin,accountant']);
@@ -467,7 +548,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/{need}/reject', [NeedController::class, 'reject'])->middleware(['role:admin,comptable_superieur']); // Rejeter
         Route::get('/statistics/summary', [NeedController::class, 'statistics'])->middleware(['role:admin,comptable_superieur']); // Statistiques
         Route::post('/test-whatsapp', [NeedController::class, 'testWhatsApp'])->middleware(['role:admin']); // Test WhatsApp (admin uniquement)
-        
+
         // Routes d'export pour administrateurs et comptables supérieurs
         Route::get('/export/pdf', [NeedController::class, 'exportPdf'])->middleware(['role:admin,comptable_superieur']); // Export PDF
         Route::get('/export/excel', [NeedController::class, 'exportExcel'])->middleware(['role:admin,comptable_superieur']); // Export Excel
@@ -497,7 +578,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/generate-all-qrs', [SupervisorController::class, 'generateAllStudentQRs'])->middleware(['role:admin']);
     });
 
-    // Routes pour la gestion RAME simplifiée
+    // Routes pour la gestion Rames de papier simplifiée
     Route::prefix('student-rame')->middleware(['role:admin,accountant'])->group(function () {
         Route::get('/student/{studentId}/status', [StudentRameController::class, 'getRameStatus']);
         Route::post('/student/{studentId}/update', [StudentRameController::class, 'updateRameStatus']);
@@ -563,15 +644,91 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/scan-qr', [TeacherAttendanceController::class, 'scanQR'])->middleware(['role:admin,surveillant_general']);
         Route::get('/daily-attendance', [TeacherAttendanceController::class, 'getDailyAttendance'])->middleware(['role:admin,surveillant_general']);
         Route::get('/entry-exit-stats', [TeacherAttendanceController::class, 'getEntryExitStats'])->middleware(['role:admin,surveillant_general']);
-        
+
         // Routes pour gestion des QR codes enseignants
         Route::post('/generate-qr', [TeacherAttendanceController::class, 'generateQRCode'])->middleware(['role:admin']);
         Route::get('/teachers-with-qr', [TeacherAttendanceController::class, 'getTeachersWithQR'])->middleware(['role:admin,surveillant_general']);
-        
+
         // Routes pour rapports et statistiques
         Route::get('/teacher/{teacherId}/report', [TeacherAttendanceController::class, 'getTeacherReport'])->middleware(['role:admin,surveillant_general']);
         Route::get('/teacher/{teacherId}/detailed-stats', [TeacherAttendanceController::class, 'getDetailedTeacherStats'])->middleware(['role:admin,surveillant_general']);
         Route::get('/teacher/{teacherId}/day-movements', [TeacherAttendanceController::class, 'getDayMovements'])->middleware(['role:admin,surveillant_general']);
         Route::put('/teacher/{teacherId}/work-schedule', [TeacherAttendanceController::class, 'updateWorkSchedule'])->middleware(['role:admin']);
+    });
+
+    // Routes pour les équipements scolaires
+    Route::prefix('school-equipment')->group(function () {
+        // Routes accessibles aux admins, comptables et surveillants généraux (lecture)
+        Route::get('/school/{schoolId}/equipment', [SchoolEquipmentController::class, 'getEquipmentBySchool'])
+            ->middleware(['role:admin,accountant,comptable_superieur,surveillant_general']);
+        Route::get('/school-code/{schoolCode}/equipment', [SchoolEquipmentController::class, 'getEquipmentBySchoolCode'])
+            ->middleware(['role:admin,accountant,comptable_superieur,surveillant_general']);
+        Route::get('/school-code/{schoolCode}/required-clothing', [SchoolEquipmentController::class, 'getRequiredClothing'])
+            ->middleware(['role:admin,accountant,comptable_superieur,surveillant_general']);
+
+        // Routes CRUD pour la gestion des équipements (admins seulement)
+        Route::middleware(['role:admin'])->group(function () {
+            Route::get('/', [SchoolEquipmentController::class, 'index']); // Lister tous les équipements
+            Route::get('/stats', [SchoolEquipmentController::class, 'getStats']); // Statistiques
+            Route::post('/', [SchoolEquipmentController::class, 'store']); // Créer un équipement
+            Route::get('/{id}', [SchoolEquipmentController::class, 'show']); // Afficher un équipement
+            Route::put('/{id}', [SchoolEquipmentController::class, 'update']); // Mettre à jour
+            Route::delete('/{id}', [SchoolEquipmentController::class, 'destroy']); // Supprimer
+            Route::patch('/{id}/toggle-status', [SchoolEquipmentController::class, 'toggleStatus']); // Activer/désactiver
+            Route::post('/reorder', [SchoolEquipmentController::class, 'reorder']); // Réordonner
+        });
+    });
+
+    // Routes pour les bourses universitaires
+    Route::prefix('scholarships')->group(function () {
+        // Routes de consultation
+        Route::get('/', [UniversityScholarshipController::class, 'index'])
+            ->middleware(['role:admin,accountant,comptable_superieur']);
+        Route::get('/school/{schoolId}', [UniversityScholarshipController::class, 'getBySchool'])
+            ->middleware(['role:admin,accountant,comptable_superieur']);
+        Route::get('/school-code/{schoolCode}', [UniversityScholarshipController::class, 'getBySchoolCode'])
+            ->middleware(['role:admin,accountant,comptable_superieur']);
+        Route::get('/student/{studentId}/calculate', [UniversityScholarshipController::class, 'calculateStudentScholarship'])
+            ->middleware(['role:admin,accountant,comptable_superieur']);
+
+        // Routes de gestion (admin uniquement)
+        Route::post('/', [UniversityScholarshipController::class, 'store'])
+            ->middleware(['role:admin']);
+        Route::get('/{id}', [UniversityScholarshipController::class, 'show'])
+            ->middleware(['role:admin']);
+        Route::put('/{id}', [UniversityScholarshipController::class, 'update'])
+            ->middleware(['role:admin']);
+        Route::delete('/{id}', [UniversityScholarshipController::class, 'destroy'])
+            ->middleware(['role:admin']);
+        Route::post('/student/{studentId}/apply', [UniversityScholarshipController::class, 'applyScholarshipToStudent'])
+            ->middleware(['role:admin']);
+        Route::post('/school/{schoolId}/update-all', [UniversityScholarshipController::class, 'updateSchoolScholarships'])
+            ->middleware(['role:admin']);
+    });
+
+    // Routes pour les paiements (comptables et admins)
+    Route::prefix('payments')->middleware(['role:admin,secretaire,accountant,comptable_superieur'])->group(function () {
+        Route::get('/student/{studentId}/info', [PaymentController::class, 'getStudentPaymentInfo']);
+        Route::get('/student/{studentId}/info-with-discount', [PaymentController::class, 'getStudentPaymentInfoWithDiscount']);
+        Route::get('/student/{studentId}/history', [PaymentController::class, 'getStudentPaymentHistory']);
+        Route::post('/student/{studentId}/calculate-with-date', [PaymentController::class, 'calculatePaymentWithDate']);
+        Route::post('/', [PaymentController::class, 'store']);
+        Route::delete('/{paymentId}', [PaymentController::class, 'cancelPayment']);
+        Route::get('/{paymentId}/receipt', [PaymentController::class, 'generateReceipt']);
+        Route::get('/{paymentId}/receipt/pdf', [PaymentController::class, 'downloadReceiptPDF']);
+        Route::get('/stats', [PaymentController::class, 'getPaymentStats']);
+        // Nouvelles routes pour les équipements
+        Route::post('process-with-equipment', [PaymentController::class, 'processPaymentWithEquipment']);
+        Route::get('student/{studentId}/required-equipments', [PaymentController::class, 'getStudentRequiredEquipments']);
+        Route::get('student/{studentId}/complete-status', [PaymentController::class, 'getCompleteStudentStatus']);
+        Route::get('student/{studentId}/summary', [PaymentController::class, 'getStudentPaymentSummary']);
+
+        // Route pour calculer les totaux avec bourses
+        Route::post('calculate-with-scholarships', [PaymentController::class, 'calculateTotalWithScholarships']);
+        Route::post('/rames/undo-brought', [PaymentController::class, 'undoRameBrought']);
+    });
+
+    Route::prefix('equipments')->middleware(['role:admin,secretaire,accountant,comptable_superieur'])->group(function () {
+        Route::post('/undo-payment', [StudentEquipmentController::class, 'undoPayment']);
     });
 });

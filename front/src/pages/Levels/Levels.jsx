@@ -26,7 +26,7 @@ import { Button } from 'react-bootstrap';
 const Levels = () => {
     const { user } = useAuth();
     const [levels, setLevels] = useState([]);
-    const [sections, setSections] = useState([]);
+    const [schools, setSchools] = useState([]);
     const [dashboardStats, setDashboardStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -47,7 +47,7 @@ const Levels = () => {
     // Form data
     const [formData, setFormData] = useState({
         name: '',
-        section_id: '',
+        school_id: '',
         description: '',
         is_active: true,
         order: 0
@@ -56,7 +56,7 @@ const Levels = () => {
     // Load data on component mount
     useEffect(() => {
         loadLevels();
-        loadSections();
+        loadSchools();
         loadDashboard();
     }, []);
 
@@ -77,14 +77,14 @@ const Levels = () => {
         }
     };
 
-    const loadSections = async () => {
+    const loadSchools = async () => {
         try {
-            const response = await secureApiEndpoints.sections.getAll();
+            const response = await secureApiEndpoints.schools.getAll();
             if (response.success) {
-                setSections(response.data);
+                setSchools(response.data);
             }
         } catch (error) {
-            console.error('Error loading sections:', error);
+            console.error('Error loading school:', error);
         }
     };
 
@@ -166,7 +166,7 @@ const Levels = () => {
     const resetForm = () => {
         setFormData({
             name: '',
-            section_id: '',
+            school_id: '',
             description: '',
             is_active: true,
             order: 0
@@ -178,7 +178,7 @@ const Levels = () => {
         setSelectedLevel(level);
         setFormData({
             name: level.name,
-            section_id: level.section_id.toString(),
+            school_id: level.school_id.toString(),
             description: level.description || '',
             is_active: level.is_active,
             order: level.order
@@ -195,14 +195,14 @@ const Levels = () => {
     const filteredLevels = levels.filter(level => {
         const matchesSearch = level.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             (level.description && level.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                            (level.section && level.section.name.toLowerCase().includes(searchTerm.toLowerCase()));
+                            (level.school && level.school.name.toLowerCase().includes(searchTerm.toLowerCase()));
         
         const matchesFilter = filterActive === 'all' || 
                             (filterActive === 'active' && level.is_active) ||
                             (filterActive === 'inactive' && !level.is_active);
 
         const matchesSection = filterSection === 'all' || 
-                              level.section_id.toString() === filterSection;
+                              level.school_id.toString() === filterSection;
         
         return matchesSearch && matchesFilter && matchesSection;
     });
@@ -224,7 +224,7 @@ const Levels = () => {
                         Gestion des Niveaux
                     </h1>
                     <p className="text-gray-600">
-                        Bienvenue {user?.name} - Gérez les niveaux de classe de l'établissement
+                        Bienvenue {user?.name} - Gérez les niveaux des écoles de l'institut
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -232,7 +232,7 @@ const Levels = () => {
                         title="Niveaux"
                         apiBasePath="/api/levels"
                         onImportSuccess={loadLevels}
-                        filters={{ section_id: filterSection !== 'all' ? filterSection : undefined }}
+                        filters={{ school_id: filterSection !== 'all' ? filterSection : undefined }}
                         templateFileName="template_niveaux.csv"
                     />
                     <Button
@@ -307,7 +307,7 @@ const Levels = () => {
                     <Card className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">Avec Classes</p>
+                                <p className="text-sm text-gray-600">Avec Spécialités</p>
                                 <p className="text-2xl font-bold text-purple-600">
                                     {dashboardStats.stats.levels_with_classes}
                                 </p>
@@ -340,16 +340,16 @@ const Levels = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-3">
-                                    <label className="form-label">Section</label>
+                                    <label className="form-label">Ecoles</label>
                                     <select
                                         className="form-select"
                                         value={filterSection}
                                         onChange={(e) => setFilterSection(e.target.value)}
                                     >
-                                        <option value="all">Toutes les sections</option>
-                                        {sections.map(section => (
-                                            <option key={section.id} value={section.id.toString()}>
-                                                {section.name}
+                                        <option value="all">Toutes les écoles</option>
+                                        {schools.map(school => (
+                                            <option key={school.id} value={school.id.toString()}>
+                                                {school.name}
                                             </option>
                                         ))}
                                     </select>
@@ -361,7 +361,7 @@ const Levels = () => {
                                         value={filterActive}
                                         onChange={(e) => setFilterActive(e.target.value)}
                                     >
-                                        <option value="all">Tous les niveaux</option>
+                                        <option value="all">Tout les niveaux</option>
                                         <option value="active">Niveaux actifs</option>
                                         <option value="inactive">Niveaux inactifs</option>
                                     </select>
@@ -439,8 +439,8 @@ const Levels = () => {
                             
                             <div className="mb-3">
                                 <p className="text-sm text-gray-600 mb-1">
-                                    Section: <span className="font-medium text-blue-600">
-                                        {level.section?.name}
+                                    School: <span className="font-medium text-blue-600">
+                                        {level.school?.name}
                                     </span>
                                 </p>
                                 {level.description && (
@@ -508,7 +508,7 @@ const Levels = () => {
                                                 {level.is_active ? 'Actif' : 'Inactif'}
                                             </span>
                                             <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                                                {level.section?.name}
+                                                {level.school?.name}
                                             </span>
                                             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                                                 Ordre: {level.order}
@@ -574,23 +574,23 @@ const Levels = () => {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
-                        placeholder="Ex: CP, CE1, 6ème..."
+                        placeholder="Ex: BTS1, Lincence1, Master1..."
                     />
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Section *
+                            Ecole *
                         </label>
                         <select
-                            value={formData.section_id}
-                            onChange={(e) => setFormData({ ...formData, section_id: e.target.value })}
+                            value={formData.school_id}
+                            onChange={(e) => setFormData({ ...formData, school_id: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required
                         >
-                            <option value="">Sélectionner une section</option>
-                            {sections.filter(s => s.is_active).map(section => (
-                                <option key={section.id} value={section.id.toString()}>
-                                    {section.name}
+                            <option value="">Sélectionner une école</option>
+                            {schools.filter(s => s.is_active).map(school => (
+                                <option key={school.id} value={school.id.toString()}>
+                                    {school.name}
                                 </option>
                             ))}
                         </select>
@@ -664,7 +664,7 @@ const Levels = () => {
                         Êtes-vous sûr de vouloir supprimer le niveau <strong>{selectedLevel?.name}</strong> ?
                     </p>
                     <p className="text-sm text-red-600">
-                        Cette action est irréversible et ne sera possible que si le niveau ne contient aucune classe.
+                        Cette action est irréversible et ne sera possible que si le niveau ne contient aucune spécialité.
                     </p>
                     
                     <div className="flex justify-end gap-2 pt-4">

@@ -434,7 +434,7 @@ const InventoryDashboard = ({ onRefresh }) => {
             <div>
               <h5 className="text-white mb-1">Résumé de l'Inventaire</h5>
               <p className="text-white-50 mb-0">
-                Collège Polyvalent Bilingue de Douala
+                Institut universitaire de la pointe
               </p>
             </div>
             <TrendingUp className="text-white-50" size={32} />

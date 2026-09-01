@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('school_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('school_name')->default('COLLÈGE POLYVALENT BILINGUE DE DOUALA');
+            $table->string('school_name')->default('INSTITUT UNIVERSITAIRE DE LA POINTE');
             $table->string('school_motto')->nullable();
             $table->text('school_address')->nullable();
             $table->string('school_phone')->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('currency', 10)->default('FCFA');
             $table->string('bank_name')->default('FIGEC');
             $table->string('country')->default('Cameroun');
-            $table->string('city')->default('Douala');
+            $table->string('city')->default('Bafoussam');
             $table->text('footer_text')->nullable();
             $table->date('scholarship_deadline')->nullable()->comment('Date limite pour bénéficier des bourses');
             $table->decimal('reduction_percentage', 5, 2)->default(10.00)->comment('Pourcentage de réduction pour anciens étudiants');
@@ -33,17 +33,17 @@ return new class extends Migration
 
         // Insérer les paramètres par défaut
         DB::table('school_settings')->insert([
-            'school_name' => 'COLLÈGE POLYVALENT BILINGUE DE DOUALA',
-            'school_address' => 'B.P. 4100, Douala, Cameroun',
-            'school_phone' => '233 43 25 47',
-            'school_email' => 'contact@cpdyassa.com',
-            'school_website' => 'www.cpdyassa.com',
+            'school_name' => 'INSTITUT UNIVERSITAIRE DE LA POINTE',
+            'school_address' => 'B.P. 3192, Bafoussam, Cameroun',
+            'school_phone' => '6 55 12 49 21',
+            'school_email' => 'contact@iu-pointe.fr',
+            'school_website' => 'iu-pointe.fr',
             'currency' => 'FCFA',
             'bank_name' => 'FIGEC',
             'country' => 'Cameroun',
-            'city' => 'Douala',
+            'city' => 'Bafoussam',
             'footer_text' => 'Vos dossiers ne seront transmis qu\'après paiement de la totalité des frais de scolarité sollicités',
-            'scholarship_deadline' => '2024-12-31',
+            'scholarship_deadline' => '2025-12-31',
             'reduction_percentage' => 10.00,
             'created_at' => now(),
             'updated_at' => now()

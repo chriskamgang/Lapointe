@@ -174,7 +174,7 @@ const Search = () => {
                                     </div>
                                     <div className="d-flex align-items-center text-muted small">
                                         <Building size={12} className="me-1" />
-                                        <span className="me-3">{student.section_name} - {student.level_name} - {student.class_name} ({student.series_name})</span>
+                                        <span className="me-3">{student.school_name} - {student.level_name} - {student.class_name} ({student.series_name})</span>
                                         {student.parent_name && (
                                             <>
                                                 <Person size={12} className="me-1" />
@@ -240,11 +240,11 @@ const Search = () => {
                                             {schoolClass.series_count} série{schoolClass.series_count > 1 ? 's' : ''}
                                         </Badge>
                                         <Badge bg="info">
-                                            {schoolClass.total_students} élève{schoolClass.total_students > 1 ? 's' : ''}
+                                            {schoolClass.total_students} étudiant{schoolClass.total_students > 1 ? 's' : ''}
                                         </Badge>
                                     </div>
                                     <div className="d-flex align-items-center text-muted small">
-                                        <span className="me-3">{schoolClass.section_name} - {schoolClass.level_name}</span>
+                                        <span className="me-3">{schoolClass.school_name} - {schoolClass.level_name}</span>
                                         {schoolClass.description && (
                                             <span className="me-3">{schoolClass.description}</span>
                                         )}
@@ -303,7 +303,7 @@ const Search = () => {
                                             {serie.code && <span className="text-muted"> ({serie.code})</span>}
                                         </h6>
                                         <Badge bg="info" className="me-2">
-                                            {serie.students_count} élève{serie.students_count > 1 ? 's' : ''}
+                                            {serie.students_count} étudiant{serie.students_count > 1 ? 's' : ''}
                                         </Badge>
                                         <Badge bg="secondary">
                                             Cap: {serie.capacity}
@@ -311,7 +311,7 @@ const Search = () => {
                                     </div>
                                     <div className="d-flex align-items-center text-muted small">
                                         <Building size={12} className="me-1" />
-                                        <span className="me-3">{serie.class_name} - {serie.section_name} - {serie.level_name}</span>
+                                        <span className="me-3">{serie.class_name} - {serie.school_name} - {serie.level_name}</span>
                                         {serie.main_teacher && (
                                             <span>Prof. principal: {serie.main_teacher}</span>
                                         )}
@@ -321,7 +321,7 @@ const Search = () => {
                             <Link
                                 to={`/students/series/${serie.id}`}
                                 className="btn btn-sm btn-outline-info ms-2"
-                                title="Voir les élèves de la série"
+                                title="Voir les étudiants de la série"
                             >
                                 <Eye size={14} className="me-1" />
                                 Voir

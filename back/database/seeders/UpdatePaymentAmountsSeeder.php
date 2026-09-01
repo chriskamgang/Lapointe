@@ -72,8 +72,6 @@ class UpdatePaymentAmountsSeeder extends Seeder
             case 'Examen':
             case 'Frais d\'examen':
                 return ['amount' => 15000, 'required' => false];
-            case 'RAME':
-                return ['amount' => 5000, 'required' => false];
             default:
                 return ['amount' => 25000, 'required' => true];
         }

@@ -12,17 +12,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Supprimer tous les montants de classe pour la tranche RAME
+        // Supprimer tous les montants de classe pour la tranche Rames de papier
         // car elle utilise maintenant un montant par défaut
-        $rameTrancheId = DB::table('payment_tranches')
-            ->where('name', 'RAME')
+        /*$rameTrancheId = DB::table('payment_tranches')
+            ->where('name', 'Rames de papier')
             ->value('id');
 
         if ($rameTrancheId) {
             DB::table('class_payment_amounts')
                 ->where('payment_tranche_id', $rameTrancheId)
                 ->delete();
-        }
+        }*/
     }
 
     /**
@@ -30,9 +30,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Recréer les montants de classe pour la tranche RAME si nécessaire
-        $rameTrancheId = DB::table('payment_tranches')
-            ->where('name', 'RAME')
+        // Recréer les montants de classe pour la tranche Rames de papier si nécessaire
+        /*$rameTrancheId = DB::table('payment_tranches')
+            ->where('name', 'Rames de papier')
             ->value('id');
 
         if ($rameTrancheId) {
@@ -51,6 +51,6 @@ return new class extends Migration
                     'updated_at' => now()
                 ]);
             }
-        }
+        }*/
     }
 };

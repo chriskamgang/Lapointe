@@ -54,7 +54,7 @@ class StudentRameStatus extends Model
     }
 
     /**
-     * Obtenir ou créer le statut RAME pour un étudiant
+     * Obtenir ou créer le statut Rames de papier pour un étudiant
      */
     public static function getOrCreateForStudent($studentId, $schoolYearId)
     {
@@ -73,7 +73,7 @@ class StudentRameStatus extends Model
     }
 
     /**
-     * Marquer comme ayant apporté la RAME
+     * Marquer comme ayant apporté la Rames de papier
      */
     public function markAsBrought($userId = null, $notes = null)
     {
@@ -87,7 +87,7 @@ class StudentRameStatus extends Model
     }
 
     /**
-     * Marquer comme n'ayant pas apporté la RAME
+     * Marquer comme n'ayant pas apporté la Rames de papier
      */
     public function markAsNotBrought($userId = null, $notes = null)
     {

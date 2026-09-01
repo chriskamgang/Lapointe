@@ -27,7 +27,7 @@ const StudentTransfer = ({ student, show, onHide, onTransferSuccess }) => {
             const response = await secureApiEndpoints.schoolClasses.getAll();
             
             if (response.success) {
-                // Filtrer pour exclure la classe actuelle de l'élève
+                // Filtrer pour exclure la classe actuelle de l'étudiant
                 const filteredClasses = response.data?.filter(cls => {
                     const currentSeriesId = student?.class_series_id || student?.series_id;
                     return !cls.series?.some(series => series.id === currentSeriesId);
@@ -97,7 +97,7 @@ const StudentTransfer = ({ student, show, onHide, onTransferSuccess }) => {
             title: 'Confirmer le transfert',
             html: `
                 <div class="text-start">
-                    <p><strong>Élève :</strong> ${student.first_name} ${student.last_name}</p>
+                    <p><strong>Étudiant :</strong> ${student.first_name} ${student.last_name}</p>
                     <hr>
                     <p><strong>Classe actuelle :</strong><br>
                        ${currentInfo.className} - ${currentInfo.seriesName}</p>
@@ -105,7 +105,7 @@ const StudentTransfer = ({ student, show, onHide, onTransferSuccess }) => {
                        ${newInfo.className} - ${newInfo.seriesName}</p>
                     <hr>
                     <p class="text-warning">
-                        <small>⚠️ Cette action est irréversible. L'élève sera transféré immédiatement.</small>
+                        <small>⚠️ Cette action est irréversible. L'étudiant sera transféré immédiatement.</small>
                     </p>
                 </div>
             `,
@@ -145,7 +145,7 @@ const StudentTransfer = ({ student, show, onHide, onTransferSuccess }) => {
             }
         } catch (error) {
             console.error('Error transferring student:', error);
-            setError('Erreur lors du transfert de l\'élève');
+            setError('Erreur lors du transfert de l\'étudiant');
         } finally {
             setLoading(false);
         }
@@ -161,16 +161,16 @@ const StudentTransfer = ({ student, show, onHide, onTransferSuccess }) => {
             <Modal.Header closeButton>
                 <Modal.Title>
                     <ArrowRightCircle className="me-2 text-primary" />
-                    Transférer un élève
+                    Transférer un étudiant
                 </Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
-                {/* Informations de l'élève */}
+                {/* Informations de l'étudiant */}
                 <div className="mb-4 p-3 bg-light rounded">
                     <h6 className="mb-2">
                         <PersonFillExclamation className="me-2 text-info" />
-                        Élève à transférer
+                        Étudiant à transférer
                     </h6>
                     <div className="row">
                         <div className="col-md-6">
@@ -207,7 +207,7 @@ const StudentTransfer = ({ student, show, onHide, onTransferSuccess }) => {
                             <option value="">Sélectionner une classe</option>
                             {availableClasses.map(cls => (
                                 <option key={cls.id} value={cls.id}>
-                                    {cls.name} ({cls.level?.name} - {cls.level?.section?.name})
+                                    {cls.name} ({cls.level?.name} - {cls.level?.school?.name})
                                 </option>
                             ))}
                         </Form.Select>
@@ -280,7 +280,7 @@ const StudentTransfer = ({ student, show, onHide, onTransferSuccess }) => {
                         <ul className="mb-0 mt-2">
                             <li>Le transfert est immédiat et irréversible</li>
                             <li>L'historique des paiements sera conservé</li>
-                            <li>Les notes et bulletins resteront liés à l'élève</li>
+                            <li>Les notes et bulletins resteront liés à l'étudiant</li>
                             <li>L'ordre dans la nouvelle classe sera automatiquement défini</li>
                         </ul>
                     </Alert>
@@ -310,7 +310,7 @@ const StudentTransfer = ({ student, show, onHide, onTransferSuccess }) => {
                     ) : (
                         <>
                             <ArrowRightCircle className="me-2" />
-                            Transférer l'élève
+                            Transférer l'étudiant
                         </>
                     )}
                 </Button>

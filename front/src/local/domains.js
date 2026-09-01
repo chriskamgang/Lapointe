@@ -1,7 +1,7 @@
 export const domainsTraductions = {
     en: {
         addDomain: 'Ajouter un domaine',
-        section: 'Section',
+        school: 'School',
         name: 'Nom',
         domainName: 'Nom du domaine',
         action: 'Actions',
@@ -23,7 +23,7 @@ export const domainsTraductions = {
     },
     fr: {
         addDomain: 'Ajouter un domaine',
-        section: 'Section',
+        school: 'School',
         name: 'Nom',
         action: 'Actions',
         activities: 'Activités',

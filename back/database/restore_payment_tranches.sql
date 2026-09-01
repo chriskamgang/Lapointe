@@ -8,7 +8,7 @@ INSERT INTO payment_tranches (name, description, `order`, is_active, default_amo
 ('2ème Tranche', 'Deuxième tranche des frais de scolarité', 3, 1, NULL, 0, NULL, NOW(), NOW()),
 ('3ème Tranche', 'Troisième tranche des frais de scolarité', 4, 1, NULL, 0, NULL, NOW(), NOW()),
 ('Examen', 'Frais d\'examen', 5, 1, NULL, 0, NULL, NOW(), NOW()),
-('RAME', 'Frais RAME (Restaurant et Matériel Éducatif)', 6, 1, 25000, 1, NULL, NOW(), NOW());
+('Rames de papier', 'Frais Rames de papier (Restaurant et Matériel Éducatif)', 6, 1, 25000, 1, NULL, NOW(), NOW());
 
 -- Afficher un message de confirmation
 SELECT 'Tranches de paiement restaurées avec succès !' AS message;

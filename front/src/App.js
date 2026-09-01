@@ -25,7 +25,7 @@ import Login from "./pages/Login";
 import PaymentTranches from "./pages/PaymentTranches";
 import SchoolClasses from "./pages/SchoolClasses/SchoolClasses";
 import SchoolYears from "./pages/SchoolYears";
-import Sections from "./pages/Sections/Sections";
+import Schools from "./pages/Schools/Schools";
 import Settings from "./pages/Settings";
 import UserProfile from "./pages/Profile/UserProfile";
 import SeriesStudents from "./pages/Students/SeriesStudents";
@@ -89,10 +89,20 @@ import TestInventory from "./pages/Inventory/TestInventory";
 // Documents
 import DocumentsManager from "./pages/Documents/DocumentsManager";
 
+// Equipment
+import SchoolEquipment from "./pages/Equipment/SchoolEquipment";
+import EquipmentManagement from "./pages/Equipment/EquipmentManagement";
+import EquipmentDistributionPage from "./pages/EquipmentDistributionPage/EquipmentDistributionPage";
+
+// Scholarships
+import ScholarshipManagement from "./pages/Scholarships/ScholarshipManagement";
 
 // Components
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
+import PaymentEquipmentPage from "./pages/PaymentEquipmentPage/PaymentEquipmentPage";
+import EquipmentDistributionHistory from "./pages/EquipmentDistributionHistory/EquipmentDistributionHistory";
+import ScholarshipManagementPage from "./pages/ScholarshipManagementPage/ScholarshipManagementPage";
 
 // Composant interne qui utilise les hooks d'auth
 const AppContent = () => {
@@ -167,7 +177,7 @@ const AppContent = () => {
                 path="/"
                 element={
                   <RoleBasedRedirect>
-                    <Sections />
+                    <Schools />
                   </RoleBasedRedirect>
                 }
               />
@@ -237,6 +247,69 @@ const AppContent = () => {
               />
 
               <Route
+                path="/equipment"
+                element={
+                  <ProtectedRoute>
+                    <SchoolEquipment />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/equipment-management"
+                element={
+                  <AdminRoute>
+                    <EquipmentManagement />
+                  </AdminRoute>
+                }
+              />
+
+              <Route
+                path="/equipment-distribution"
+                element={
+                  <AdminRoute>
+                    <EquipmentDistributionPage />
+                  </AdminRoute>
+                }
+              />
+
+              <Route
+                path="/equipment-history"
+                element={
+                  <AdminRoute>
+                    <EquipmentDistributionHistory />
+                  </AdminRoute>
+                }
+              />
+
+              <Route
+                path="/university-scholarships"
+                element={
+                  <AdminRoute>
+                    <ScholarshipManagementPage />
+                  </AdminRoute>
+                }
+              />
+
+              <Route
+                path="/payment-equipment"
+                element={
+                  <AdminRoute>
+                    <PaymentEquipmentPage />
+                  </AdminRoute>
+                }
+              />
+
+              <Route
+                path="/scholarship-management"
+                element={
+                  <AdminRoute>
+                    <ScholarshipManagement />
+                  </AdminRoute>
+                }
+              />
+
+              <Route
                 path="/test-inventory"
                 element={
                   <AdminRoute>
@@ -292,10 +365,10 @@ const AppContent = () => {
 
               {/* Routes pour administrateurs uniquement */}
               <Route
-                path="/sections"
+                path="/schools"
                 element={
                   <AdminRoute>
-                    <Sections />
+                    <Schools />
                   </AdminRoute>
                 }
               />

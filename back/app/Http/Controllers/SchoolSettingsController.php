@@ -36,13 +36,13 @@ class SchoolSettingsController extends Controller
     public function update(Request $request)
     {
         // Débogage temporaire
-        \Log::info('SchoolSettings update request:', $request->all());
-        \Log::info('SchoolSettings files:', $request->allFiles());
-        \Log::info('SchoolSettings content type:', ['content_type' => $request->header('Content-Type')]);
-        \Log::info('User authenticated:', auth()->check() ? auth()->user()->toArray() : 'Not authenticated');
+        Log::info('SchoolSettings update request:', $request->all());
+        Log::info('SchoolSettings files:', $request->allFiles());
+        Log::info('SchoolSettings content type:', ['content_type' => $request->header('Content-Type')]);
+        Log::info('User authenticated:', auth()->check() ? auth()->user()->toArray() : 'Not authenticated');
         
         // Spécifiquement pour les champs WhatsApp
-        \Log::info('WhatsApp fields:', [
+        Log::info('WhatsApp fields:', [
             'whatsapp_notification_number' => $request->get('whatsapp_notification_number'),
             'whatsapp_notifications_enabled' => $request->get('whatsapp_notifications_enabled'),
             'whatsapp_api_url' => $request->get('whatsapp_api_url'),
@@ -76,7 +76,7 @@ class SchoolSettingsController extends Controller
 
         if ($validator->fails()) {
             // Débogage temporaire  
-            \Log::error('SchoolSettings validation failed:', $validator->errors()->toArray());
+            Log::error('SchoolSettings validation failed:', $validator->errors()->toArray());
             
             return response()->json([
                 'success' => false,
@@ -86,12 +86,12 @@ class SchoolSettingsController extends Controller
         }
 
         try {
-            \Log::info('Getting school settings...');
+            Log::info('Getting school settings...');
             $settings = SchoolSetting::getSettings();
-            \Log::info('Settings retrieved:', $settings ? $settings->toArray() : 'null');
+            Log::info('Settings retrieved:', $settings ? $settings->toArray() : 'null');
             
             $data = $request->except(['school_logo']);
-            \Log::info('Data to update:', $data);
+            Log::info('Data to update:', $data);
 
             // Convertir le boolean WhatsApp
             if (isset($data['whatsapp_notifications_enabled'])) {
@@ -111,23 +111,23 @@ class SchoolSettingsController extends Controller
             // Gérer l'upload du logo
             if ($request->hasFile('school_logo')) {
                 try {
-                    \Log::info('Starting logo upload...');
+                    Log::info('Starting logo upload...');
                     
                     // Supprimer l'ancien logo
                     if ($settings->school_logo && Storage::exists('public/' . $settings->school_logo)) {
                         Storage::delete('public/' . $settings->school_logo);
-                        \Log::info('Old logo deleted: ' . $settings->school_logo);
+                        Log::info('Old logo deleted: ' . $settings->school_logo);
                     }
 
                     // Créer le dossier logos s'il n'existe pas
                     if (!Storage::disk('public')->exists('logos')) {
                         Storage::disk('public')->makeDirectory('logos');
-                        \Log::info('Created logos directory');
+                        Log::info('Created logos directory');
                     }
 
                     // Sauvegarder le nouveau logo
                     $logoFile = $request->file('school_logo');
-                    \Log::info('Logo file info:', [
+                    Log::info('Logo file info:', [
                         'name' => $logoFile->getClientOriginalName(),
                         'size' => $logoFile->getSize(),
                         'mime' => $logoFile->getMimeType()
@@ -136,9 +136,9 @@ class SchoolSettingsController extends Controller
                     $logoPath = $logoFile->store('logos', 'public');
                     $data['school_logo'] = $logoPath;
                     
-                    \Log::info('Logo uploaded successfully: ' . $logoPath);
+                    Log::info('Logo uploaded successfully: ' . $logoPath);
                 } catch (\Exception $logoError) {
-                    \Log::error('Logo upload error: ' . $logoError->getMessage());
+                    Log::error('Logo upload error: ' . $logoError->getMessage());
                     return response()->json([
                         'success' => false,
                         'message' => 'Erreur lors de l\'upload du logo: ' . $logoError->getMessage(),
@@ -156,8 +156,8 @@ class SchoolSettingsController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('SchoolSettings update general error: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('SchoolSettings update general error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,

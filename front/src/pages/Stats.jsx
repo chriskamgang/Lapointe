@@ -214,18 +214,18 @@ const Stats = () => {
         />;
     };
 
-    // Graphique de répartition par section (étudiants)
+    // Graphique de répartition par school (étudiants)
     const renderStudentSectionChart = () => {
         if (!stats?.students?.section_distribution || stats.students.section_distribution.length === 0) return null;
 
         const data = stats.students.section_distribution.map(item => ({
-            label: item.section_name,
+            label: item.school_name,
             value: item.count
         }));
 
         return <SimpleBarChart 
             data={data} 
-            title="Répartition par Section" 
+            title="Répartition par School" 
             color={colors.primary} 
         />;
     };
@@ -257,7 +257,7 @@ const Stats = () => {
 
         return <SimpleBarChart 
             data={data} 
-            title="Classes avec le Plus d'Élèves" 
+            title="Classes avec le Plus d'Étudiants" 
             color={colors.success} 
         />;
     };
@@ -388,7 +388,7 @@ const Stats = () => {
                                 </div>
                                 <div>
                                     <h5 className="mb-0">{stats?.students?.total || 0}</h5>
-                                    <small className="text-muted">Élèves Total</small>
+                                    <small className="text-muted">Étudiants Total</small>
                                     <div>
                                         <Badge bg="success" className="me-1">{stats?.students?.active || 0} actifs</Badge>
                                         <Badge bg="secondary">{stats?.students?.inactive || 0} inactifs</Badge>
@@ -443,9 +443,9 @@ const Stats = () => {
             <Card>
                 <Card.Body>
                     <Tabs activeKey={activeTab} onSelect={setActiveTab}>
-                        {/* Onglet Élèves */}
+                        {/* Onglet Étudiants */}
                         <Tab eventKey="students" title={
-                            <span className='d-flex align-items-center'><Person className="me-2" />Élèves</span>
+                            <span className='d-flex align-items-center'><Person className="me-2" />Étudiants</span>
                         }>
                             <Row className="mt-4">
                                 <Col md={6}>

@@ -227,9 +227,9 @@ const AttendanceScanner = () => {
     const result = await Swal.fire({
       title: '📋 Marquer les absents ?',
       html: `
-        <p>Cette action va marquer comme <strong>absents</strong> tous les élèves qui n'ont pas été enregistrés comme présents aujourd'hui.</p>
+        <p>Cette action va marquer comme <strong>absents</strong> tous les étudiants qui n'ont pas été enregistrés comme présents aujourd'hui.</p>
         <div class="alert alert-info mt-3">
-          <strong>ℹ️ Note :</strong> Seuls les élèves qui n'ont <strong>aucune entrée</strong> aujourd'hui seront marqués absents.
+          <strong>ℹ️ Note :</strong> Seuls les étudiants qui n'ont <strong>aucune entrée</strong> aujourd'hui seront marqués absents.
         </div>
         <p><strong>Êtes-vous sûr de vouloir continuer ?</strong></p>
       `,
@@ -260,11 +260,11 @@ const AttendanceScanner = () => {
             title: '✅ Absences marquées !',
             html: `
               <div class="text-left">
-                <p><strong>${response.data.absent_students_marked}</strong> élève(s) marqué(s) comme absent(s)</p>
+                <p><strong>${response.data.absent_students_marked}</strong> étudiant(s) marqué(s) comme absent(s)</p>
                 <hr>
                 <p><strong>📊 Résumé du jour :</strong></p>
                 <ul class="list-unstyled">
-                  <li>👥 <strong>Total élèves :</strong> ${response.data.total_students}</li>
+                  <li>👥 <strong>Total étudiants :</strong> ${response.data.total_students}</li>
                   <li>✅ <strong>Présents :</strong> ${response.data.present_students}</li>
                   <li>❌ <strong>Absents marqués :</strong> ${response.data.absent_students_marked}</li>
                 </ul>
@@ -378,7 +378,7 @@ const AttendanceScanner = () => {
         </Col>
       </Row>
 
-      {/* Scanner Section */}
+      {/* Scanner School */}
       <Row className="mb-4">
         <Col lg={6}>
           <Card>
@@ -526,7 +526,7 @@ const AttendanceScanner = () => {
                     <Card.Body>
                       <Form onSubmit={handleManualSubmit}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Code QR ou ID de l'élève</Form.Label>
+                          <Form.Label>Code QR ou ID de l'étudiant</Form.Label>
                           <Form.Control
                             type="text"
                             placeholder="Ex: STUDENT_ID_123 ou 123"
@@ -535,7 +535,7 @@ const AttendanceScanner = () => {
                             disabled={isLoading}
                           />
                           <Form.Text className="text-muted">
-                            Saisissez le code QR ou l'ID numérique de l'élève
+                            Saisissez le code QR ou l'ID numérique de l'étudiant
                           </Form.Text>
                         </Form.Group>
                         <div className="d-flex gap-2">
@@ -666,7 +666,7 @@ const AttendanceScanner = () => {
                   </Button>
                   <div className="mt-2">
                     <small className="text-muted">
-                      Marque comme absents tous les élèves sans entrée aujourd'hui
+                      Marque comme absents tous les étudiants sans entrée aujourd'hui
                     </small>
                   </div>
                 </Card.Footer>
@@ -696,7 +696,7 @@ const AttendanceScanner = () => {
                   <Table striped hover size="sm">
                     <thead>
                       <tr>
-                        <th>Élève</th>
+                        <th>Étudiant</th>
                         <th>Classe</th>
                         <th>Type</th>
                         <th>Heure</th>
@@ -773,22 +773,22 @@ const AttendanceScanner = () => {
             </Card.Header>
             <Card.Body>
               <ol className="mb-3">
-                <li><strong>🤖 Mode Automatique (Recommandé) :</strong> Le système détecte automatiquement si l'élève doit entrer ou sortir</li>
+                <li><strong>🤖 Mode Automatique (Recommandé) :</strong> Le système détecte automatiquement si l'étudiant doit entrer ou sortir</li>
                 <li><strong>🎯 Mode Manuel :</strong> Choisissez "Entrée" ou "Sortie" selon le besoin</li>
                 <li><strong>📷 Scanner Caméra :</strong> Cliquez sur "Démarrer le Scanner" et dirigez vers le code QR</li>
                 <li><strong>📝 Saisie Manuelle :</strong> Si la caméra ne fonctionne pas, utilisez "Saisie manuelle"</li>
-                <li><strong>📋 Gestion des Absences :</strong> Utilisez "Marquer les absents" pour marquer automatiquement tous les élèves sans entrée</li>
+                <li><strong>📋 Gestion des Absences :</strong> Utilisez "Marquer les absents" pour marquer automatiquement tous les étudiants sans entrée</li>
                 <li>Le système vérifie automatiquement les conditions (pas de double entrée/sortie)</li>
                 <li>Les parents reçoivent une notification WhatsApp automatique</li>
                 <li>Consultez les statistiques et la liste des mouvements du jour</li>
               </ol>
               
               <div className="alert alert-info mb-3">
-                <strong>💡 Astuce :</strong> En cas de problème de caméra, vous pouvez toujours utiliser la saisie manuelle en saisissant directement l'ID de l'élève (ex: 123) ou le code QR complet (ex: STUDENT_ID_123).
+                <strong>💡 Astuce :</strong> En cas de problème de caméra, vous pouvez toujours utiliser la saisie manuelle en saisissant directement l'ID de l'étudiant (ex: 123) ou le code QR complet (ex: STUDENT_ID_123).
               </div>
               
               <div className="alert alert-warning mb-0">
-                <strong>📋 Absences :</strong> Les <strong>sorties</strong> ne sont pas des absences ! Elles indiquent simplement que l'élève est parti. Utilisez le bouton "Marquer les absents" pour les élèves qui ne sont jamais venus à l'école.
+                <strong>📋 Absences :</strong> Les <strong>sorties</strong> ne sont pas des absences ! Elles indiquent simplement que l'étudiant est parti. Utilisez le bouton "Marquer les absents" pour les étudiants qui ne sont jamais venus à l'école.
               </div>
             </Card.Body>
           </Card>

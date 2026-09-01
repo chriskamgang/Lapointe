@@ -74,7 +74,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
                     'sexe' => 'nullable|in:M,F,Masculin,Féminin,m,f,masculin,féminin',
                     'nom_parent' => 'nullable|string|max:255',
                     'telephone_parent' => 'nullable|string|max:20',
-                    'email_parent' => 'nullable|email|max:255',
+                    'telephone' => 'nullable|string|max:20',
                     'adresse' => 'nullable|string|max:500',
                     'statut_etudiant' => 'nullable|in:nouveau,ancien,new,old,Nouveau,Ancien',
                     'statut' => 'nullable|in:0,1'
@@ -96,7 +96,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
                     'place_of_birth' => trim($rowData['lieu_naissance'] ?? ''),
                     'parent_name' => trim($rowData['nom_parent'] ?? ''),
                     'parent_phone' => trim($rowData['telephone_parent'] ?? ''),
-                    'parent_email' => trim($rowData['email_parent'] ?? ''),
+                    'phone' => trim($rowData['telephone'] ?? ''),
                     'address' => trim($rowData['adresse'] ?? ''),
                     'is_active' => $this->parseStatus($rowData['statut'] ?? 1),
                     'school_year_id' => $this->schoolYearId

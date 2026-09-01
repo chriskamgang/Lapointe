@@ -54,7 +54,7 @@ class AccountantController extends Controller
             }
 
             $classes = SchoolClass::with([
-                'level.section',
+                'level.school',
                 'series' => function ($query) use ($workingYear) {
                     $query->orderBy('name')
                           ->withCount(['students' => function ($q) use ($workingYear) {
@@ -70,26 +70,26 @@ class AccountantController extends Controller
             ->withCount('series')
             ->get();
 
-            // Calculer le nombre total d'élèves par classe
+            // Calculer le nombre total d'étudiants par classe
             foreach ($classes as $class) {
                 $class->total_students = $class->series->sum('students_count');
             }
 
-            // Grouper les classes par section et niveau
+            // Grouper les classes par school et niveau
             $groupedClasses = [];
             foreach ($classes as $class) {
-                $sectionName = $class->level->section->name;
+                $schoolName = $class->level->school->name;
                 $levelName = $class->level->name;
                 
-                if (!isset($groupedClasses[$sectionName])) {
-                    $groupedClasses[$sectionName] = [];
+                if (!isset($groupedClasses[$schoolName])) {
+                    $groupedClasses[$schoolName] = [];
                 }
                 
-                if (!isset($groupedClasses[$sectionName][$levelName])) {
-                    $groupedClasses[$sectionName][$levelName] = [];
+                if (!isset($groupedClasses[$schoolName][$levelName])) {
+                    $groupedClasses[$schoolName][$levelName] = [];
                 }
                 
-                $groupedClasses[$sectionName][$levelName][] = $class;
+                $groupedClasses[$schoolName][$levelName][] = $class;
             }
 
             return response()->json([
@@ -126,7 +126,7 @@ class AccountantController extends Controller
             }
 
             $class = SchoolClass::with([
-                'level.section',
+                'level.school',
                 'series' => function ($query) use ($workingYear) {
                     $query->orderBy('name')
                           ->withCount(['students' => function ($q) use ($workingYear) {
@@ -163,7 +163,7 @@ class AccountantController extends Controller
     }
 
     /**
-     * Obtenir les élèves d'une série pour les comptables (avec CRUD complet)
+     * Obtenir les étudiants d'une série pour les comptables (avec CRUD complet)
      */
     public function getSeriesStudents($seriesId)
     {
@@ -178,7 +178,7 @@ class AccountantController extends Controller
                 ], 400);
             }
 
-            // Récupérer les élèves
+            // Récupérer les étudiants
             $studentsQuery = Student::with(['schoolYear', 'classSeries'])
                 ->where('class_series_id', $seriesId)
                 ->where('is_active', true);
@@ -194,7 +194,7 @@ class AccountantController extends Controller
                 ->get();
 
             // Récupérer les informations de la série
-            $series = ClassSeries::with(['schoolClass.level.section'])->find($seriesId);
+            $series = ClassSeries::with(['schoolClass.level.school'])->find($seriesId);
             
             if (!$series) {
                 return response()->json([
@@ -216,27 +216,27 @@ class AccountantController extends Controller
             Log::error('Error in AccountantController@getSeriesStudents: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération des élèves',
+                'message' => 'Erreur lors de la récupération des étudiants',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Obtenir les détails d'un élève pour inscription/modification
+     * Obtenir les détails d'un étudiant pour inscription/modification
      */
     public function getStudent($studentId)
     {
         try {
             $student = Student::with([
                 'schoolYear',
-                'classSeries.schoolClass.level.section'
+                'classSeries.schoolClass.level.school'
             ])->find($studentId);
 
             if (!$student) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Élève non trouvé'
+                    'message' => 'Étudiant non trouvé'
                 ], 404);
             }
 
@@ -248,7 +248,7 @@ class AccountantController extends Controller
             Log::error('Error in AccountantController@getStudent: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération de l\'élève',
+                'message' => 'Erreur lors de la récupération de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -37,13 +37,13 @@ const StudentActionsDropdown = ({
             </Dropdown.Toggle>
 
             <Dropdown.Menu className="shadow-sm">
-                {/* Voir l'élève */}
+                {/* Voir l'étudiant */}
                 <Dropdown.Item 
                     onClick={() => onViewStudent?.(student)}
                     className="d-flex align-items-center"
                 >
                     <Eye size={16} className="me-2 text-info" />
-                    Voir l'élève
+                    Voir l'étudiant
                 </Dropdown.Item>
 
                 <Dropdown.Divider />

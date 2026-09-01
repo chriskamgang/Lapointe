@@ -52,13 +52,13 @@ class StudentController extends Controller
     {
         try {
             if (!$photo || !$photo->isValid()) {
-                \Log::error('Photo upload failed: Invalid photo file');
+                Log::error('Photo upload failed: Invalid photo file');
                 return null;
             }
 
             // Vérifier si GD est disponible
             if (!extension_loaded('gd')) {
-                \Log::warning('GD extension not available, storing original image');
+                Log::warning('GD extension not available, storing original image');
                 // Fallback: stocker l'image sans redimensionnement
                 $extension = $photo->getClientOriginalExtension() ?: 'jpg';
                 $filename = 'student_' . $studentNumber . '_' . time() . '.' . $extension;
@@ -75,13 +75,13 @@ class StudentController extends Controller
             // Validation du type de fichier
             $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
             if (!in_array($photo->getMimeType(), $allowedMimes)) {
-                \Log::error('Photo upload failed: Invalid mime type', ['mime' => $photo->getMimeType()]);
+                Log::error('Photo upload failed: Invalid mime type', ['mime' => $photo->getMimeType()]);
                 throw new \Exception('Format de fichier non supporté. Utilisez JPG, PNG ou GIF.');
             }
 
             // Validation de la taille (max 5MB)
             if ($photo->getSize() > 5 * 1024 * 1024) {
-                \Log::error('Photo upload failed: File too large', ['size' => $photo->getSize()]);
+                Log::error('Photo upload failed: File too large', ['size' => $photo->getSize()]);
                 throw new \Exception('La taille de l\'image ne doit pas dépasser 5MB.');
             }
 
@@ -100,7 +100,7 @@ class StudentController extends Controller
             $image = imagecreatefromstring($imageData);
 
             if (!$image) {
-                \Log::error('Photo upload failed: Could not create image from string');
+                Log::error('Photo upload failed: Could not create image from string');
                 // Fallback: stocker l'image sans redimensionnement
                 $path = $photo->storeAs($uploadPath, $filename, 'public');
                 return $path;
@@ -156,7 +156,7 @@ class StudentController extends Controller
 
             return $uploadPath . '/' . $filename;
         } catch (\Exception $e) {
-            \Log::error('Photo upload failed with exception: ' . $e->getMessage());
+            Log::error('Photo upload failed with exception: ' . $e->getMessage());
             // Si le traitement échoue, essayer de stocker l'image sans redimensionnement
             try {
                 $extension = $photo->getClientOriginalExtension() ?: 'jpg';
@@ -168,17 +168,17 @@ class StudentController extends Controller
                 }
 
                 $path = $photo->storeAs($uploadPath, $filename, 'public');
-                \Log::info('Photo stored without processing: ' . $path);
+                Log::info('Photo stored without processing: ' . $path);
                 return $path;
             } catch (\Exception $fallbackException) {
-                \Log::error('Fallback photo upload also failed: ' . $fallbackException->getMessage());
+                Log::error('Fallback photo upload also failed: ' . $fallbackException->getMessage());
                 throw new \Exception('Impossible de sauvegarder la photo.');
             }
         }
     }
 
     /**
-     * Obtenir tous les élèves d'une série de classe
+     * Obtenir tous les étudiants d'une série de classe
      */
     public function getByClassSeries($seriesId)
     {
@@ -193,7 +193,7 @@ class StudentController extends Controller
                 ], 400);
             }
 
-            // Récupérer les élèves pour l'année de travail sélectionnée
+            // Récupérer les étudiants pour l'année de travail sélectionnée
             $studentsQuery = Student::with(['schoolYear', 'classSeries'])
                 ->where('class_series_id', $seriesId)
                 ->where('is_active', true)
@@ -206,7 +206,7 @@ class StudentController extends Controller
                 ->get();
 
             // Récupérer les informations de la série
-            $series = ClassSeries::with(['schoolClass.level.section'])->find($seriesId);
+            $series = ClassSeries::with(['schoolClass.level.school'])->find($seriesId);
 
             if (!$series) {
                 return response()->json([
@@ -225,23 +225,23 @@ class StudentController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error in getByClassSeries: ' . $e->getMessage());
+            Log::error('Error in getByClassSeries: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la récupération des élèves',
+                'message' => 'Erreur lors de la récupération des étudiants',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Créer un nouvel élève
+     * Créer un nouvel étudiant
      */
     public function store(Request $request)
     {
         // Debug: afficher les données reçues
-        \Log::info('Student creation request data:', $request->all());
-        \Log::info('Student creation files:', $request->allFiles());
+        Log::info('Student creation request data:', $request->all());
+        Log::info('Student creation files:', $request->allFiles());
 
         // Obtenir l'année de travail de l'utilisateur
         $workingYear = $this->getUserWorkingYear();
@@ -261,9 +261,10 @@ class StudentController extends Controller
             'gender' => 'required|in:M,F',
             'parent_name' => 'required|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
-            'parent_email' => 'nullable|email|max:255',
+            'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'class_series_id' => 'required|integer|exists:class_series,id',
+            'is_new' => 'nullable|boolean',
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' // 5MB max
         ]);
 
@@ -278,7 +279,7 @@ class StudentController extends Controller
         try {
             DB::beginTransaction();
 
-            // Générer le numéro d'élève pour l'année de travail
+            // Générer le numéro d'étudiant pour l'année de travail
             $studentNumber = Student::generateStudentNumber(
                 $workingYear->start_date,
                 $request->class_series_id
@@ -295,17 +296,22 @@ class StudentController extends Controller
             $studentData['order'] = $maxOrder + 1; // Ajouter à la fin par défaut
             $studentData['is_active'] = true;
             
-            // Convertir les chaînes boolean en vrais boolean
+            // Gérer le champ has_scholarship_enabled
             if (isset($studentData['has_scholarship_enabled'])) {
                 $studentData['has_scholarship_enabled'] = filter_var($studentData['has_scholarship_enabled'], FILTER_VALIDATE_BOOLEAN);
+            } else {
+                // Par défaut, activer les bourses si l'étudiant est éligible
+                $studentData['has_scholarship_enabled'] = true;
             }
 
-            // Combiner nom + prénom pour le champ legacy 'name'
+            if (!isset($studentData['bts_mention'])) {
+                $studentData['bts_mention'] = null;
+            }
+
             if (!empty($studentData['last_name']) && !empty($studentData['first_name'])) {
                 $studentData['name'] = $studentData['last_name'] . ' ' . $studentData['first_name'];
             }
 
-            // Gérer l'upload de photo
             if ($request->hasFile('photo')) {
                 $photoPath = $this->handlePhotoUpload($request->file('photo'), $studentNumber);
                 $studentData['photo'] = $photoPath;
@@ -319,20 +325,21 @@ class StudentController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $student,
-                'message' => 'Élève créé avec succès'
+                'message' => 'Étudiant créé avec succès'
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Student creation failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la création de l\'élève',
+                'message' => 'Erreur lors de la création de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Mettre à jour un élève
+     * Mettre à jour un étudiant
      */
     public function update(Request $request, Student $student)
     {
@@ -344,11 +351,12 @@ class StudentController extends Controller
             'gender' => 'required|in:M,F',
             'parent_name' => 'required|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
-            'parent_email' => 'nullable|email|max:255',
+            'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'class_series_id' => 'required|exists:class_series,id',
             'school_year_id' => 'nullable|exists:school_years,id', // Optionnel lors de la modification
             'is_active' => 'boolean',
+            'is_new' => 'nullable|boolean',
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' // 5MB max
         ]);
 
@@ -371,6 +379,9 @@ class StudentController extends Controller
             // Convertir les chaînes boolean en vrais boolean
             if (isset($updateData['has_scholarship_enabled'])) {
                 $updateData['has_scholarship_enabled'] = filter_var($updateData['has_scholarship_enabled'], FILTER_VALIDATE_BOOLEAN);
+            } else {
+                // Par défaut, activer les bourses si l'étudiant est éligible
+                $updateData['has_scholarship_enabled'] = true;
             }
 
             // Combiner nom + prénom pour le champ legacy 'name'
@@ -395,25 +406,43 @@ class StudentController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $student,
-                'message' => 'Élève mis à jour avec succès'
+                'message' => 'Étudiant mis à jour avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la mise à jour de l\'élève',
+                'message' => 'Erreur lors de la mise à jour de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
+    // Dans StudentController.php
+public function show(Student $student)
+{
+    try {
+        $student->load(['classSeries.schoolClass.level.school']);
+        
+        return response()->json([
+            'success' => true,
+            'data' => $student
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Erreur lors de la récupération de l\'étudiant'
+        ], 500);
+    }
+}
+
     /**
-     * Mettre à jour un élève avec photo (via POST pour FormData)
+     * Mettre à jour un étudiant avec photo (via POST pour FormData)
      */
     public function updateWithPhoto(Request $request, Student $student)
     {
         // Debug: logger les données reçues
-        \Log::info('Student update with photo request data:', $request->all());
-        \Log::info('Student update with photo files:', $request->allFiles());
+        Log::info('Student update with photo request data:', $request->all());
+        Log::info('Student update with photo files:', $request->allFiles());
 
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
@@ -423,16 +452,17 @@ class StudentController extends Controller
             'gender' => 'required|in:M,F',
             'parent_name' => 'required|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
-            'parent_email' => 'nullable|email|max:255',
+            'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'class_series_id' => 'required|exists:class_series,id',
             'school_year_id' => 'nullable|exists:school_years,id', // Make nullable for update
             'is_active' => 'nullable|boolean',
+            'is_new' => 'nullable|boolean',
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' // 5MB max
         ]);
 
         if ($validator->fails()) {
-            \Log::error('Student update with photo validation failed:', $validator->errors()->toArray());
+            Log::error('Student update with photo validation failed:', $validator->errors()->toArray());
             return response()->json([
                 'success' => false,
                 'message' => 'Données invalides',
@@ -454,6 +484,9 @@ class StudentController extends Controller
             // Convertir les chaînes boolean en vrais boolean
             if (isset($updateData['has_scholarship_enabled'])) {
                 $updateData['has_scholarship_enabled'] = filter_var($updateData['has_scholarship_enabled'], FILTER_VALIDATE_BOOLEAN);
+            } else {
+                // Par défaut, activer les bourses si l'étudiant est éligible
+                $updateData['has_scholarship_enabled'] = true;
             }
 
             // Combiner nom + prénom pour le champ legacy 'name'
@@ -478,19 +511,19 @@ class StudentController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $student,
-                'message' => 'Élève mis à jour avec succès'
+                'message' => 'Étudiant mis à jour avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la mise à jour de l\'élève',
+                'message' => 'Erreur lors de la mise à jour de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Supprimer un élève
+     * Supprimer un étudiant
      */
     public function destroy(Student $student)
     {
@@ -504,19 +537,19 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Élève supprimé avec succès'
+                'message' => 'Étudiant supprimé avec succès'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la suppression de l\'élève',
+                'message' => 'Erreur lors de la suppression de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Exporter la liste des élèves en CSV
+     * Exporter la liste des étudiants en CSV
      */
     public function exportCsv($seriesId)
     {
@@ -539,7 +572,7 @@ class StudentController extends Controller
                 ->orderBy('first_name')
                 ->get();
 
-            $series = ClassSeries::with(['schoolClass.level.section'])->find($seriesId);
+            $series = ClassSeries::with(['schoolClass.level.school'])->find($seriesId);
 
             $filename = 'eleves_' . str_replace(' ', '_', $series->name) . '_' . date('Y-m-d') . '.csv';
 
@@ -561,7 +594,7 @@ class StudentController extends Controller
                     'Sexe',
                     'Nom du parent',
                     'Téléphone parent',
-                    'Email parent',
+                    'Téléphone étudiant',
                     'Adresse'
                 ], ';');
 
@@ -576,7 +609,7 @@ class StudentController extends Controller
                         $student->gender === 'M' ? 'Masculin' : 'Féminin',
                         $student->parent_name,
                         $student->parent_phone,
-                        $student->parent_email,
+                        $student->phone_number,
                         $student->address
                     ], ';');
                 }
@@ -595,7 +628,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Exporter la liste des élèves en PDF
+     * Exporter la liste des étudiants en PDF
      */
     public function exportPdf($seriesId)
     {
@@ -618,7 +651,7 @@ class StudentController extends Controller
                 ->orderBy('first_name')
                 ->get();
 
-            $series = ClassSeries::with(['schoolClass.level.section'])->find($seriesId);
+            $series = ClassSeries::with(['schoolClass.level.school'])->find($seriesId);
 
             // Générer le HTML pour le PDF
             $html = $this->generateStudentListHtml($students, $series, $workingYear);
@@ -644,7 +677,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Générer le HTML pour la liste des élèves
+     * Générer le HTML pour la liste des étudiants
      */
     private function generateStudentListHtml($students, $series, $schoolYear)
     {
@@ -652,7 +685,7 @@ class StudentController extends Controller
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Liste des Élèves - ' . $series->name . '</title>
+    <title>Liste des Étudiants - ' . $series->name . '</title>
     <style>
         body { font-family: Arial, sans-serif; font-size: 12px; margin: 20px; }
         .header { text-align: center; margin-bottom: 30px; }
@@ -677,8 +710,8 @@ class StudentController extends Controller
 </head>
 <body>
     <div class="header">
-        <h1>COLLEGE POLYVALENT BILINGUE DE DOUALA</h1>
-        <p>Liste des Élèves</p>
+        <h1>INSTITUT UNIVERSITAIRE DE LA POINTE</h1>
+        <p>Liste des Étudiants</p>
     </div>
 
     <div class="info-box">
@@ -692,13 +725,13 @@ class StudentController extends Controller
             <strong>Niveau:</strong> <span>' . $series->schoolClass->level->name . '</span>
         </div>
         <div class="info-row">
-            <strong>Section:</strong> <span>' . $series->schoolClass->level->section->name . '</span>
+            <strong>School:</strong> <span>' . $series->schoolClass->level->school->name . '</span>
         </div>
         <div class="info-row">
             <strong>Année scolaire:</strong> <span>' . $schoolYear->name . '</span>
         </div>
         <div class="info-row">
-            <strong>Nombre d\'élèves:</strong> <span>' . $students->count() . '</span>
+            <strong>Nombre d\'étudiants:</strong> <span>' . $students->count() . '</span>
         </div>
         <div class="info-row">
             <strong>Date d\'export:</strong> <span>' . date('d/m/Y à H:i') . '</span>
@@ -715,6 +748,7 @@ class StudentController extends Controller
                 <th style="width: 8%;">Sexe</th>
                 <th style="width: 20%;">Parent</th>
                 <th style="width: 12%;">Téléphone</th>
+                <th style="width: 12%;">Téléphone étudiant</th>
             </tr>
         </thead>
         <tbody>';
@@ -729,6 +763,7 @@ class StudentController extends Controller
                 ($student->gender === 'M' ? 'M' : 'F') . '</td>
                 <td>' . $student->parent_name . '</td>
                 <td>' . $student->parent_phone . '</td>
+                <td>' . $student->phone_number . '</td>
             </tr>';
         }
 
@@ -737,7 +772,7 @@ class StudentController extends Controller
 
     <div class="footer">
         <p>Document généré automatiquement le ' . date('d/m/Y à H:i:s') . '</p>
-        <p>COLLEGE POLYVALENT BILINGUE DE DOUALA</p>
+        <p>INSTITUT UNIVERSITAIRE DE LA POINTE</p>
     </div>
 </body>
 </html>';
@@ -789,7 +824,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Importer des élèves depuis un fichier CSV
+     * Importer des étudiants depuis un fichier CSV
      */
     public function importCsv(Request $request)
     {
@@ -919,7 +954,7 @@ class StudentController extends Controller
                         'gender' => $gender,
                         'parent_name' => trim($row[5] ?? ''),
                         'parent_phone' => trim($row[6] ?? null),
-                        'parent_email' => trim($row[7] ?? null),
+                        'phone_number' => trim($row[7] ?? null),
                         'address' => trim($row[8] ?? null),
                         'class_series_id' => $classSeriesId,
                         'school_year_id' => $workingYear->id,
@@ -938,7 +973,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "$imported élève(s) importé(s) avec succès",
+                'message' => "$imported étudiant(s) importé(s) avec succès",
                 'data' => [
                     'imported' => $imported,
                     'errors' => $errors
@@ -969,7 +1004,7 @@ class StudentController extends Controller
                 'data' => $years
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error in getSchoolYears: ' . $e->getMessage());
+            Log::error('Error in getSchoolYears: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la récupération des années scolaires',
@@ -979,7 +1014,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Réorganiser les élèves par drag & drop
+     * Réorganiser les étudiants par drag & drop
      */
     public function reorder(Request $request)
     {
@@ -1022,7 +1057,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Ordre des élèves mis à jour avec succès'
+                'message' => 'Ordre des étudiants mis à jour avec succès'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1035,7 +1070,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Reclasser les élèves par ordre alphabétique
+     * Reclasser les étudiants par ordre alphabétique
      */
     public function sortAlphabetically(Request $request, $seriesId)
     {
@@ -1052,7 +1087,7 @@ class StudentController extends Controller
         try {
             DB::beginTransaction();
 
-            // Récupérer les élèves de la série et année scolaire
+            // Récupérer les étudiants de la série et année scolaire
             $students = Student::where('class_series_id', $seriesId)
                 ->where('school_year_id', $workingYear->id)
                 ->where('is_active', true)
@@ -1069,7 +1104,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Élèves reclassés par ordre alphabétique avec succès',
+                'message' => 'Étudiants reclassés par ordre alphabétique avec succès',
                 'data' => $students->load(['schoolYear', 'classSeries'])
             ]);
         } catch (\Exception $e) {
@@ -1083,7 +1118,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Mettre à jour uniquement le statut d'un élève
+     * Mettre à jour uniquement le statut d'un étudiant
      */
     public function updateStatus(Request $request, Student $student)
     {
@@ -1119,7 +1154,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Transférer un élève vers une nouvelle série
+     * Transférer un étudiant vers une nouvelle série
      */
     public function transferToSeries(Request $request, Student $student)
     {
@@ -1145,12 +1180,12 @@ class StudentController extends Controller
             if ($oldSeriesId == $newSeriesId) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'L\'élève est déjà dans cette série'
+                    'message' => 'L\'étudiant est déjà dans cette série'
                 ], 422);
             }
 
             // Récupérer les informations de la nouvelle série
-            $newSeries = ClassSeries::with(['schoolClass', 'schoolClass.level', 'schoolClass.level.section'])
+            $newSeries = ClassSeries::with(['schoolClass', 'schoolClass.level', 'schoolClass.level.school'])
                 ->find($newSeriesId);
 
             if (!$newSeries) {
@@ -1187,7 +1222,7 @@ class StudentController extends Controller
             ]);
 
             // Log du transfert
-            \Log::info('Student transfer completed', [
+            Log::info('Student transfer completed', [
                 'student_id' => $student->id,
                 'student_name' => $student->first_name . ' ' . $student->last_name,
                 'from_series' => $oldSeries ? $oldSeries->name : 'Aucune série',
@@ -1200,19 +1235,19 @@ class StudentController extends Controller
 
             DB::commit();
 
-            // Recharger l'élève avec ses nouvelles relations
+            // Recharger l'étudiant avec ses nouvelles relations
             $student = $student->fresh()->load([
                 'classSeries',
                 'classSeries.schoolClass',
                 'classSeries.schoolClass.level',
-                'classSeries.schoolClass.level.section',
+                'classSeries.schoolClass.level.school',
                 'schoolYear'
             ]);
 
             return response()->json([
                 'success' => true,
                 'message' => sprintf(
-                    'Élève transféré avec succès vers %s - %s',
+                    'Étudiant transféré avec succès vers %s - %s',
                     $newSeries->schoolClass->name,
                     $newSeries->name
                 ),
@@ -1225,14 +1260,14 @@ class StudentController extends Controller
                     'to' => [
                         'series_name' => $newSeries->name,
                         'class_name' => $newSeries->schoolClass->name,
-                        'section_name' => $newSeries->schoolClass->level->section->name ?? '',
+                        'school_name' => $newSeries->schoolClass->level->school->name ?? '',
                         'level_name' => $newSeries->schoolClass->level->name ?? ''
                     ]
                 ]
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Student transfer failed', [
+            Log::error('Student transfer failed', [
                 'student_id' => $student->id,
                 'class_series_id' => $request->class_series_id,
                 'error' => $e->getMessage(),
@@ -1241,7 +1276,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors du transfert de l\'élève',
+                'message' => 'Erreur lors du transfert de l\'étudiant',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -1270,8 +1305,8 @@ class StudentController extends Controller
                 $filters['class_series_id'] = $request->class_series_id;
             }
             
-            if ($request->has('section_id')) {
-                $filters['section_id'] = $request->section_id;
+            if ($request->has('school_id')) {
+                $filters['school_id'] = $request->school_id;
             }
             
             if ($request->has('level_id')) {
@@ -1317,8 +1352,8 @@ class StudentController extends Controller
                 $filters['class_series_id'] = $request->class_series_id;
             }
             
-            if ($request->has('section_id')) {
-                $filters['section_id'] = $request->section_id;
+            if ($request->has('school_id')) {
+                $filters['school_id'] = $request->school_id;
             }
             
             if ($request->has('level_id')) {
@@ -1597,8 +1632,8 @@ class StudentController extends Controller
                 $filters['class_series_id'] = $request->class_series_id;
             }
             
-            if ($request->has('section_id')) {
-                $filters['section_id'] = $request->section_id;
+            if ($request->has('school_id')) {
+                $filters['school_id'] = $request->school_id;
             }
             
             if ($request->has('level_id')) {
@@ -1644,8 +1679,8 @@ class StudentController extends Controller
                 $filters['class_series_id'] = $request->class_series_id;
             }
             
-            if ($request->has('section_id')) {
-                $filters['section_id'] = $request->section_id;
+            if ($request->has('school_id')) {
+                $filters['school_id'] = $request->school_id;
             }
             
             if ($request->has('level_id')) {
@@ -1724,7 +1759,7 @@ class StudentController extends Controller
                 'Content-Disposition' => 'attachment; filename="template_eleves.csv"'
             ];
 
-            $csvData = "id,nom,prenom,date_naissance,lieu_naissance,sexe,nom_parent,telephone_parent,email_parent,adresse,statut_etudiant,statut\n";
+            $csvData = "id,nom,prenom,date_naissance,lieu_naissance,sexe,nom_parent,telephone_parent,telephone,adresse,statut_etudiant,statut\n";
             $csvData .= ",DUPONT,Jean,01/01/2010,Douala,M,Marie DUPONT,123456789,marie@example.com,Douala,nouveau,1\n";
             $csvData .= ",MARTIN,Sophie,15/06/2009,Yaoundé,F,Paul MARTIN,987654321,paul@example.com,Yaoundé,ancien,1\n";
             $csvData .= "123,BERNARD,Alice,12/03/2009,Douala,F,Pierre BERNARD,654321987,pierre@example.com,Douala,ancien,0\n";

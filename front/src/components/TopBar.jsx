@@ -28,7 +28,7 @@ const TopBar = ({ onSidebarToggle, showSidebarToggle = false }) => {
             '': 'Accueil',
             'class': 'Classes',
             'teachers': 'Enseignants',
-            'students': 'Élèves',
+            'students': 'Étudiants',
             'matieres': 'Matières',
             'search': 'Recherche',
             'params': 'Profil',
@@ -107,7 +107,7 @@ const TopBar = ({ onSidebarToggle, showSidebarToggle = false }) => {
                                 <input
                                     type="text"
                                     className="search-input"
-                                    placeholder="Rechercher élèves, enseignants..."
+                                    placeholder="Rechercher étudiants, enseignants..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />

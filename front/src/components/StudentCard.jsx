@@ -1,5 +1,7 @@
 import React from 'react';
 import { useSchool } from '../contexts/SchoolContext';
+import { scholarshipUtils } from '../services/scholarshipApi';
+import StudentScholarshipCard from './Students/StudentScholarshipCard';
 import defaultPhoto from '../images/1.png';
 import cameroonFlag from '../images/carte.jpeg'; // On utilisera le drapeau intégré dans l'image de référence
 
@@ -165,7 +167,7 @@ const StudentCard = ({ student, schoolYear, onPrint }) => {
 
             {/* Corps de la carte */}
             <div style={bodyStyle}>
-                {/* Photo de l'élève */}
+                {/* Photo de l'étudiant */}
                 <div>
                     <img 
                         src={getStudentPhotoUrl(student)} 
@@ -184,7 +186,7 @@ const StudentCard = ({ student, schoolYear, onPrint }) => {
                     />
                 </div>
 
-                {/* Informations de l'élève */}
+                {/* Informations de l'étudiant */}
                 <div style={infoStyle}>
                     <div>
                         <div style={{ fontSize: '7px', marginBottom: '1px', fontWeight: 'bold', color: '#2c3e50' }}>
@@ -201,7 +203,7 @@ const StudentCard = ({ student, schoolYear, onPrint }) => {
                         
                         <div style={{ marginBottom: '1px', fontSize: '9px' }}>
                             <strong>Né(e) le :</strong> {formatDate(student.date_of_birth)} 
-                            <strong style={{ marginLeft: '4px' }}>À :</strong> {student.place_of_birth || 'DOUALA'}
+                            <strong style={{ marginLeft: '4px' }}>À :</strong> {student.place_of_birth || 'BAFOUSSAM'}
                         </div>
                         <div style={{ marginBottom: '1px', fontSize: '10px' }}>
                             <strong>Matricule :</strong> {generateMatricule(student)}

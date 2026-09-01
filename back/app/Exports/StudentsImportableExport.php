@@ -31,7 +31,7 @@ class StudentsImportableExport implements FromCollection, WithHeadings, WithMapp
             'classSeries', 
             'classSeries.schoolClass',
             'classSeries.schoolClass.level',
-            'classSeries.schoolClass.level.section',
+            'classSeries.schoolClass.level.school',
             'schoolYear'
         ]);
         
@@ -45,9 +45,9 @@ class StudentsImportableExport implements FromCollection, WithHeadings, WithMapp
             $query->where('class_series_id', $this->filters['class_series_id']);
         }
         
-        if (!empty($this->filters['section_id'])) {
+        if (!empty($this->filters['school_id'])) {
             $query->whereHas('classSeries.schoolClass.level', function($q) {
-                $q->where('section_id', $this->filters['section_id']);
+                $q->where('school_id', $this->filters['school_id']);
             });
         }
         
@@ -80,7 +80,7 @@ class StudentsImportableExport implements FromCollection, WithHeadings, WithMapp
             'sexe',
             'nom_parent',
             'telephone_parent',
-            'email_parent',
+            'telephone',
             'adresse',
             'statut_etudiant',
             'statut'
@@ -101,7 +101,7 @@ class StudentsImportableExport implements FromCollection, WithHeadings, WithMapp
             $student->gender ?? $student->sex ?? 'M',
             $student->parent_name ?? $student->father_name ?? '',
             $student->parent_phone ?? $student->phone_number ?? '',
-            $student->parent_email ?? $student->email ?? '',
+            $student->phone ?? '',
             $student->address ?? '',
             $student->student_status ?? ($student->is_new ? 'nouveau' : 'ancien'),
             $student->is_active ? '1' : '0'

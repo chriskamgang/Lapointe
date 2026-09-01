@@ -12,11 +12,11 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class LevelsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
-    protected $sectionId;
+    protected $schoolId;
 
-    public function __construct($sectionId = null)
+    public function __construct($schoolId = null)
     {
-        $this->sectionId = $sectionId;
+        $this->schoolId = $schoolId;
     }
 
     /**
@@ -24,14 +24,14 @@ class LevelsExport implements FromCollection, WithHeadings, WithMapping, WithSty
      */
     public function collection()
     {
-        $query = Level::with(['section', 'schoolClasses']);
+        $query = Level::with(['schools', 'schoolClasses']);
         
-        if ($this->sectionId) {
-            $query->where('section_id', $this->sectionId);
-            // Si la section n'a pas de niveaux, retourner tous les niveaux
+        if ($this->schoolId) {
+            $query->where('school_id', $this->schoolId);
+            // Si la school n'a pas de niveaux, retourner tous les niveaux
             $filteredLevels = $query->get();
             if ($filteredLevels->isEmpty()) {
-                return Level::with(['section', 'schoolClasses'])->orderBy('name')->get();
+                return Level::with(['school', 'schoolClasses'])->orderBy('name')->get();
             }
             return $filteredLevels;
         }
@@ -47,7 +47,7 @@ class LevelsExport implements FromCollection, WithHeadings, WithMapping, WithSty
         return [
             'ID',
             'Nom',
-            'Section',
+            'School',
             'Description',
             'Nombre de Classes',
             'Statut',
@@ -64,7 +64,7 @@ class LevelsExport implements FromCollection, WithHeadings, WithMapping, WithSty
         return [
             $level->id,
             $level->name,
-            $level->section->name ?? 'N/A',
+            $level->school->name ?? 'N/A',
             $level->description ?? 'N/A',
             $level->schoolClasses->count(),
             $level->is_active ? 'Actif' : 'Inactif',

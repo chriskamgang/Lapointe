@@ -5,7 +5,7 @@ namespace App\Imports;
 use App\Models\ClassSeries;
 use App\Models\SchoolClass;
 use App\Models\Level;
-use App\Models\Section;
+use App\Models\School;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -29,7 +29,7 @@ class SeriesImport implements ToCollection, WithHeadingRow
                     'code' => 'nullable|string|max:10',
                     'classe' => 'required|string|max:255',
                     'niveau' => 'required|string|max:255',
-                    'section' => 'required|string|max:255',
+                    'school' => 'required|string|max:255',
                     'capacite' => 'nullable|integer|min:1|max:200',
                     'statut' => 'nullable|string|in:actif,inactif,Actif,Inactif,ACTIF,INACTIF'
                 ]);
@@ -42,24 +42,24 @@ class SeriesImport implements ToCollection, WithHeadingRow
                     continue;
                 }
 
-                // Trouver la section
-                $section = Section::where('name', $row['section'])->first();
-                if (!$section) {
+                // Trouver la school
+                $school = School::where('name', $row['school'])->first();
+                if (!$school) {
                     $this->results['errors'][] = [
                         'line' => $index + 2,
-                        'errors' => ['Section non trouvée: ' . $row['section']]
+                        'errors' => ['School non trouvée: ' . $row['school']]
                     ];
                     continue;
                 }
 
                 // Trouver le niveau
                 $level = Level::where('name', $row['niveau'])
-                             ->where('section_id', $section->id)
+                             ->where('school_id', $school->id)
                              ->first();
                 if (!$level) {
                     $this->results['errors'][] = [
                         'line' => $index + 2,
-                        'errors' => ['Niveau non trouvé: ' . $row['niveau'] . ' dans la section ' . $row['section']]
+                        'errors' => ['Niveau non trouvé: ' . $row['niveau'] . ' dans la school ' . $row['school']]
                     ];
                     continue;
                 }

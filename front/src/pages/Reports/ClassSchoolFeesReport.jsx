@@ -70,7 +70,7 @@ const ClassSchoolFeesReport = () => {
                 setSummary(response.data.summary);
                 setClassInfo(response.data.class_info);
                 setSchoolYear(response.data.school_year);
-                setSuccess(`${response.data.students.length} élèves trouvés`);
+                setSuccess(`${response.data.students.length} étudiants trouvés`);
             } else {
                 setError(response.message);
             }
@@ -185,7 +185,7 @@ const ClassSchoolFeesReport = () => {
                                     <option value="">Sélectionner une classe</option>
                                     {classes.map(classe => (
                                         <option key={classe.id} value={classe.id}>
-                                            {classe.name} ({classe.level?.section?.name || 'Section N/A'})
+                                            {classe.name} ({classe.level?.school?.name || 'School N/A'})
                                         </option>
                                     ))}
                                 </Form.Select>
@@ -226,7 +226,7 @@ const ClassSchoolFeesReport = () => {
                             <Card.Body>
                                 <div className="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6>Total Élèves</h6>
+                                        <h6>Total Étudiants</h6>
                                         <h4>{summary.total_students}</h4>
                                     </div>
                                     <List size={30} />
@@ -311,7 +311,7 @@ const ClassSchoolFeesReport = () => {
                                 <strong>Classe :</strong> {classInfo?.name}
                             </Col>
                             <Col md={4}>
-                                <strong>Section :</strong> {classInfo?.section_name}
+                                <strong>School :</strong> {classInfo?.school_name}
                             </Col>
                             <Col md={4}>
                                 <strong>Année scolaire :</strong> {schoolYear?.name || 'N/A'}
@@ -328,7 +328,7 @@ const ClassSchoolFeesReport = () => {
                         Détail des Paiements de Frais de Scolarité
                         {summary.total_students > 0 && (
                             <Badge bg="secondary" className="ms-2">
-                                {summary.total_students} élèves
+                                {summary.total_students} étudiants
                             </Badge>
                         )}
                     </h5>
@@ -344,7 +344,7 @@ const ClassSchoolFeesReport = () => {
                         <div className="text-center py-4">
                             <List size={48} className="text-muted mb-3" />
                             <p className="text-muted">
-                                Aucun élève trouvé pour la classe sélectionnée
+                                Aucun étudiant trouvé pour la classe sélectionnée
                             </p>
                             <p className="small text-muted">
                                 Veuillez sélectionner une classe et cliquer sur "Générer"
@@ -434,7 +434,7 @@ const ClassSchoolFeesReport = () => {
                                     <tfoot className="table-secondary">
                                         <tr>
                                             <th colSpan={4} className="text-end">
-                                                <strong>TOTAL ({summary.total_students} élèves) :</strong>
+                                                <strong>TOTAL ({summary.total_students} étudiants) :</strong>
                                             </th>
                                             <th className="text-end">
                                                 <strong className="text-warning fs-6">

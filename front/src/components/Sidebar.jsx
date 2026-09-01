@@ -1,16 +1,18 @@
-import { 
-    HospitalFill, HouseHeartFill, 
-    PeopleFill, GearFill, Search, 
-    BookFill, FileTextFill,
-    BarChartFill, List, CreditCard,
-    PersonCircle, BoxArrowRight, CashCoin,
-    Receipt, People, JournalBookmarkFill,
-    Clipboard2PlusFill,
-    ClipboardCheckFill,
-    QrCodeScan,
-    Calendar,
-    Archive,
-    FolderFill,
+import {
+  HospitalFill, HouseHeartFill,
+  PeopleFill, GearFill, Search,
+  BookFill, FileTextFill,
+  BarChartFill, List, CreditCard,
+  PersonCircle, BoxArrowRight, CashCoin,
+  Receipt, People, JournalBookmarkFill,
+  Clipboard2PlusFill,
+  ClipboardCheckFill,
+  QrCodeScan,
+  Calendar,
+  Archive,
+  FolderFill,
+  BagFill,
+  Award,
 } from 'react-bootstrap-icons'
 import logo from '../images/logo.png'
 import { useAuth } from '../hooks/useAuth';
@@ -48,11 +50,12 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
 
   // Les données utilisateur sont directement disponibles via le hook useAuth
 
-  // Navigation sections based on user role
-  const getNavigationSections = () => {
+  // Navigation schools based on user role
+  // Dans ton Sidebar.jsx existant, remplacer la fonction getNavigationSchools par celle-ci :
+
+  const getNavigationSchools = () => {
     if (!user || !user.role) {
       return [];
-
     }
 
     const userRole = user.role;
@@ -63,10 +66,10 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           title: "Gestion Académique",
           items: [
             { name: "Années Scolaires", href: "/school-years", icon: <Calendar /> },
-            { name: "Sections", href: "/sections", icon: <HospitalFill /> },
+            { name: "Ecoles", href: "/schools", icon: <HospitalFill /> },
             { name: "Niveaux", href: "/levels", icon: <BookFill /> },
             {
-              name: "Classes",
+              name: "Spécialités",
               href: "/school-classes",
               icon: <HouseHeartFill />,
             },
@@ -90,6 +93,21 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           ],
         },
         {
+          title: "Gestion Équipements & Bourses", // 🆕 NOUVELLE SECTION
+          items: [
+            { name: "Équipements par École", href: "/equipment", icon: <BagFill /> },
+            { name: "Distribution Équipements", href: "/equipment-distribution", icon: <GearFill /> },
+            { name: "Historique Distribution", href: "/equipment-history", icon: <Archive /> },
+            { name: "Gestion Bourses", href: "/scholarship-management", icon: <Award /> },
+            { name: "Configuration Bourses", href: "/university-scholarships", icon: <Award /> },
+            {
+              name: "Paiements avec Équipements", // 🆕 NOUVELLE PAGE
+              href: "/payment-equipment",
+              icon: <CashCoin />,
+            },
+          ],
+        },
+        {
           title: "Outils",
           items: [
             { name: "Inventaire", href: "/inventory", icon: <Archive /> },
@@ -103,8 +121,8 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           items: [
             { name: "Gestion des Besoins", href: "/needs-management", icon: <ClipboardCheckFill /> },
             { name: "Mes Besoins", href: "/my-needs", icon: <Clipboard2PlusFill /> },
-            { name: 'Utilisateurs', href: '/user-management', icon: <People/> },
-            { name: 'Surveillants Généraux', href: '/supervisor-assignments', icon: <PersonCircle/> },
+            { name: 'Utilisateurs', href: '/user-management', icon: <People /> },
+            { name: 'Surveillants Généraux', href: '/supervisor-assignments', icon: <PersonCircle /> },
             { name: "Profil", href: "/profile", icon: <PersonCircle /> },
             { name: "Paramètres", href: "/settings", icon: <GearFill /> },
           ],
@@ -115,9 +133,18 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
         {
           title: "Comptabilité",
           items: [
-            { name: "Classes", href: "/class-comp", icon: <HouseHeartFill /> },
+            { name: "Spécialités", href: "/class-comp", icon: <HouseHeartFill /> },
             { name: "Statistiques", href: "/stats", icon: <BarChartFill /> },
             { name: "Rechercher", href: "/search", icon: <Search /> },
+          ],
+        },
+        {
+          title: "Équipements & Bourses", // 🆕 NOUVELLE SECTION
+          items: [
+            { name: "Équipements par École", href: "/equipment", icon: <BagFill /> },
+            { name: "Distribution Équipements", href: "/equipment-distribution", icon: <GearFill /> },
+            { name: "Historique Distribution", href: "/equipment-history", icon: <Archive /> },
+            { name: "Gestion Bourses", href: "/scholarship-management", icon: <Award /> },
           ],
         },
         {
@@ -134,6 +161,11 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
               name: "États de Paiements",
               href: "/payment-reports",
               icon: <Receipt />,
+            },
+            {
+              name: "Paiements avec Équipements", // 🆕 NOUVELLE PAGE
+              href: "/payment-equipment",
+              icon: <CashCoin />,
             },
           ],
         },
@@ -156,7 +188,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
               icon: <CashCoin />,
             },
             {
-              name: "Paiement Frais par Classe",
+              name: "Paiement Frais par Spécialités",
               href: "/reports/class-school-fees",
               icon: <Receipt />,
             },
@@ -186,6 +218,13 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           ],
         },
         {
+          title: "Équipements", // 🆕 NOUVELLE SECTION
+          items: [
+            { name: "Équipements par École", href: "/equipment", icon: <BagFill /> },
+            { name: "Distribution Équipements", href: "/equipment-distribution", icon: <GearFill /> },
+          ],
+        },
+        {
           title: "Outils",
           items: [
             { name: "Documents", href: "/documents", icon: <FolderFill /> },
@@ -205,7 +244,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           title: "Enseignement",
           items: [
             {
-              name: "Élèves",
+              name: "Étudiants",
               href: "/students/" + (user.class_id || "1"),
               icon: <PeopleFill />,
             },
@@ -217,6 +256,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           title: "Outils",
           items: [
             { name: "Documents", href: "/documents", icon: <FolderFill /> },
+            { name: "Équipements", href: "/equipment", icon: <BagFill /> }, // 🆕 ACCÈS EN LECTURE
             { name: "Mes Besoins", href: "/my-needs", icon: <Clipboard2PlusFill /> },
             { name: "Rechercher", href: "/search", icon: <Search /> },
             { name: "Profil", href: "/profile", icon: <PersonCircle /> },
@@ -287,7 +327,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
     return null;
   }
 
-  const navigationSections = getNavigationSections();
+  const navigationSchools = getNavigationSchools();
 
   // Render the sidebar with proper styling
   return (
@@ -311,9 +351,8 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
 
       {/* Sidebar */}
       <div
-        className={`sidebar ${isCollapsed ? "collapsed" : ""} ${
-          isMobile && isOpen ? "mobile-open" : ""
-        }`}
+        className={`sidebar ${isCollapsed ? "collapsed" : ""} ${isMobile && isOpen ? "mobile-open" : ""
+          }`}
         style={{
           position: "fixed",
           left: 0,
@@ -343,7 +382,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
         >
           <img
             src={getLogoSrc()}
-            alt={`${schoolSettings.school_name || "CPBD"} Logo`}
+            alt={`${schoolSettings.school_name || "INSTITUT UNIVERSITAIRE DE LA POINTE"} Logo`}
             style={{
               width: "40px",
               height: "40px",
@@ -357,10 +396,11 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
           {(!isCollapsed || isMobile) && (
             <div>
               <div style={{ fontSize: "18px", fontWeight: "bold", color: primaryColor }}>
-                {schoolSettings.school_name
+                {/* {schoolSettings.school_name
                   ?.split(" ")
                   .map((word) => word.charAt(0))
-                  .join("") || "CPBD"}
+                  .join("") || "INSTITUT UNIVERSITAIRE DE LA POINTE"} */}
+                IUP
               </div>
               <div
                 style={{
@@ -369,7 +409,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
                 }}
               >
                 {schoolSettings.school_name ||
-                  "College Polyvalent Bilingue de Douala"}
+                  "Institut Universitaire de la Pointe"}
               </div>
             </div>
           )}
@@ -377,7 +417,7 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
 
         {/* Navigation */}
         <div style={{ flex: 1, padding: "20px 0", overflowY: "auto" }}>
-          {navigationSections.map((section, sectionIndex) => (
+          {navigationSchools.map((school, sectionIndex) => (
             <div key={sectionIndex} style={{ marginBottom: "30px" }}>
               {(!isCollapsed || isMobile) && (
                 <div
@@ -390,10 +430,10 @@ function Sidebar({ isCollapsed, onToggle, isOpen, setIsOpen }) {
                     fontWeight: "600",
                   }}
                 >
-                  {section.title}
+                  {school.title}
                 </div>
               )}
-              {section.items.map((item, itemIndex) => (
+              {school.items.map((item, itemIndex) => (
                 <Link
                   key={itemIndex}
                   to={item.href}

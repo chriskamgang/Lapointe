@@ -22,14 +22,14 @@ import Swal from 'sweetalert2';
 const SchoolClasses = () => {
     const navigate = useNavigate();
     const [classes, setClasses] = useState([]);
-    const [sections, setSections] = useState([]);
+    const [schools, setSchools] = useState([]);
     const [levels, setLevels] = useState([]);
     const [expandedClasses, setExpandedClasses] = useState({});
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedClass, setSelectedClass] = useState(null);
     const [filters, setFilters] = useState({
-        section_id: '',
+        school_id: '',
         level_id: ''
     });
     const [loading, setLoading] = useState(false);
@@ -51,50 +51,50 @@ const SchoolClasses = () => {
 
     const loadInitialData = async () => {
         try {
-            console.log('Loading initial data - sections and levels...');
-            const [sectionsResponse, levelsResponse] = await Promise.all([
-                secureApiEndpoints.sections.getAll(),
+            console.log('Loading initial data - schools and levels...');
+            const [schoolsResponse, levelsResponse] = await Promise.all([
+                secureApiEndpoints.schools.getAll(),
                 secureApiEndpoints.levels.getAll()
             ]);
             
-            console.log('Sections response:', sectionsResponse);
+            console.log('Schools response:', schoolsResponse);
             console.log('Levels response:', levelsResponse);
             
-            if (sectionsResponse.success) {
-                setSections(sectionsResponse.data || []);
+            if (schoolsResponse.success) {
+                setSchools(schoolsResponse.data || []);
             }
             if (levelsResponse.success) {
                 setLevels(levelsResponse.data || []);
             }
         } catch (error) {
             console.error('Erreur lors du chargement des données:', error);
-            setError('Erreur lors du chargement des sections et niveaux');
+            setError('Erreur lors du chargement des schools et niveaux');
         }
     };
 
     const loadClasses = async () => {
         try {
             setLoading(true);
-            console.log('Loading classes with filters:', filters);
+            console.log('Loading spécialités with filters:', filters);
             let response;
             
-            if (filters.section_id) {
-                response = await secureApiEndpoints.schoolClasses.getBySection(filters.section_id);
+            if (filters.school_id) {
+                response = await secureApiEndpoints.schoolClasses.getBySection(filters.school_id);
             } else if (filters.level_id) {
                 response = await secureApiEndpoints.schoolClasses.getByLevel(filters.level_id);
             } else {
                 response = await secureApiEndpoints.schoolClasses.getAll();
             }
             
-            console.log('Classes response:', response);
+            console.log('Spécialités response:', response);
             if (response.success) {
                 setClasses(response.data || []);
             } else {
-                setError(response.message || 'Erreur lors du chargement des classes');
+                setError(response.message || 'Erreur lors du chargement des spécialités');
             }
         } catch (error) {
-            console.error('Erreur lors du chargement des classes:', error);
-            setError('Erreur lors du chargement des classes');
+            console.error('Erreur lors du chargement des spécialités:', error);
+            setError('Erreur lors du chargement des spécialités');
         } finally {
             setLoading(false);
         }
@@ -112,7 +112,7 @@ const SchoolClasses = () => {
     const handleDeleteClass = async (classItem) => {
         const result = await Swal.fire({
             title: 'Confirmer la suppression',
-            text: `Êtes-vous sûr de vouloir supprimer la classe "${classItem.name}" ?`,
+            text: `Êtes-vous sûr de vouloir supprimer la spécialité "${classItem.name}" ?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
@@ -126,7 +126,7 @@ const SchoolClasses = () => {
                 const response = await secureApiEndpoints.schoolClasses.delete(classItem.id);
                 if (response.success) {
                     loadClasses();
-                    Swal.fire('Supprimé!', 'La classe a été supprimée.', 'success');
+                    Swal.fire('Supprimé!', 'La spécialité a été supprimée.', 'success');
                 } else {
                     Swal.fire('Erreur!', response.message || 'Erreur lors de la suppression.', 'error');
                 }
@@ -147,9 +147,9 @@ const SchoolClasses = () => {
         navigate(`/students/series/${seriesId}`);
     };
 
-    const getSectionName = (sectionId) => {
-        const section = sections.find(s => s.id === sectionId);
-        return section ? section.name : 'Section inconnue';
+    const getSchoolName = (schoolId) => {
+        const school = schools.find(s => s.id === schoolId);
+        return school ? school.name : 'Ecole inconnue';
     };
 
     const getLevelName = (levelId) => {
@@ -158,12 +158,12 @@ const SchoolClasses = () => {
     };
 
     const getFilteredLevels = () => {
-        if (!filters.section_id) return levels;
-        return levels.filter(level => level.section_id === parseInt(filters.section_id));
+        if (!filters.school_id) return levels;
+        return levels.filter(level => level.school_id === parseInt(filters.school_id));
     };
 
     const groupedClasses = classes.reduce((acc, classItem) => {
-        const key = `${classItem.level?.section?.name || 'Sans section'} - ${classItem.level?.name || 'Sans niveau'}`;
+        const key = `${classItem.level?.school?.name || 'Sans école'} - ${classItem.level?.name || 'Sans niveau'}`;
         if (!acc[key]) {
             acc[key] = [];
         }
@@ -197,14 +197,14 @@ const SchoolClasses = () => {
                 <div className="col-12">
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <h2 className="h4 mb-1">Gestion des Classes</h2>
+                            <h2 className="h4 mb-1">Gestion des Spécialités</h2>
                             <p className="text-muted mb-0">
-                                Gérez les classes, leurs séries et montants de paiement
+                                Gérez les Spécialités, leurs séries et montants de paiement
                             </p>
                         </div>
                         <div className="d-flex gap-2">
                             <ImportExportButton
-                                title="Classes"
+                                title="Spécialités"
                                 apiBasePath="/api/school-classes"
                                 onImportSuccess={loadClasses}
                                 filters={filters}
@@ -215,7 +215,7 @@ const SchoolClasses = () => {
                                 onClick={handleCreateClass}
                             >
                                 <Plus size={16} />
-                                Nouvelle Classe
+                                Nouvelle Spécialité
                             </button>
                         </div>
                     </div>
@@ -229,20 +229,20 @@ const SchoolClasses = () => {
                         <div className="card-body">
                             <div className="row g-3">
                                 <div className="col-md-4">
-                                    <label className="form-label">Section</label>
+                                    <label className="form-label">Ecole</label>
                                     <select
                                         className="form-select"
-                                        value={filters.section_id}
+                                        value={filters.school_id}
                                         onChange={(e) => setFilters(prev => ({
                                             ...prev,
-                                            section_id: e.target.value,
-                                            level_id: '' // Reset level when section changes
+                                            school_id: e.target.value,
+                                            level_id: '' // Reset level when school changes
                                         }))}
                                     >
-                                        <option value="">Toutes les sections</option>
-                                        {sections.map(section => (
-                                            <option key={section.id} value={section.id}>
-                                                {section.name}
+                                        <option value="">Toutes les écoles</option>
+                                        {schools.map(school => (
+                                            <option key={school.id} value={school.id}>
+                                                {school.name}
                                             </option>
                                         ))}
                                     </select>
@@ -257,7 +257,7 @@ const SchoolClasses = () => {
                                             level_id: e.target.value
                                         }))}
                                     >
-                                        <option value="">Tous les niveaux</option>
+                                        <option value="">Tout les niveaux</option>
                                         {getFilteredLevels().map(level => (
                                             <option key={level.id} value={level.id}>
                                                 {level.name}
@@ -268,7 +268,7 @@ const SchoolClasses = () => {
                                 <div className="col-md-4 d-flex align-items-end">
                                     <button
                                         className="btn btn-outline-secondary"
-                                        onClick={() => setFilters({ section_id: '', level_id: '' })}
+                                        onClick={() => setFilters({ school_id: '', level_id: '' })}
                                     >
                                         Réinitialiser
                                     </button>
@@ -309,16 +309,16 @@ const SchoolClasses = () => {
                         <div className="card">
                             <div className="card-body text-center py-5">
                                 {/* <BookOpen size={48} className="text-muted mb-3" /> */}
-                                <h5 className="text-muted">Aucune classe trouvée</h5>
+                                <h5 className="text-muted">Aucune spécialité trouvée</h5>
                                 <p className="text-muted mb-4">
-                                    Commencez par créer votre première classe
+                                    Commencez par créer votre première spécialité
                                 </p>
                                 <button
                                     className="btn btn-primary"
                                     onClick={handleCreateClass}
                                 >
                                     <Plus size={16} className="me-2" />
-                                    Créer une classe
+                                    Créer une spécialité
                                 </button>
                             </div>
                         </div>
@@ -331,7 +331,7 @@ const SchoolClasses = () => {
                                             <Building size={16} className="me-2 text-primary" />
                                             {groupKey}
                                             <span className="badge bg-primary ms-2">
-                                                {groupClasses.length} classe{groupClasses.length > 1 ? 's' : ''}
+                                                {groupClasses.length} spécialité{groupClasses.length > 1 ? 's' : ''}
                                             </span>
                                         </h6>
                                     </div>
@@ -419,10 +419,10 @@ const SchoolClasses = () => {
                                                                                                 e.stopPropagation();
                                                                                                 handleViewStudents(serie.id);
                                                                                             }}
-                                                                                            title="Voir les élèves"
+                                                                                            title="Voir les étudiants"
                                                                                         >
                                                                                             <Eye size={12} className="me-1" />
-                                                                                            Élèves
+                                                                                            Étudiants
                                                                                         </button>
                                                                                     </div>
                                                                                 </div>
@@ -490,7 +490,7 @@ const SchoolClasses = () => {
                         setShowCreateModal(false);
                         loadClasses();
                     }}
-                    sections={sections}
+                    schools={schools}
                     levels={levels}
                 />
             )}
@@ -508,7 +508,7 @@ const SchoolClasses = () => {
                         loadClasses();
                     }}
                     classData={selectedClass}
-                    sections={sections}
+                    schools={schools}
                     levels={levels}
                 />
             )}

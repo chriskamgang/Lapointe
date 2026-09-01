@@ -159,7 +159,7 @@ const SeriesCollectionSummary = () => {
     const generatePrintHTML = () => {
         return `
             <div class="header">
-                <h1>COLLÈGE POLYVALENT BILINGUE DE DOUALA</h1>
+                <h1>INSTITUT UNIVERSITAIRE DE LA POINTE</h1>
                 <h2>Récapitulatif d'Encaissement par Série</h2>
                 <p><strong>Année scolaire:</strong> ${schoolYear?.name || 'N/A'}</p>
                 <p><strong>Généré le:</strong> ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
@@ -191,7 +191,7 @@ const SeriesCollectionSummary = () => {
                             <th>Série</th>
                             <th class="text-center">Effectif</th>
                             ${paymentTranches.map(tranche => `<th class="text-center">${tranche}</th>`).join('')}
-                            <th class="text-center">RAME Physique</th>
+                            <th class="text-center">Rames de papier Physique</th>
                             <th class="text-center">Total Collecté</th>
                         </tr>
                     </thead>
@@ -203,7 +203,7 @@ const SeriesCollectionSummary = () => {
                                 ${paymentTranches.map(tranche => `
                                     <td class="text-end">${formatAmount(series.tranches[tranche]?.amount_collected || 0)}</td>
                                 `).join('')}
-                                <td class="text-end">${formatAmount(series.tranches['RAME Physique']?.amount_collected || 0)}</td>
+                                <td class="text-end">${formatAmount(series.tranches['Rames de papier Physique']?.amount_collected || 0)}</td>
                                 <td class="text-end"><strong>${formatAmount(series.total_collected)}</strong></td>
                             </tr>
                         `).join('')}
@@ -213,7 +213,7 @@ const SeriesCollectionSummary = () => {
                             ${paymentTranches.map(tranche => `
                                 <td class="text-end"><strong>${formatAmount(grandTotals.by_tranche?.[tranche] || 0)}</strong></td>
                             `).join('')}
-                            <td class="text-end"><strong>${formatAmount(grandTotals.by_tranche?.['RAME Physique'] || 0)}</strong></td>
+                            <td class="text-end"><strong>${formatAmount(grandTotals.by_tranche?.['Rames de papier Physique'] || 0)}</strong></td>
                             <td class="text-end"><strong>${formatAmount(grandTotals.total_collected || 0)}</strong></td>
                         </tr>
                     </tbody>
@@ -381,7 +381,7 @@ const SeriesCollectionSummary = () => {
                                     {paymentTranches.map(tranche => (
                                         <th key={tranche} className="text-center">{tranche}</th>
                                     ))}
-                                    <th className="text-center">RAME Physique</th>
+                                    <th className="text-center">Rames de papier Physique</th>
                                     <th className="text-center">Total Collecté</th>
                                 </tr>
                             </thead>
@@ -402,7 +402,7 @@ const SeriesCollectionSummary = () => {
                                             </td>
                                         ))}
                                         <td className="text-end">
-                                            {formatAmount(series.tranches['RAME Physique']?.amount_collected || 0)}
+                                            {formatAmount(series.tranches['Rames de papier Physique']?.amount_collected || 0)}
                                         </td>
                                         <td className="text-end">
                                             <strong className="text-success">
@@ -423,7 +423,7 @@ const SeriesCollectionSummary = () => {
                                         </td>
                                     ))}
                                     <td className="text-end">
-                                        <strong>{formatAmount(grandTotals.by_tranche?.['RAME Physique'] || 0)}</strong>
+                                        <strong>{formatAmount(grandTotals.by_tranche?.['Rames de papier Physique'] || 0)}</strong>
                                     </td>
                                     <td className="text-end">
                                         <strong className="text-success fs-5">

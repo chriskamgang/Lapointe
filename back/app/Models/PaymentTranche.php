@@ -36,6 +36,16 @@ class PaymentTranche extends Model
     }
 
     /**
+     * Relation plusieurs-à-plusieurs avec les classes scolaires.
+     */
+    public function schoolClasses()
+    {
+        return $this->belongsToMany(SchoolClass::class, 'class_payment_amounts', 'payment_tranche_id', 'class_id')
+            ->withPivot('amount')
+            ->withTimestamps();
+    }
+
+    /**
      * Scope pour les tranches actives
      */
     public function scopeActive($query)
@@ -58,7 +68,7 @@ class PaymentTranche extends Model
     {
         $baseAmount = 0;
         
-        // Si cette tranche utilise un montant par défaut (comme RAME)
+        // Si cette tranche utilise un montant par défaut (comme Rames de papier)
         if ($this->use_default_amount && $this->default_amount) {
             $baseAmount = $this->default_amount;
         } else {

@@ -386,7 +386,7 @@ const SchoolFeePaymentDetails = () => {
                                                         bg={
                                                             detail.type_paiement === 'Inscrip' ? 'warning' :
                                                             detail.type_paiement.startsWith('Trch') ? 'info' :
-                                                            detail.type_paiement === 'RAME' ? 'success' :
+                                                            detail.type_paiement === 'Rames de papier' ? 'success' :
                                                             'secondary'
                                                         }
                                                     >

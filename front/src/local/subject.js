@@ -2,8 +2,8 @@ export const subjectTraductions = {
     en: {
         addSubject: 'Ajouter une matière',
         subjectName: 'Nom de la matière',
-        section: 'Section',
-        selectSection: '--- Selectionner la section ----',
+        school: 'School',
+        selectSection: '--- Selectionner la school ----',
         fr: 'Francophone',
         en: 'Anglophone',
         mat: 'Maternelle',
@@ -41,8 +41,8 @@ export const subjectTraductions = {
     fr: {
         addSubject: 'Ajouter une matière',
         subjectName: 'Nom de la matière',
-        section: 'Section',
-        selectSection: '--- Selectionner la section ----',
+        school: 'School',
+        selectSection: '--- Selectionner la school ----',
         addSubCom: 'Ajouter une sous competence',
         fr: 'Francophone',
         en: 'Anglophone',

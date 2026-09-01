@@ -140,11 +140,11 @@ const StudentCardPrint = ({ student, schoolYear, show, onHide, onPrintSuccess })
                             justify-content: space-between;
                         }
                         
-                        .flag-section {
+                        .flag-school {
                             font-size: 6px;
                         }
                         
-                        .school-section {
+                        .school-school {
                             text-align: center;
                             flex: 1;
                         }
@@ -160,7 +160,7 @@ const StudentCardPrint = ({ student, schoolYear, show, onHide, onPrintSuccess })
                             color: #7f8c8d;
                         }
                         
-                        .logo-section {
+                        .logo-school {
                             width: 20px;
                         }
                         
@@ -186,7 +186,7 @@ const StudentCardPrint = ({ student, schoolYear, show, onHide, onPrintSuccess })
                             margin-right: 6px;
                         }
                         
-                        .info-section {
+                        .info-school {
                             flex: 1;
                             font-size: 8px;
                             line-height: 1.2;
@@ -276,15 +276,15 @@ const StudentCardPrint = ({ student, schoolYear, show, onHide, onPrintSuccess })
                     <div class="card-container">
                         <div class="card-header">
                             <div class="header-content">
-                                <div class="flag-section">
+                                <div class="flag-school">
                                     🇨🇲 RÉPUBLIQUE DU CAMEROUN<br />
                                     Paix - Travail - Patrie
                                 </div>
-                                <div class="school-section">
+                                <div class="school-school">
                                     <div class="school-name">${schoolSettings?.school_name?.toUpperCase() || 'LYCÉE GANALIS'}</div>
                                     <div class="card-title">CARTE D'IDENTITÉ SCOLAIRE</div>
                                 </div>
-                                <div class="logo-section">
+                                <div class="logo-school">
                                     ${logoBase64 ? `<img src="${logoBase64}" alt="Logo" class="logo" />` : '<div style="width: 18px; height: 18px; background: #ddd; border-radius: 2px;"></div>'}
                                 </div>
                             </div>
@@ -297,7 +297,7 @@ const StudentCardPrint = ({ student, schoolYear, show, onHide, onPrintSuccess })
                                 class="photo"
                             />
                             
-                            <div class="info-section">
+                            <div class="info-school">
                                 <div class="year-info">
                                     ANNÉE SCOLAIRE : ${schoolYear?.year || `${new Date().getFullYear()} - ${new Date().getFullYear() + 1}`}
                                 </div>
@@ -312,7 +312,7 @@ const StudentCardPrint = ({ student, schoolYear, show, onHide, onPrintSuccess })
                                 
                                 <div class="info-line">
                                     <strong>Née le :</strong> ${student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString('fr-FR') : ''} 
-                                    <strong style="margin-left: 8px;">À</strong> ${student.place_of_birth || 'DOUALA'}
+                                    <strong style="margin-left: 8px;">À</strong> ${student.place_of_birth || 'BAFOUSSAM'}
                                 </div>
                                 
                                 <div class="info-line">

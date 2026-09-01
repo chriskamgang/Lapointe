@@ -46,10 +46,10 @@ const Reports = () => {
   // États pour les filtres
   const [filters, setFilters] = useState({
     // Filtre principal
-    filterType: "section", // section, class, series
+    filterType: "school", // school, class, series
 
     // Filtres spécifiques
-    sectionId: "",
+    schoolId: "",
     classId: "",
     seriesId: "",
 
@@ -59,7 +59,7 @@ const Reports = () => {
   });
 
   const [availableOptions, setAvailableOptions] = useState({
-    sections: [],
+    schools: [],
     classes: [],
     series: [],
   });
@@ -70,16 +70,16 @@ const Reports = () => {
 
   const loadAvailableOptions = async () => {
     try {
-      // Charger les sections, classes disponibles
-      const [sectionsRes, classesRes] = await Promise.all([
-        secureApiEndpoints.sections.getAll(),
+      // Charger les schools, classes disponibles
+      const [schoolsRes, classesRes] = await Promise.all([
+        secureApiEndpoints.schools.getAll(),
         secureApiEndpoints.schoolClasses.getAll(),
       ]);
 
       // S'assurer que les données sont des tableaux
-      const sections =
-        sectionsRes.success && Array.isArray(sectionsRes.data)
-          ? sectionsRes.data
+      const schools =
+        schoolsRes.success && Array.isArray(schoolsRes.data)
+          ? schoolsRes.data
           : [];
       const classes =
         classesRes.success && Array.isArray(classesRes.data)
@@ -108,7 +108,7 @@ const Reports = () => {
       }
 
       setAvailableOptions({
-        sections,
+        schools,
         classes,
         series: allSeries,
       });
@@ -431,7 +431,7 @@ const Reports = () => {
           if (data.students && Array.isArray(data.students)) {
             const studentsData = data.students.map((student) => ({
               Étudiant: cleanValue(student?.student?.full_name),
-              "Classe/Série": cleanValue(student?.student?.class_series),
+              "Spécialité/Salle": cleanValue(student?.student?.class_series),
               "Total Requis": cleanValue(student?.total_required),
               "Total Payé": cleanValue(student?.total_paid),
               "Reste à Payer": cleanValue(student?.total_remaining),
@@ -448,7 +448,7 @@ const Reports = () => {
             XLSX.utils.book_append_sheet(
               workbook,
               worksheet,
-              "Élèves Insolvables"
+              "Étudiants Insolvables"
             );
           }
           break;
@@ -457,7 +457,7 @@ const Reports = () => {
           if (data.students && Array.isArray(data.students)) {
             const paymentsData = data.students.map((student) => ({
               Étudiant: cleanValue(student?.student?.full_name),
-              "Classe/Série": cleanValue(student?.student?.class_series),
+              "Spécialité/Salle": cleanValue(student?.student?.class_series),
               "Total Requis": cleanValue(student?.total_required),
               "Total Payé": cleanValue(student?.total_paid),
               Statut: cleanValue(student?.status),
@@ -473,14 +473,14 @@ const Reports = () => {
             const rameData = data.students.map((student) => ({
               Étudiant: cleanValue(student?.student?.full_name),
               "Classe/Série": cleanValue(student?.student?.class_series),
-              "Statut RAME": cleanValue(student?.rame_status),
+              "Statut Rames de papier": cleanValue(student?.rame_status),
               "Date de Paiement": cleanValue(
                 student?.rame_details?.payment_date
               ),
             }));
 
             const worksheet = XLSX.utils.json_to_sheet(rameData);
-            XLSX.utils.book_append_sheet(workbook, worksheet, "État RAME");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "État Rames de papier");
           }
           break;
 
@@ -488,7 +488,7 @@ const Reports = () => {
           if (data.students && Array.isArray(data.students)) {
             const scholarshipsData = data.students.map((student) => ({
               Étudiant: cleanValue(student?.student?.full_name),
-              "Classe/Série": cleanValue(student?.student?.class_series),
+              "Spécialité/Salle": cleanValue(student?.student?.class_series),
               "Type de Réduction": cleanValue(student?.discount_type),
               Montant: cleanValue(student?.discount_amount),
               Pourcentage: cleanValue(
@@ -725,39 +725,39 @@ const Reports = () => {
                   setFilters({
                     ...filters,
                     filterType: e.target.value,
-                    sectionId: "",
+                    schoolId: "",
                     classId: "",
                     seriesId: "",
                   });
                 }}
               >
-                <option value="section">Section</option>
-                <option value="class">Classe</option>
-                <option value="series">Série</option>
+                <option value="school">Ecole</option>
+                <option value="class">Spécialité</option>
+                <option value="series">Salle</option>
               </Form.Select>
             </Form.Group>
           </Col>
           <Col md={3}>
             <Form.Group className="mb-3">
               <Form.Label>
-                {filters.filterType === "section"
-                  ? "Section"
+                {filters.filterType === "school"
+                  ? "School"
                   : filters.filterType === "class"
                   ? "Classe"
                   : "Série"}
               </Form.Label>
               <Form.Select
                 value={
-                  filters.filterType === "section"
-                    ? filters.sectionId
+                  filters.filterType === "school"
+                    ? filters.schoolId
                     : filters.filterType === "class"
                     ? filters.classId
                     : filters.seriesId
                 }
                 onChange={(e) => {
                   const newFilters = { ...filters };
-                  if (filters.filterType === "section") {
-                    newFilters.sectionId = e.target.value;
+                  if (filters.filterType === "school") {
+                    newFilters.schoolId = e.target.value;
                   } else if (filters.filterType === "class") {
                     newFilters.classId = e.target.value;
                   } else {
@@ -767,16 +767,16 @@ const Reports = () => {
                 }}
               >
                 <option value="">
-                  {filters.filterType === "section"
-                    ? "Toutes les sections"
+                  {filters.filterType === "school"
+                    ? "Toutes les écoles"
                     : filters.filterType === "class"
-                    ? "Toutes les classes"
-                    : "Toutes les séries"}
+                    ? "Toutes les spécialités"
+                    : "Toutes les salles"}
                 </option>
-                {filters.filterType === "section" &&
-                  availableOptions.sections.map((section) => (
-                    <option key={section.id} value={section.id}>
-                      {section.name}
+                {filters.filterType === "school" &&
+                  availableOptions.schools.map((school) => (
+                    <option key={school.id} value={school.id}>
+                      {school.name}
                     </option>
                   ))}
                 {filters.filterType === "class" &&
@@ -872,7 +872,7 @@ const Reports = () => {
     <Card>
       <Card.Header>
         <h5 className="mb-0">
-          État Insolvable - Élèves n'ayant pas fini de payer
+          État Insolvable - Étudiants n'ayant pas fini de payer
         </h5>
       </Card.Header>
       <Card.Body>
@@ -880,7 +880,7 @@ const Reports = () => {
           <>
             <div className="mb-3">
               <Badge bg="info">
-                Total des élèves insolvables:{" "}
+                Total des étudiants insolvables:{" "}
                 {paginatedReportData?.total_insolvable_students || 0}
               </Badge>
             </div>
@@ -946,7 +946,7 @@ const Reports = () => {
             </Table>
             <PaginationControls
               dataArray={sortedReportData?.students}
-              dataType="élèves insolvables"
+              dataType="étudiants insolvables"
             />
           </>
         ) : (
@@ -962,7 +962,7 @@ const Reports = () => {
     <Card>
       <Card.Header>
         <h5 className="mb-0">
-          État des Paiements - Tous les élèves avec infos toutes tranches
+          État des Paiements - Tous les étudiants avec infos toutes tranches
         </h5>
       </Card.Header>
       <Card.Body>
@@ -970,7 +970,7 @@ const Reports = () => {
           <>
             <div className="mb-3">
               <Badge bg="info">
-                Total des élèves: {reportData?.total_students || 0}
+                Total des étudiants: {reportData?.total_students || 0}
               </Badge>
             </div>
             {reportData.students?.map((studentData, studentIndex) => (
@@ -1041,7 +1041,7 @@ const Reports = () => {
     <Card>
       <Card.Header>
         <h5 className="mb-0">
-          État des RAME - Détails par élève (espèces/physique/pas payé)
+          État des Rames de papier - Détails par étudiant (espèces/physique/pas payé)
         </h5>
       </Card.Header>
       <Card.Body>
@@ -1051,7 +1051,7 @@ const Reports = () => {
               <Row>
                 <Col md={3}>
                   <Badge bg="info">
-                    Total élèves: {reportData?.summary?.total_students || 0}
+                    Total étudiants: {reportData?.summary?.total_students || 0}
                   </Badge>
                 </Col>
                 <Col md={3}>
@@ -1089,7 +1089,7 @@ const Reports = () => {
               <thead>
                 <tr>
                   <th>Étudiant</th>
-                  <th>Classe/Série</th>
+                  <th>Spécialité/Salle</th>
                   <th>Quantité</th>
                   <th>Statut</th>
                   <th>Date de Dépôt</th>
@@ -1202,7 +1202,7 @@ const Reports = () => {
             <div>
               <h5 className="mb-0">États Bourses et Rabais</h5>
               <small className="text-muted">
-                Tous les avantages accordés aux élèves
+                Tous les avantages accordés aux étudiants
               </small>
             </div>
             {reportData && (
@@ -1294,7 +1294,7 @@ const Reports = () => {
                       </div>
                       <p className="text-muted mb-0">Taux Bénéficiaires</p>
                       <small className="text-primary">
-                        Sur {scholarshipsSortedStudents.length} élèves
+                        Sur {scholarshipsSortedStudents.length} étudiants
                       </small>
                     </Card.Body>
                   </Card>
@@ -1340,7 +1340,7 @@ const Reports = () => {
                       style={{ cursor: "pointer" }}
                       onClick={() => handleSort("class_name")}
                     >
-                      Classe {getSortIcon("class_name")}
+                      Spécialité {getSortIcon("class_name")}
                     </th>
                     <th
                       style={{ cursor: "pointer" }}
@@ -1504,7 +1504,7 @@ const Reports = () => {
                 <Card.Header>
                   <h6 className="mb-0">
                     <Building className="me-2" />
-                    Récapitulatif par Classe et Série
+                    Récapitulatif par Spécialité et Salle
                   </h6>
                 </Card.Header>
                 <Card.Body>
@@ -1513,7 +1513,7 @@ const Reports = () => {
                       <tr>
                         <th>
                           <Building size={16} className="me-1" />
-                          Classe - Série
+                          Spécialité - Salle
                         </th>
                         <th className="text-center">
                           <CashCoin size={16} className="me-1" />
@@ -1671,7 +1671,7 @@ const Reports = () => {
             <div>
               <h4 className="mb-1">
                 {paginatedReportData?.school_settings?.school_name ||
-                  "COLLEGE POLYVALENT BILINGUE DE DOUALA"}
+                  "INSTITUT UNIVERSITAIRE DE LA POINTE"}
               </h4>
               <h5 className="mb-0 text-primary">DÉTAIL DES ENCAISSEMENTS</h5>
             </div>
@@ -1731,7 +1731,7 @@ const Reports = () => {
                     Prénom
                   </SortableHeader>
                   <SortableHeader sortKey="student.class_name">
-                    Classe
+                    Spécialité
                   </SortableHeader>
                   <SortableHeader sortKey="payment_date">
                     Date de Versement
@@ -1942,7 +1942,7 @@ const Reports = () => {
               <Nav.Item>
                 <Nav.Link eventKey="rame">
                   <FileEarmarkText className="me-2" />
-                  État RAME
+                  État Rames de papier
                 </Nav.Link>
               </Nav.Item>
               <Nav.Item>
